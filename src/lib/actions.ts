@@ -244,35 +244,53 @@ export async function updateJewelerAdmin(formData: FormData) {
 export async function createJewelerAdmin(formData: FormData) {
   "use server";
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
+  const { data: { user: adminUser } } = await supabase.auth.getUser();
+  if (!adminUser) throw new Error("Unauthorized");
 
   // Admin Check
   const { data: adminProfile } = await supabase
     .from("jeweler_profiles")
     .select("is_admin")
-    .eq("user_id", user.id)
+    .eq("user_id", adminUser.id)
     .maybeSingle();
 
-  const isMaster = user.email?.toLowerCase() === "ibrahmyldrim@gmail.com";
-  if (!adminProfile?.is_admin && !isMaster) throw new Error("Unauthorized");
+  const isMaster = adminUser.email?.toLowerCase() === "ibrahmyldrim@gmail.com";
+  if (!adminProfile?.is_admin && !isMaster) throw new Error("Unauthorized Admin Only");
 
   const name = formData.get("name") as string;
   const address = formData.get("address") as string;
-  
-  // Generate slug
-  const slug = name.toLowerCase()
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password) throw new Error("Email ve Şifre gereklidir.");
+
+  // 1. Create Auth User via Admin API
+  const { data: newUser, error: authError } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { name }
+  });
+
+  if (authError) {
+    console.error("Auth Admin Create Error:", authError);
+    throw new Error(`Kullanıcı oluşturulamadı: ${authError.message}`);
+  }
+
+  // 2. Generate slug
+  let slug = turkishToEnglish(name)
+    .toLowerCase()
     .replace(/[^a-z0-9]/g, "-")
     .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "") || `kuyumcu-${Math.random().toString(36).substring(7)}`;
+    .replace(/^-|-$/g, "");
+  
+  if (!slug) slug = `kuyumcu-${newUser.user.id.substring(0, 5)}`;
 
-  // Use a random UUID for the profile (Note: This may fail if auth.users FK is active)
-  const tempUserId = crypto.randomUUID();
-
-  const { error } = await supabase
+  // 3. Create Profile linked to the new user
+  const { error: profileError } = await supabase
     .from("jeweler_profiles")
     .insert({
-      user_id: tempUserId,
+      user_id: newUser.user.id,
       name,
       slug,
       address,
@@ -281,11 +299,12 @@ export async function createJewelerAdmin(formData: FormData) {
       sort_order: 0
     });
 
-  if (error) {
-    console.error("Admin Create Error:", error);
-    // If it fails because of FK, we let the admin know they should have a user ID
-    throw new Error(`Mağaza oluşturulamadı. (Hata: ${error.message}). Not: Supabase üzerinde auth.users kısıtlaması varsa önce bir kullanıcı ID'si gereklidir.`);
+  if (profileError) {
+    console.error("Admin Profile Create Error:", profileError);
+    // If it fails, we should ideally delete the auth user, but for now we throw
+    throw new Error(`Mağaza profili oluşturulamadı: ${profileError.message}`);
   }
 
   revalidatePath("/admin");
+  revalidatePath("/");
 }
