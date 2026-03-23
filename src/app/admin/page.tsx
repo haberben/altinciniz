@@ -7,7 +7,8 @@ import {
   Star, 
   Clock, 
   ArrowLeft,
-  Settings 
+  Settings,
+  Store 
 } from "lucide-react";
 import Link from "next/link";
 import { approveJeweler, toggleVIP } from "@/lib/actions";
