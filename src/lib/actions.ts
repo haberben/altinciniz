@@ -240,3 +240,52 @@ export async function updateJewelerAdmin(formData: FormData) {
   revalidatePath("/");
   revalidatePath(`/kuyumcular/[slug]`);
 }
+
+export async function createJewelerAdmin(formData: FormData) {
+  "use server";
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  // Admin Check
+  const { data: adminProfile } = await supabase
+    .from("jeweler_profiles")
+    .select("is_admin")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const isMaster = user.email?.toLowerCase() === "ibrahmyldrim@gmail.com";
+  if (!adminProfile?.is_admin && !isMaster) throw new Error("Unauthorized");
+
+  const name = formData.get("name") as string;
+  const address = formData.get("address") as string;
+  
+  // Generate slug
+  const slug = name.toLowerCase()
+    .replace(/[^a-z0-9]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "") || `kuyumcu-${Math.random().toString(36).substring(7)}`;
+
+  // Use a random UUID for the profile (Note: This may fail if auth.users FK is active)
+  const tempUserId = crypto.randomUUID();
+
+  const { error } = await supabase
+    .from("jeweler_profiles")
+    .insert({
+      user_id: tempUserId,
+      name,
+      slug,
+      address,
+      is_approved: true,
+      is_verified: false,
+      sort_order: 0
+    });
+
+  if (error) {
+    console.error("Admin Create Error:", error);
+    // If it fails because of FK, we let the admin know they should have a user ID
+    throw new Error(`Mağaza oluşturulamadı. (Hata: ${error.message}). Not: Supabase üzerinde auth.users kısıtlaması varsa önce bir kullanıcı ID'si gereklidir.`);
+  }
+
+  revalidatePath("/admin");
+}

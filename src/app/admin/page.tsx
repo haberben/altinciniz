@@ -252,7 +252,7 @@ export default async function AdminPanel() {
                  <p className="text-gray-500 text-sm max-w-sm italic">Sisteme manuel olarak yeni bir kuyumcu kaydı girişi yapın.</p>
               </div>
 
-              <form action={submitProfile} className="max-w-xl space-y-6">
+              <form action={createJewelerAdmin} className="max-w-xl space-y-6">
                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">MAĞAZA ADI</label>
                     <input name="name" required placeholder="Örn: Lizbon Kuyumculuk" className="w-full h-16 bg-white/5 border border-white/10 rounded-[28px] px-8 outline-none focus:border-gold-primary transition-all font-bold" />
