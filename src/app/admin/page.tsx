@@ -1,23 +1,17 @@
-﻿import { createClient } from "@/lib/supabase-server";
+import { createClient } from "@/lib/supabase-server";
 import { 
   Users, 
   Star, 
   Home,
   Store,
   ShieldAlert,
-  Phone,
-  Video,
-  MapPin,
-  Instagram,
-  Globe,
   Plus,
   ArrowRight,
   ChevronDown,
   Save,
-  Trash
 } from "lucide-react";
 import Link from "next/link";
-import { approveJeweler, toggleVIP, ensureAdminProfile, updateJewelerAdmin, createJewelerAdmin, submitProfile } from "@/lib/actions";
+import { approveJeweler, toggleVIP, ensureAdminProfile, updateJewelerAdmin } from "@/lib/actions";
 import AdminLoginForm from "@/components/AdminLoginForm";
 import AdminCreateStoreForm from "@/components/AdminCreateStoreForm";
 
@@ -30,19 +24,22 @@ export default async function AdminPanel() {
 
   if (!user) return <AdminLoginForm />;
 
+  // Check master email FIRST — bypass everything
+  const masterEmail = "ibrahmyldrim@gmail.com";
+  const isMasterAdmin = user.email?.toLowerCase() === masterEmail.toLowerCase();
+
   let { data: profile } = await supabase
     .from("jeweler_profiles")
-    .select("*")
+    .select("id, name, is_admin")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  const masterEmail = "ibrahmyldrim@gmail.com";
-  const isMasterAdmin = user.email?.toLowerCase() === masterEmail.toLowerCase();
-  let hasAccess = profile?.is_admin || isMasterAdmin;
-
+  // Auto-provision admin profile for master email
   if (isMasterAdmin && !profile?.is_admin) {
-      profile = await ensureAdminProfile(user.id, user.email!);
+    profile = await ensureAdminProfile(user.id, user.email!);
   }
+
+  const hasAccess = isMasterAdmin || profile?.is_admin === true;
 
   if (!hasAccess) {
     return (
@@ -67,11 +64,10 @@ export default async function AdminPanel() {
     );
   }
 
-  // Fetch all jewelers
+  // Fetch all jewelers — order by created_at only (no sort_order column)
   const { data: allJewelers } = await supabase
     .from("jeweler_profiles")
-    .select("*")
-    .order("sort_order", { ascending: true })
+    .select("id, user_id, name, slug, address, is_approved, is_verified, is_admin, logo_url, created_at")
     .order("created_at", { ascending: false });
 
   return (
@@ -87,7 +83,7 @@ export default async function AdminPanel() {
            </div>
            <div className="flex items-center gap-6">
               <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">YÜKSEK YETKİLİ MOD</p>
+                <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">YÜKSELİK YETKİLİ MOD</p>
                 <p className="text-xs font-bold text-gray-500">{user.email}</p>
               </div>
               <Link href="/" className="bg-white/5 border border-white/10 p-3 rounded-2xl hover:bg-white/10 transition-all text-gray-400 hover:text-white group">
@@ -107,7 +103,7 @@ export default async function AdminPanel() {
               </div>
               <h2 className="text-6xl font-black tracking-tighter italic uppercase leading-[0.9]">MAĞAZA<br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-primary to-gold-light">YÖNETİMİ</span></h2>
               <p className="text-gray-500 text-sm max-w-lg italic font-medium leading-relaxed">
-                 Tüm kuyumcuların verilerini düzenleyebilir, iletişim bilgilerini güncelleyebilir ve VIP sıralamasını manuel olarak belirleyebilirsiniz.
+                 Tüm kuyumcuların verilerini düzenleyebilir ve VIP/onay durumlarını yönetebilirsiniz.
               </p>
            </div>
            
@@ -148,6 +144,7 @@ export default async function AdminPanel() {
                           {jeweler.is_verified && <Star size={16} fill="#D4AF37" className="text-gold-primary" />}
                         </div>
                         <p className="text-[10px] font-bold text-gray-500 tracking-widest uppercase italic">@{jeweler.slug}</p>
+                        <p className="text-xs text-gray-600">{jeweler.address}</p>
                       </div>
                     </div>
 
@@ -159,27 +156,19 @@ export default async function AdminPanel() {
                            </span>
                         </div>
                         <div className="text-center">
-                           <p className="text-[9px] font-black text-gray-600 uppercase mb-1">Sıra</p>
-                           <p className="text-xl font-black text-gold-primary italic">#{jeweler.sort_order || 0}</p>
-                        </div>
-                        <div className="flex gap-2">
-                           <button className="h-14 px-8 rounded-2xl bg-white/5 border border-white/10 font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
-                              Detayları Düzenle <ChevronDown size={14} className="opacity-40" />
-                           </button>
+                           <p className="text-[9px] font-black text-gray-600 uppercase mb-1">VIP</p>
+                           <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${jeweler.is_verified ? 'bg-gold-primary/10 text-gold-primary border border-gold-primary/20' : 'bg-white/5 text-gray-500 border border-white/10'}`}>
+                              {jeweler.is_verified ? '⭐ VIP' : 'NORMAL'}
+                           </span>
                         </div>
                     </div>
                   </div>
 
-                  {/* Expanded Edit Form */}
+                  {/* Edit Form */}
                   <div className="bg-[#050505] p-10 lg:p-14 border-t border-white/5">
-                     <form action={updateJewelerAdmin} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-12">
+                     <form action={updateJewelerAdmin} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <input type="hidden" name="id" value={jeweler.id} />
                         
-                        <div className="space-y-8 col-span-1 md:col-span-2 lg:col-span-3 pb-6 border-b border-white/5">
-                           <h5 className="text-xs font-black uppercase tracking-[0.4em] text-emerald-500">Profil Verilerini Güncelle</h5>
-                        </div>
-
-                        {/* General Info */}
                         <div className="space-y-2">
                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Mağaza Adı</label>
                            <input name="name" defaultValue={jeweler.name} className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
@@ -188,37 +177,8 @@ export default async function AdminPanel() {
                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Adres</label>
                            <input name="address" defaultValue={jeweler.address} className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
                         </div>
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Sıralama (VIP İçin)</label>
-                           <input name="sort_order" type="number" defaultValue={jeweler.sort_order || 0} className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
-                        </div>
 
-                        {/* Contact & Social */}
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-2"><Phone size={12}/> Telefon</label>
-                           <input name="phone" defaultValue={jeweler.phone} placeholder="+90 ..." className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-2"><Instagram size={12}/> Instagram @</label>
-                           <input name="instagram" defaultValue={jeweler.instagram} placeholder="kuyumcu_hesabi" className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-2"><Globe size={12}/> Web Sitesi</label>
-                           <input name="website" defaultValue={jeweler.website} placeholder="www.kuyumcu.com" className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
-                        </div>
-
-                        {/* Location & Desc */}
-                        <div className="space-y-2 col-span-1 md:col-span-2">
-                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-2"><MapPin size={12}/> Harita URL (Google Maps)</label>
-                           <input name="map_url" defaultValue={jeweler.map_url} className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
-                        </div>
-                        <div className="space-y-2 col-span-1 md:col-span-2">
-                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Açıklama</label>
-                           <textarea name="description" defaultValue={jeweler.description} className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-6 outline-none focus:border-gold-primary transition-all font-medium text-sm resize-none" />
-                        </div>
-
-                        {/* Toggles */}
-                        <div className="flex items-center gap-8 py-4">
+                        <div className="flex items-center gap-8 py-4 col-span-1 md:col-span-2">
                            <label className="flex items-center gap-3 cursor-pointer group">
                               <input type="checkbox" name="is_approved" defaultChecked={jeweler.is_approved} className="w-6 h-6 rounded-lg bg-white/5 border-white/10 checked:bg-emerald-500 transition-all cursor-pointer" />
                               <span className="text-xs font-black uppercase text-gray-400 group-hover:text-white transition-colors">Mağaza Onaylı</span>
@@ -229,7 +189,7 @@ export default async function AdminPanel() {
                            </label>
                         </div>
 
-                        <div className="col-span-1 md:col-span-2 lg:col-span-3 pt-6">
+                        <div className="col-span-1 md:col-span-2">
                            <button type="submit" className="w-full lg:w-auto h-16 px-12 bg-white text-black rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-gold-primary transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-gold-primary/20 group">
                               <Save size={18} className="group-hover:scale-110 transition-transform"/> KAYDET VE GÜNCELLE
                            </button>
@@ -238,6 +198,12 @@ export default async function AdminPanel() {
                   </div>
                 </div>
               ))}
+              {(!allJewelers || allJewelers.length === 0) && (
+                <div className="text-center py-24 text-gray-600">
+                  <Store size={48} className="mx-auto mb-4 opacity-20" />
+                  <p className="font-bold">Henüz kayıtlı mağaza yok.</p>
+                </div>
+              )}
            </div>
         </section>
 
