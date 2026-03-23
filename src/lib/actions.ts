@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { createClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
@@ -67,7 +67,7 @@ export async function submitProfile(prevState: any, formData: FormData) {
         is_approved: false,
         sort_order: 0,
         phone: "",
-        map_url: "",
+
         description: ""
       }, { onConflict: 'user_id' });
 
@@ -327,7 +327,7 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
         phone: "",
         instagram: "",
         website: "",
-        map_url: "",
+
         description: ""
       });
 
