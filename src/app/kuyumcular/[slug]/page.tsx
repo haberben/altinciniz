@@ -84,9 +84,22 @@ export default async function KuyumcuProfili({ params }: { params: { slug: strin
             <p className="text-gray-400 text-lg leading-relaxed">{profile.description || `${profile.name} mağazasının canlı altın ve döviz fiyatları. Kapalıçarşı verilerine dayalı özel fiyatlandırma.`}</p>
             
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-sm text-gray-400">
-               <div className="flex items-center gap-2"><MapPin size={16} className="text-gold-primary"/> {profile.address}</div>
-               {profile.instagram && <div className="flex items-center gap-2"><Instagram size={16} className="text-gold-primary"/> {profile.instagram}</div>}
-               {profile.phone && <div className="flex items-center gap-2"><Phone size={16} className="text-gold-primary"/> {profile.phone}</div>}
+               <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5"><MapPin size={16} className="text-gold-primary"/> {profile.address}</div>
+               {profile.instagram && (
+                 <a href={`https://instagram.com/${profile.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 hover:border-gold-primary/30 transition-all">
+                   <Instagram size={16} className="text-gold-primary"/> @{profile.instagram.replace('@', '')}
+                 </a>
+               )}
+               {profile.phone && (
+                 <a href={`tel:${profile.phone}`} className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 hover:border-gold-primary/30 transition-all">
+                   <Phone size={16} className="text-gold-primary"/> {profile.phone}
+                 </a>
+               )}
+               {profile.website && (
+                 <a href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5 hover:border-gold-primary/30 transition-all">
+                   <Globe size={16} className="text-gold-primary"/> Web Sitesi
+                 </a>
+               )}
             </div>
           </div>
 
@@ -155,12 +168,28 @@ export default async function KuyumcuProfili({ params }: { params: { slug: strin
         </div>
 
         {/* Footer Contact */}
-        <div className="bg-gold-primary/5 border border-gold-primary/20 rounded-[40px] p-12 text-center space-y-6">
-            <h3 className="text-2xl font-black tracking-tighter uppercase italic">Bu Fiyatlarla İşlem Yapmak İster Misiniz?</h3>
-            <p className="text-gray-400 max-w-xl mx-auto text-sm">Fiyatlarımız Kapalıçarşı fıyatlarına ek olarak kuyumcumuzun özel kâr marjlarını içerir. Detaylı bilgi ve randevu için iletişime geçin.</p>
-            <div className="flex flex-wrap justify-center gap-4">
-               <button className="bg-gold-primary text-black px-10 py-4 rounded-2xl font-black text-sm hover:scale-105 transition-transform uppercase italic">HEMEN ARA</button>
-               {profile.instagram && <button className="bg-white/5 border border-white/10 px-10 py-4 rounded-2xl font-black text-sm hover:bg-white/10 transition-all uppercase italic">INSTAGRAM PROFILI</button>}
+        <div className="bg-gold-primary/5 border border-gold-primary/20 rounded-[40px] p-12 text-center space-y-8 relative overflow-hidden backdrop-blur-xl">
+            <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
+               <Store size={200} className="text-gold-primary" />
+            </div>
+            <h3 className="text-3xl font-black tracking-tighter uppercase italic relative z-10">BU FİYATLARLA İŞLEM YAPMAK İSTER MİSİNİZ?</h3>
+            <p className="text-gray-400 max-w-xl mx-auto text-sm relative z-10 font-medium">Fiyatlar mağazamızın anlık piyasa koşullarına göre belirlenmiştir. Doğrudan iletişim kurarak randevu alabilir veya konum bilgisi isteyebilirsiniz.</p>
+            <div className="flex flex-wrap justify-center gap-4 relative z-10">
+               {profile.phone && (
+                 <a href={`tel:${profile.phone}`} className="bg-gold-primary text-black px-12 py-5 rounded-2xl font-black text-xs hover:scale-105 transition-transform uppercase italic shadow-xl shadow-gold-primary/20 flex items-center gap-3">
+                   <Phone size={18}/> HEMEN ARA
+                 </a>
+               )}
+               {profile.map_url && (
+                 <a href={profile.map_url} target="_blank" rel="noopener noreferrer" className="bg-white text-black px-12 py-5 rounded-2xl font-black text-xs hover:scale-105 transition-transform uppercase italic shadow-xl flex items-center gap-3">
+                   <MapPin size={18}/> KONUMA GİT
+                 </a>
+               )}
+               {profile.instagram && (
+                 <a href={`https://instagram.com/${profile.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="bg-white/5 border border-white/10 px-12 py-5 rounded-2xl font-black text-xs hover:bg-white/10 transition-all uppercase italic flex items-center gap-3">
+                   <Instagram size={18}/> INSTAGRAM
+                 </a>
+               )}
             </div>
         </div>
 
