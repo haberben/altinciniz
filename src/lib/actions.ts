@@ -264,68 +264,71 @@ export async function updateJewelerAdmin(formData: FormData) {
 
 export async function createJewelerAdmin(formData: FormData) {
   "use server";
-  const supabase = createClient();
-  const { data: { user: adminUser } } = await supabase.auth.getUser();
-  if (!adminUser) throw new Error("Unauthorized");
+  try {
+    const supabase = createClient();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+    if (!adminUser) throw new Error("Unauthorized");
 
-  // Admin Check
-  const { data: adminProfile } = await supabase
-    .from("jeweler_profiles")
-    .select("is_admin")
-    .eq("user_id", adminUser.id)
-    .maybeSingle();
+    // Admin Check
+    const { data: adminProfile } = await supabase
+      .from("jeweler_profiles")
+      .select("is_admin")
+      .eq("user_id", adminUser.id)
+      .maybeSingle();
 
-  const isMaster = adminUser.email?.toLowerCase() === "ibrahmyldrim@gmail.com";
-  if (!adminProfile?.is_admin && !isMaster) throw new Error("Unauthorized Admin Only");
+    const isMaster = adminUser.email?.toLowerCase() === "ibrahmyldrim@gmail.com";
+    if (!adminProfile?.is_admin && !isMaster) throw new Error("Unauthorized Admin Only");
 
-  const name = formData.get("name") as string;
-  const address = formData.get("address") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
+    const address = formData.get("address") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-  if (!email || !password) throw new Error("Email ve Şifre gereklidir.");
+    if (!email || !password || !name) throw new Error("Email, Şifre ve Mağaza Adı gereklidir.");
 
-  // 1. Create Auth User via Admin API
-  const { data: newUser, error: authError } = await supabase.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { name }
-  });
-
-  if (authError) {
-    console.error("Auth Admin Create Error:", authError);
-    throw new Error(`Kullanıcı oluşturulamadı: ${authError.message}`);
-  }
-
-  // 2. Generate slug
-  let slug = turkishToEnglish(name)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-  
-  if (!slug) slug = `kuyumcu-${newUser.user.id.substring(0, 5)}`;
-
-  // 3. Create Profile linked to the new user
-  const { error: profileError } = await supabase
-    .from("jeweler_profiles")
-    .insert({
-      user_id: newUser.user.id,
-      name,
-      slug,
-      address,
-      is_approved: true,
-      is_verified: false,
-      sort_order: 0
+    // 1. Create Auth User via Admin API
+    const { data: newUser, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name }
     });
 
-  if (profileError) {
-    console.error("Admin Profile Create Error:", profileError);
-    // If it fails, we should ideally delete the auth user, but for now we throw
-    throw new Error(`Mağaza profili oluşturulamadı: ${profileError.message}`);
-  }
+    if (authError) throw authError;
 
-  revalidatePath("/admin");
-  revalidatePath("/");
+    // 2. Generate slug
+    let slug = turkishToEnglish(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+    
+    if (!slug) slug = `kuyumcu-${newUser.user.id.substring(0, 5)}`;
+
+    // 3. Create Profile linked to the new user
+    const { error: profileError } = await supabase
+      .from("jeweler_profiles")
+      .insert({
+        user_id: newUser.user.id,
+        name,
+        slug,
+        address,
+        is_approved: true,
+        is_verified: false,
+        sort_order: 0,
+        phone: "",
+        instagram: "",
+        website: "",
+        map_url: "",
+        description: ""
+      });
+
+    if (profileError) throw profileError;
+
+    revalidatePath("/admin");
+    revalidatePath("/");
+  } catch (err: any) {
+    console.error("FATAL: createJewelerAdmin failed:", err);
+    throw new Error(err.message || "Admin üzerinden mağaza oluşturulurken hata oluştu.");
+  }
 }
