@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase-server";
+﻿import { createClient } from "@/lib/supabase-server";
 import { 
   Users, 
   Star, 
@@ -253,29 +253,7 @@ export default async function AdminPanel() {
                  <p className="text-gray-500 text-sm max-w-sm italic">Sisteme manuel olarak yeni bir kuyumcu kaydı girişi yapın.</p>
               </div>
 
-              <form action={createJewelerAdmin} className="max-w-xl space-y-6">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">MÜŞTERİ MAİL (GİRİŞ İÇİN)</label>
-                       <input name="email" type="email" required placeholder="ornek@mail.com" className="w-full h-16 bg-white/5 border border-white/10 rounded-[28px] px-8 outline-none focus:border-gold-primary transition-all font-bold" />
-                    </div>
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">GEÇİCİ ŞİFRE</label>
-                       <input name="password" type="text" required placeholder="Sifre123..." className="w-full h-16 bg-white/5 border border-white/10 rounded-[28px] px-8 outline-none focus:border-gold-primary transition-all font-bold" />
-                    </div>
-                 </div>
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">MAĞAZA ADI</label>
-                    <input name="name" required placeholder="Örn: Lizbon Kuyumculuk" className="w-full h-16 bg-white/5 border border-white/10 rounded-[28px] px-8 outline-none focus:border-gold-primary transition-all font-bold" />
-                 </div>
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">ADRES</label>
-                    <input name="address" required placeholder="Şehir, Mahalle vb." className="w-full h-16 bg-white/5 border border-white/10 rounded-[28px] px-8 outline-none focus:border-gold-primary transition-all font-bold" />
-                 </div>
-                 <button type="submit" className="h-16 px-12 bg-gold-primary text-black rounded-[28px] font-black text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all flex items-center gap-3 shadow-xl shadow-gold-primary/20">
-                    KULLANICI VE MAĞAZA OLUŞTUR <ArrowRight size={18} />
-                 </button>
-              </form>
+               <AdminCreateStoreForm />
            </div>
         </section>
       </main>
