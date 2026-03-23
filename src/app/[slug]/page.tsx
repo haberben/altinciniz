@@ -2,14 +2,14 @@ import { getMarketData } from "@/lib/api";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, ArrowDownRight, TrendingUp } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ArrowDownRight, TrendingUp, AlertTriangle } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
 
 export const revalidate = 60; // 60 saniye cache
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const data = await getMarketData();
-  const item = data.find(i => i.slug === params.slug);
+  const { items } = await getMarketData();
+  const item = items.find((i: any) => i.slug === params.slug);
   
   if (!item) {
     return {
@@ -30,8 +30,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function DetaySayfasi({ params }: { params: { slug: string } }) {
-  const data = await getMarketData();
-  const item = data.find(i => i.slug === params.slug);
+  const { items, updateDate } = await getMarketData();
+  const item = items.find((i: any) => i.slug === params.slug);
 
   if (!item) {
     notFound();
@@ -87,7 +87,10 @@ export default async function DetaySayfasi({ params }: { params: { slug: string 
             </div>
             
             <div className="bg-black/40 backdrop-blur-md rounded-2xl p-6 border border-[#333] min-w-[300px]">
-              <div className="text-sm text-gray-400 mb-2 font-medium">Anlık Piyasa Fiyatı</div>
+              <div className="text-sm text-gray-400 mb-2 font-medium flex justify-between">
+                <span>Anlık Piyasa Fiyatı</span>
+                <span className="text-[10px] text-gray-500">{updateDate}</span>
+              </div>
               <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white to-gray-400 mb-4">
                 {formattedPrice}
               </div>
@@ -104,11 +107,14 @@ export default async function DetaySayfasi({ params }: { params: { slug: string 
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-medium text-gold-light mb-2">Piyasa verileri ne sıklıkla yenileniyor?</h3>
-            <p className="text-gray-400">Verilerimiz uluslararası borsalardan saniyeler içinde çekilmekte olup 60 saniyede bir cüzdanınıza/ekranınıza yansımaktadır.</p>
+            <p className="text-gray-400">Verilerimiz fiziki kuyumcu piyasasından saniyeler içinde çekilmekte olup sitenize anında yansımaktadır. Son güncelleme: {updateDate}</p>
           </div>
           <div>
-            <h3 className="text-lg font-medium text-gold-light mb-2">{item.name} nasıl hesaplanır?</h3>
-            <p className="text-gray-400">Altın türlerinin hesaplamaları global ons fiyatının Dolar/TL kuruyla çarpımı sonucu çıkan miligram teminatlar ile oranlanarak yapılır.</p>
+            <h3 className="text-lg font-medium text-gold-light mb-2 font-flex items-center">
+              <AlertTriangle className="inline mr-2 text-red-400" size={18} />
+              Sorumluluk Reddi (Yasal Uyarı)
+            </h3>
+            <p className="text-gray-400 text-sm">Burada yer alan yatırım bilgi, yorum ve tavsiyeleri yatırım danışmanlığı kapsamında değildir. Herhangi bir kuyumcuda işlem yapacağınız tutarlar buradaki tutarlardan işçilik veya makas farkı sebebiyle sapma gösterebilir. Altınciniz.com oluşabilecek mali kayıplardan sorumlu değildir.</p>
           </div>
         </div>
       </section>
