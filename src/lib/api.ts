@@ -1,7 +1,7 @@
 export interface AssetItem {
   name: string;
   slug: string;
-  price: number; // For backward compatibility / default sorting
+  price: number; 
   priceBuying: number;
   priceSelling: number;
   changePercent: number;
@@ -14,73 +14,69 @@ export interface MarketResponse {
   updateDate: string;
 }
 
-const API_URL = "https://finans.truncgil.com/v3/today.json";
-
-function parseTRNumber(str: string | undefined): number {
-  if (!str) return 0;
-  return parseFloat(str.replace(/\./g, '').replace(',', '.'));
-}
-
-function parsePercent(str: string | undefined): number {
-  if (!str) return 0;
-  return parseFloat(str.replace('%', '').replace(',', '.'));
-}
+const API_KEY = "hapi_6eb9f72089734ea7aa46655f7f000689";
+const API_URL = `https://haremapi.tr/api/v1/prices?api_key=${API_KEY}`;
 
 export async function getMarketData(): Promise<MarketResponse> {
   try {
     const res = await fetch(API_URL, { next: { revalidate: 60 } });
-    if (!res.ok) throw new Error("Failed to fetch");
-    const data = await res.json();
+    if (!res.ok) throw new Error("Failed to fetch HaremAPI");
+    const json = await res.json();
+    const dataArray = json.data;
 
-    const updateDate = data.Update_Date || new Date().toLocaleString('tr-TR');
+    // updatedAt format is ISO string, let's localize it safely
+    let updateDate = new Date().toLocaleString('tr-TR');
+    if (json.updatedAt) {
+        updateDate = new Date(json.updatedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
 
     const createItem = (key: string, name: string, type: 'gold' | 'currency' | 'metal', customSlug?: string): AssetItem => {
-      const item = data[key];
-      const slug = customSlug || key.toLowerCase();
+      const item = dataArray.find((i: any) => i.symbol === key);
+      const slug = customSlug || key.toLowerCase().replace(/_/g, '-');
+      
       if (!item) return { name, slug, price: 0, priceBuying: 0, priceSelling: 0, changePercent: 0, isUp: true, type };
       
-      const priceBuying = parseTRNumber(item.Buying);
-      const priceSelling = parseTRNumber(item.Selling);
-      const changeP = parsePercent(item.Change);
+      const priceBuying = parseFloat(item.bid) || 0;
+      const priceSelling = parseFloat(item.ask) || 0;
       
       return {
         name,
         slug,
         price: priceSelling || priceBuying, 
-        priceBuying: priceBuying || priceSelling,
-        priceSelling: priceSelling || priceBuying,
-        changePercent: changeP,
-        isUp: changeP >= 0,
+        priceBuying: priceBuying,
+        priceSelling: priceSelling,
+        changePercent: 0, // HaremAPI temel fiyat endpointinde anlık % değişim verisi bulunmuyor
+        isUp: true,
         type
       };
     };
 
     const items = [
-      createItem("gram-altin", "Gram Altın", "gold"),
-      createItem("gram-has-altin", "Has Altın (Gram)", "gold", "has-altin"),
-      createItem("ceyrek-altin", "Çeyrek Altın", "gold"),
-      createItem("yarim-altin", "Yarım Altın", "gold"),
-      createItem("tam-altin", "Tam Altın", "gold"),
-      createItem("cumhuriyet-altini", "Cumhuriyet Altını", "gold"),
-      createItem("ata-altin", "Ata Altın", "gold"),
-      createItem("gremse-altin", "Gremse Altın", "gold"),
-      createItem("resat-altin", "Reşat Altın", "gold"),
-      createItem("22-ayar-bilezik", "22 Ayar Bilezik", "gold"),
-      createItem("18-ayar-altin", "18 Ayar Altın", "gold"),
-      createItem("14-ayar-altin", "14 Ayar Altın", "gold"),
+      createItem("ALTIN", "Gram Altın", "gold", "gram-altin"),
+      createItem("KULCEALTIN", "Has Altın (Külçe)", "gold", "has-altin"),
+      createItem("CEYREK_YENI", "Çeyrek Altın", "gold", "ceyrek-altin"),
+      createItem("YARIM_YENI", "Yarım Altın", "gold", "yarim-altin"),
+      createItem("TEK_YENI", "Tam Altın", "gold", "tam-altin"),
+      createItem("ATA_YENI", "Ata Altın", "gold", "ata-altin"),
+      createItem("GREMESE_YENI", "Gremse Altın", "gold", "gremse-altin"),
+      createItem("ATA5_YENI", "Beşli Ata", "gold", "besli-ata"),
+      createItem("AYAR22", "22 Ayar Bilezik", "gold", "22-ayar-bilezik"),
+      createItem("AYAR14", "14 Ayar Altın", "gold", "14-ayar-altin"),
       
-      createItem("USD", "Dolar (USD/TL)", "currency", "dolar"),
-      createItem("EUR", "Euro (EUR/TL)", "currency", "euro"),
-      createItem("GBP", "İngiliz Sterlini", "currency", "sterlin"),
-      createItem("CHF", "İsviçre Frangı", "currency", "frank"),
-      createItem("SAR", "Suudi Riyali", "currency", "riyal"),
+      createItem("USDTRY", "Dolar", "currency", "usd"),
+      createItem("EURTRY", "Euro", "currency", "eur"),
+      createItem("GBPTRY", "İngiliz Sterlini", "currency", "gbp"),
+      createItem("CHFTRY", "İsviçre Frangı", "currency", "chf"),
+      createItem("SARTRY", "Suudi Riyali", "currency", "sar"),
+      createItem("AUDTRY", "Avustralya Doları", "currency", "aud"),
+      createItem("CADTRY", "Kanada Doları", "currency", "cad"),
       
-      createItem("gumus", "Gümüş (Gram)", "metal"),
-      createItem("gram-platin", "Platin (Gram)", "metal", "platin"),
-      createItem("gram-paladyum", "Paladyum (Gram)", "metal", "paladyum")
+      createItem("GUMTRY", "Gümüş (Gram)", "metal", "gumus"),
+      createItem("PLATIN", "Platin", "metal", "platin"),
+      createItem("PALADYUM", "Paladyum", "metal", "paladyum")
     ];
 
-    return { items, updateDate };
+    return { items, updateDate: `Bugün ${updateDate}` };
   } catch (error) {
     console.error("API Fetch Error:", error);
     return { items: [], updateDate: new Date().toLocaleString('tr-TR') };
