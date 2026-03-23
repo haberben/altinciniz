@@ -91,10 +91,15 @@ export default async function KuyumcuPaneli() {
             <div className="h-6 w-px bg-[#333]" />
             <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Yönetim Paneli</span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 md:gap-6">
+            {profile?.is_admin && (
+              <Link href="/admin" className="bg-emerald-500/10 text-emerald-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2">
+                <Settings size={14}/> Yönetici Paneli
+              </Link>
+            )}
             <span className="text-xs font-bold text-gold-light hidden md:inline">{user.email}</span>
             <form action="/auth/logout" method="post">
-              <button type="submit" className="bg-red-500/10 text-red-500 p-2 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+              <button type="submit" className="bg-red-500/10 text-red-500 p-2 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-500/10">
                 <LogOut size={18} />
               </button>
             </form>
