@@ -1,17 +1,17 @@
 import { getMarketData } from "@/lib/api";
 import PriceCard from "@/components/PriceCard";
 import AdBanner from "@/components/AdBanner";
-import { TrendingUp, Clock, Globe } from "lucide-react";
+import { TrendingUp, Clock, Globe, ShieldAlert } from "lucide-react";
 
 export const revalidate = 60; // Ana sayfayı her 60 saniyede bir yeniden oluştur (ISR)
 
 export default async function Home() {
-  const data = await getMarketData();
+  const { items: data, updateDate } = await getMarketData();
 
   if (!data || data.length === 0) {
     return (
       <main className="min-h-screen flex items-center justify-center p-8 text-center text-gray-400 bg-[#060606]">
-        Veriler şu anda yüklerniyor. Lütfen daha sonra tekrar deneyin veya internet bağlantınızı kontrol edin.
+        Veriler şu anda yüklenemiyor. Lütfen daha sonra tekrar deneyin veya internet bağlantınızı kontrol edin.
       </main>
     );
   }
@@ -40,9 +40,12 @@ export default async function Home() {
               Canlı Serbest Piyasa ve Kapalıçarşı Fiyatları
             </p>
           </div>
-          <div className="flex items-center text-sm font-medium text-gold-light bg-gold-primary/10 px-5 py-2.5 rounded-full border border-gold-primary/20 shadow-[0_0_20px_rgba(212,175,55,0.1)] backdrop-blur-md">
-            <Clock size={18} className="mr-2 animate-pulse" />
-            Gerçek Zamanlı Veri
+          <div className="flex flex-col items-center md:items-end gap-2">
+            <div className="flex items-center text-sm font-medium text-gold-light bg-gold-primary/10 px-5 py-2.5 rounded-full border border-gold-primary/20 shadow-[0_0_20px_rgba(212,175,55,0.1)] backdrop-blur-md">
+              <Clock size={18} className="mr-2 animate-pulse" />
+              Sistem Aktif
+            </div>
+            <span className="text-xs text-gray-500 font-medium tracking-wider flex items-center justify-center">Son Güncelleme: {updateDate}</span>
           </div>
         </header>
 
@@ -96,14 +99,18 @@ export default async function Home() {
 
         <AdBanner />
 
-        {/* Elevated Footer */}
-        <footer className="border-t border-white/10 pt-10 mt-20 text-center flex flex-col items-center">
-          <div className="bg-white/5 p-6 rounded-3xl backdrop-blur-lg border border-white/5 w-full max-w-2xl mx-auto">
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Tüm fiyatlar ve kurlar anlık olarak canlı piyasalardan (Kapalıçarşı) yansıtılmaktadır ancak bilgilendirme amaçlıdır. Hiçbir sorumluluk kabul edilmez ve yatırım tavsiyesi değildir.
-            </p>
+        {/* Elevated Legal Footer */}
+        <footer className="border-t border-white/10 pt-10 mt-20 text-center flex flex-col items-center pb-8">
+          <div className="bg-red-500/5 p-6 rounded-3xl backdrop-blur-lg border border-red-500/10 w-full max-w-4xl mx-auto flex gap-4 md:items-center flex-col md:flex-row text-left">
+            <ShieldAlert size={40} className="text-red-400/80 shrink-0 mx-auto md:mx-0" />
+            <div className="space-y-2">
+              <h3 className="font-bold text-red-400 tracking-wide text-center md:text-left">YASAL UYARI VE SORUMLULUK REDDİ</h3>
+              <p className="text-gray-400 text-sm leading-relaxed text-center md:text-left">
+                Burada yer alan yatırım bilgi, yorum ve tavsiyeleri <strong>yatırım danışmanlığı kapsamında değildir.</strong> Sitede yer alan altın, döviz ve değerli maden fiyatları tamamen bilgilendirme amacı taşıyan serbest piyasa (Kapalıçarşı) anlık verilerinden derlenmektedir. Herhangi bir kuyumcuda, bankada veya döviz bürosunda işlem yapacağınız tutarlar buradaki tutarlardan bölgesel farklılıklar nedeniyle sapma gösterebilir. Altınciniz.com, fiyat farklılıklarından oluşabilecek ticari zararlardan veya yaşanacak mağduriyetlerden yasal olarak kesinlikle <strong>sorumlu tutulamaz.</strong>
+              </p>
+            </div>
           </div>
-          <p className="mt-8 text-gold-dark font-bold text-lg tracking-widest">© {new Date().getFullYear()} Altınciniz.com</p>
+          <p className="mt-10 text-gold-dark font-bold text-lg tracking-widest">© {new Date().getFullYear()} Altınciniz.com</p>
         </footer>
 
       </div>

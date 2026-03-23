@@ -7,6 +7,11 @@ export interface AssetItem {
   type: 'gold' | 'currency' | 'metal';
 }
 
+export interface MarketResponse {
+  items: AssetItem[];
+  updateDate: string;
+}
+
 const API_URL = "https://finans.truncgil.com/v3/today.json";
 
 function parseTRNumber(str: string): number {
@@ -19,11 +24,13 @@ function parsePercent(str: string): number {
   return parseFloat(str.replace('%', '').replace(',', '.'));
 }
 
-export async function getMarketData(): Promise<AssetItem[]> {
+export async function getMarketData(): Promise<MarketResponse> {
   try {
     const res = await fetch(API_URL, { next: { revalidate: 60 } });
     if (!res.ok) throw new Error("Failed to fetch");
     const data = await res.json();
+
+    const updateDate = data.Update_Date || new Date().toLocaleString('tr-TR');
 
     const createItem = (key: string, name: string, type: 'gold' | 'currency' | 'metal', customSlug?: string): AssetItem => {
       const item = data[key];
@@ -43,7 +50,7 @@ export async function getMarketData(): Promise<AssetItem[]> {
       };
     };
 
-    return [
+    const items = [
       createItem("gram-altin", "Gram Altın", "gold"),
       createItem("gram-has-altin", "Has Altın (Gram)", "gold", "has-altin"),
       createItem("ceyrek-altin", "Çeyrek Altın", "gold"),
@@ -67,8 +74,10 @@ export async function getMarketData(): Promise<AssetItem[]> {
       createItem("gram-platin", "Platin (Gram)", "metal", "platin"),
       createItem("gram-paladyum", "Paladyum (Gram)", "metal", "paladyum")
     ];
+
+    return { items, updateDate };
   } catch (error) {
     console.error("API Fetch Error:", error);
-    return [];
+    return { items: [], updateDate: new Date().toLocaleString('tr-TR') };
   }
 }
