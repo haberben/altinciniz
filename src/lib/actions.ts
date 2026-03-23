@@ -185,3 +185,58 @@ export async function ensureAdminProfile(userId: string, email: string) {
   }
   return data;
 }
+
+export async function updateJewelerAdmin(formData: FormData) {
+  "use server";
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  // Admin Check
+  const { data: adminProfile } = await supabase
+    .from("jeweler_profiles")
+    .select("is_admin")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  // Master bypass
+  const isMaster = user.email?.toLowerCase() === "ibrahmyldrim@gmail.com";
+  if (!adminProfile?.is_admin && !isMaster) throw new Error("Unauthorized Admin Only");
+
+  const jewelerId = formData.get("id") as string;
+  const name = formData.get("name") as string;
+  const address = formData.get("address") as string;
+  const phone = formData.get("phone") as string;
+  const instagram = formData.get("instagram") as string;
+  const website = formData.get("website") as string;
+  const map_url = formData.get("map_url") as string;
+  const description = formData.get("description") as string;
+  const sort_order = parseInt(formData.get("sort_order") as string) || 0;
+  const is_approved = formData.get("is_approved") === "on";
+  const is_verified = formData.get("is_verified") === "on";
+
+  const { error } = await supabase
+    .from("jeweler_profiles")
+    .update({
+      name,
+      address,
+      phone,
+      instagram,
+      website,
+      map_url,
+      description,
+      sort_order,
+      is_approved,
+      is_verified
+    })
+    .eq("id", jewelerId);
+
+  if (error) {
+    console.error("Update Jeweler Admin Error:", error);
+    throw error;
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath(`/kuyumcular/[slug]`);
+}
