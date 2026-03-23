@@ -8,7 +8,8 @@ import {
   Phone, 
   TrendingUp, 
   TrendingDown,
-  Info 
+  Info,
+  Store 
 } from "lucide-react";
 import Link from "next/link";
 
@@ -39,13 +40,29 @@ export default async function KuyumcuProfili({ params }: { params: { slug: strin
     if (offset) {
       return {
         ...item,
-        buy: item.buy + (parseFloat(offset.buy_offset) || 0),
-        sell: item.sell + (parseFloat(offset.sell_offset) || 0),
+        priceBuying: item.priceBuying + (parseFloat(offset.buy_offset as any) || 0),
+        priceSelling: item.priceSelling + (parseFloat(offset.sell_offset as any) || 0),
         isCustom: true
       };
     }
-    return item;
+    return { ...item, isCustom: false };
   });
+
+  // Only show the page if approved OR if the current user is the owner/admin
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+  const isOwner = currentUser?.id === profile.user_id;
+  
+  if (!profile.is_approved && !isOwner) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center space-y-4">
+             <h1 className="text-2xl font-black italic uppercase">Profil Henüz Onaylanmadı</h1>
+             <p className="text-gray-500 text-sm">Bu kuyumcu profili yönetici onayı beklemektedir.</p>
+             <Link href="/" className="text-gold-primary font-bold text-xs">Ana Sayfaya Dön</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#060606] text-white">
@@ -106,11 +123,11 @@ export default async function KuyumcuProfili({ params }: { params: { slug: strin
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold text-gray-600 uppercase">Aliş</p>
-                    <p className="text-2xl font-black tracking-tight">{item.buy.toLocaleString("tr-TR")} ₺</p>
+                    <p className="text-2xl font-black tracking-tight">{item.priceBuying.toLocaleString("tr-TR")} ₺</p>
                   </div>
                   <div className="space-y-1 text-right">
                     <p className="text-[10px] font-bold text-gray-600 uppercase">Satiş</p>
-                    <p className="text-2xl font-black tracking-tight text-gold-light">{item.sell.toLocaleString("tr-TR")} ₺</p>
+                    <p className="text-2xl font-black tracking-tight text-gold-light">{item.priceSelling.toLocaleString("tr-TR")} ₺</p>
                   </div>
                </div>
 
@@ -130,7 +147,7 @@ export default async function KuyumcuProfili({ params }: { params: { slug: strin
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold text-gray-600 uppercase">Satiş</p>
-                    <p className="text-xl font-black">{item.sell.toLocaleString("tr-TR")} ₺</p>
+                    <p className="text-xl font-black">{item.priceSelling.toLocaleString("tr-TR")} ₺</p>
                   </div>
                </div>
             </div>
