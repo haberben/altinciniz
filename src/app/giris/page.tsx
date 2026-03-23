@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
-import { ShieldKey, Loader2, Mail, Lock } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, Loader2, Mail, Lock } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ export default function LoginPage() {
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Note: User needs to provide this or I use a placeholder
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -45,7 +46,7 @@ export default function LoginPage() {
         <div className="text-center space-y-2 relative z-10">
           <div className="flex justify-center mb-4">
             <div className="bg-gold-primary/10 p-4 rounded-2xl border border-gold-primary/20">
-              <ShieldKey size={32} className="text-gold-light" />
+              <ShieldCheck size={32} className="text-gold-light" />
             </div>
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight">Kuyumcu Girişi</h1>
