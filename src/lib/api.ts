@@ -1,7 +1,9 @@
 export interface AssetItem {
   name: string;
   slug: string;
-  price: number;
+  price: number; // For backward compatibility / default sorting
+  priceBuying: number;
+  priceSelling: number;
   changePercent: number;
   isUp: boolean;
   type: 'gold' | 'currency' | 'metal';
@@ -14,12 +16,12 @@ export interface MarketResponse {
 
 const API_URL = "https://finans.truncgil.com/v3/today.json";
 
-function parseTRNumber(str: string): number {
+function parseTRNumber(str: string | undefined): number {
   if (!str) return 0;
   return parseFloat(str.replace(/\./g, '').replace(',', '.'));
 }
 
-function parsePercent(str: string): number {
+function parsePercent(str: string | undefined): number {
   if (!str) return 0;
   return parseFloat(str.replace('%', '').replace(',', '.'));
 }
@@ -35,15 +37,18 @@ export async function getMarketData(): Promise<MarketResponse> {
     const createItem = (key: string, name: string, type: 'gold' | 'currency' | 'metal', customSlug?: string): AssetItem => {
       const item = data[key];
       const slug = customSlug || key.toLowerCase();
-      if (!item) return { name, slug, price: 0, changePercent: 0, isUp: true, type };
+      if (!item) return { name, slug, price: 0, priceBuying: 0, priceSelling: 0, changePercent: 0, isUp: true, type };
       
-      const price = parseTRNumber(item.Selling || item.Buying);
+      const priceBuying = parseTRNumber(item.Buying);
+      const priceSelling = parseTRNumber(item.Selling);
       const changeP = parsePercent(item.Change);
       
       return {
         name,
         slug,
-        price,
+        price: priceSelling || priceBuying, 
+        priceBuying: priceBuying || priceSelling,
+        priceSelling: priceSelling || priceBuying,
         changePercent: changeP,
         isUp: changeP >= 0,
         type
