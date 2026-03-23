@@ -99,20 +99,29 @@ export async function approveJeweler(jewelerId: string, approved: boolean) {
   const supabase = createClient();
   
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { data: adminProfile } = await supabase
     .from("jeweler_profiles")
     .select("is_admin")
-    .eq("user_id", user?.id)
-    .single();
+    .eq("user_id", user.id)
+    .maybeSingle();
 
-  if (!adminProfile?.is_admin) throw new Error("Unauthorized Admin Only");
+  if (!adminProfile?.is_admin) {
+    console.error("Access Denied: User is not admin", user.email);
+    throw new Error("Unauthorized Admin Only");
+  }
 
   const { error } = await supabase
     .from("jeweler_profiles")
     .update({ is_approved: approved })
     .eq("id", jewelerId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Approve Jeweler Error:", error);
+    throw error;
+  }
+
   revalidatePath("/admin");
 }
 
@@ -121,20 +130,29 @@ export async function toggleVIP(jewelerId: string, verified: boolean) {
   const supabase = createClient();
   
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { data: adminProfile } = await supabase
     .from("jeweler_profiles")
     .select("is_admin")
-    .eq("user_id", user?.id)
-    .single();
+    .eq("user_id", user.id)
+    .maybeSingle();
 
-  if (!adminProfile?.is_admin) throw new Error("Unauthorized Admin Only");
+  if (!adminProfile?.is_admin) {
+    console.error("Access Denied: User is not admin", user.email);
+    throw new Error("Unauthorized Admin Only");
+  }
 
   const { error } = await supabase
     .from("jeweler_profiles")
     .update({ is_verified: verified })
     .eq("id", jewelerId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Toggle VIP Error:", error);
+    throw error;
+  }
+
   revalidatePath("/admin");
   revalidatePath("/");
 }
