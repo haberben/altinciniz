@@ -7,7 +7,8 @@ import {
   ShieldAlert
 } from "lucide-react";
 import Link from "next/link";
-import { approveJeweler, toggleVIP, ensureAdminProfile } from "@/lib/actions";
+import { approveJeweler, toggleVIP,// Vercel Deployment Trigger: 2024-03-23-4
+ensureAdminProfile } from "@/lib/actions";
 import AdminLoginForm from "@/components/AdminLoginForm";
 
 export default async function AdminPanel() {
