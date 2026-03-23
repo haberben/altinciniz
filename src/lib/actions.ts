@@ -1,6 +1,23 @@
 import { createClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 
+// Türkçe Karakterleri İngilizce Karakterlere Çeviren Fonksiyon
+function turkishToEnglish(text: string) {
+    return text
+        .replace(/Ğ/g, "G")
+        .replace(/ğ/g, "g")
+        .replace(/Ü/g, "U")
+        .replace(/ü/g, "u")
+        .replace(/Ş/g, "S")
+        .replace(/ş/g, "s")
+        .replace(/İ/g, "I")
+        .replace(/ı/g, "i")
+        .replace(/Ö/g, "O")
+        .replace(/ö/g, "o")
+        .replace(/Ç/g, "C")
+        .replace(/ç/g, "c");
+}
+
 export async function submitProfile(formData: FormData) {
   "use server";
   
@@ -12,6 +29,13 @@ export async function submitProfile(formData: FormData) {
   const address = formData.get("address") as string;
   const instagram = formData.get("instagram") as string;
   const website = formData.get("website") as string;
+  
+  // Güclendirilmiş Slug Jeneratörü
+  const slug = turkishToEnglish(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 
   // Create or Update profile
   const { error } = await supabase
@@ -19,14 +43,17 @@ export async function submitProfile(formData: FormData) {
     .upsert({
       user_id: user.id,
       name,
-      slug: name.toLowerCase().replace(/ /g, "-").replace(/[^\w-]/g, ""),
+      slug: slug || `kuyumcu-${user.id.substring(0, 5)}`,
       address,
       instagram,
       website,
       is_approved: false, // Onay bekliyor olarak baslar
     }, { onConflict: 'user_id' });
 
-  if (error) throw error;
+  if (error) {
+    console.error("Profile Submit Error:", error);
+    throw new Error(`Veritabanı Hatası: ${error.message}`);
+  }
   
   revalidatePath("/kuyumcu-paneli");
 }
