@@ -1,44 +1,54 @@
 import { createClient } from "@/lib/supabase-server";
-import { redirect } from "next/navigation";
 import { 
   Users, 
-  CheckCircle2, 
-  XCircle, 
   Star, 
-  Clock, 
-  ArrowLeft,
   Settings,
-  Store 
+  Store,
+  ShieldAlert
 } from "lucide-react";
 import Link from "next/link";
-import { approveJeweler, toggleVIP } from "@/lib/actions";
+import { approveJeweler, toggleVIP, ensureAdminProfile } from "@/lib/actions";
+import AdminLoginForm from "@/components/AdminLoginForm";
 
 export default async function AdminPanel() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) redirect("/giris");
+  if (!user) return <AdminLoginForm />;
 
-  // Admin Check: Use .select().eq().maybeSingle() to prevent "PGRST116" error if no profile exists
-  const { data: profile } = await supabase
+  // Admin Check: maybeSingle()
+  let { data: profile } = await supabase
     .from("jeweler_profiles")
     .select("*")
     .eq("user_id", user.id)
-    .maybeSingle(); // single() yerine maybeSingle() dùng sướng hơn
+    .maybeSingle();
+
+  // Master Admin Auto-Provisioning
+  const masterEmail = "ibrahmyldrim@gmail.com";
+  if (!profile && user.email?.toLowerCase() === masterEmail.toLowerCase()) {
+      profile = await ensureAdminProfile(user.id, user.email);
+  }
 
   if (!profile?.is_admin) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center space-y-4">
-             <div className="bg-red-500/10 p-6 rounded-full inline-block mb-4 border border-red-500/20">
-                <XCircle size={48} className="text-red-500" />
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full bg-[#0a0a0a] border border-white/5 p-12 rounded-[48px] shadow-2xl space-y-8">
+             <div className="bg-red-500/10 p-6 rounded-full inline-block border border-red-500/20">
+                <ShieldAlert size={48} className="text-red-500" />
              </div>
-             <h1 className="text-4xl font-black italic uppercase tracking-tighter">YETKİSİZ ERİŞİM</h1>
-             <p className="text-gray-500 max-w-sm mx-auto">Bu sayfaya sadece yönetici yetkisi olan hesaplar girebilir.</p>
-             <div className="pt-6">
-                <Link href="/" className="bg-white/5 border border-white/10 px-8 py-3 rounded-xl text-xs font-bold hover:bg-white/10 transition-all uppercase tracking-widest">
+             <div className="space-y-4">
+                <h1 className="text-4xl font-black italic uppercase tracking-tighter">ERIŞIM REDDEDILDI</h1>
+                <p className="text-gray-500 text-sm leading-relaxed">Bu alan sadece sistem yöneticileri içindir. Giriş yaptığınız hesap yetkili değildir.</p>
+             </div>
+             <div className="pt-6 space-y-4">
+                <Link href="/" className="block w-full bg-white/5 border border-white/10 px-8 py-4 rounded-2xl text-xs font-bold hover:bg-white/10 transition-all uppercase tracking-widest">
                   Ana Sayfaya Dön
                 </Link>
+                <form action="/auth/logout" method="post">
+                   <button type="submit" className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em] hover:text-red-400 transition-colors">
+                      FARKLI HESAPLA GIRIŞ YAP
+                   </button>
+                </form>
              </div>
         </div>
       </div>
@@ -100,7 +110,7 @@ export default async function AdminPanel() {
             {allJewelers?.map(jeweler => (
               <div key={jeweler.id} className="bg-[#0a0a0a] border border-white/5 rounded-[32px] p-8 flex flex-col md:flex-row items-center justify-between gap-8 hover:border-gold-primary/20 transition-all group">
                 <div className="flex items-center gap-6 flex-1">
-                   <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 group-hover:border-gold-primary/30 transition-all relative overflow-hidden">
+                   <div className="w-20 s-20 bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 group-hover:border-gold-primary/30 transition-all relative overflow-hidden">
                       {jeweler.logo_url ? <img src={jeweler.logo_url} className="w-full h-full object-cover" /> : <Store size={32} className="text-gold-primary opacity-40" />}
                       {jeweler.is_admin && <div className="absolute top-0 right-0 bg-emerald-500 w-3 h-3 rounded-full border-2 border-black" title="Admin Account" />}
                    </div>

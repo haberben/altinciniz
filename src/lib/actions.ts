@@ -156,3 +156,32 @@ export async function toggleVIP(jewelerId: string, verified: boolean) {
   revalidatePath("/admin");
   revalidatePath("/");
 }
+
+// Automated Admin Provisioning
+export async function ensureAdminProfile(userId: string, email: string) {
+  const masterEmail = "ibrahmyldrim@gmail.com";
+  if (email.toLowerCase() !== masterEmail.toLowerCase()) return null;
+
+  const supabase = createClient();
+  
+  // Upsert the master admin profile
+  const { data, error } = await supabase
+    .from("jeweler_profiles")
+    .upsert({
+      user_id: userId,
+      name: "Sistem Yöneticisi",
+      slug: "platform-admin",
+      address: "LIZBON-HQ",
+      is_admin: true,
+      is_approved: true,
+      is_verified: true
+    }, { onConflict: 'user_id' })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Admin Provisioning Error:", error);
+    return null;
+  }
+  return data;
+}
