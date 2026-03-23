@@ -21,41 +21,62 @@ function turkishToEnglish(text: string) {
 export async function submitProfile(formData: FormData) {
   "use server";
   
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Oturum açılamadı. Lütfen tekrar giriş yapın.");
 
-  const name = formData.get("name") as string;
-  const address = formData.get("address") as string;
-  const instagram = formData.get("instagram") as string;
-  const website = formData.get("website") as string;
-  
-  // Güclendirilmiş Slug Jeneratörü
-  const slug = turkishToEnglish(name)
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+    const name = formData.get("name") as string;
+    const address = formData.get("address") as string;
+    const instagram = formData.get("instagram") as string;
+    const website = formData.get("website") as string;
 
-  // Create or Update profile
-  const { error } = await supabase
-    .from("jeweler_profiles")
-    .upsert({
-      user_id: user.id,
-      name,
-      slug: slug || `kuyumcu-${user.id.substring(0, 5)}`,
-      address,
-      instagram,
-      website,
-      is_approved: false, // Onay bekliyor olarak baslar
-    }, { onConflict: 'user_id' });
+    if (!name || !address) throw new Error("Mağaza adı ve adres gereklidir.");
+    
+    // Güclendirilmiş Slug Jeneratörü
+    const baseSlug = turkishToEnglish(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || `kuyumcu-${user.id.substring(0, 5)}`;
 
-  if (error) {
-    console.error("Profile Submit Error:", error);
-    throw new Error(`Veritabanı Hatası: ${error.message}`);
+    let finalSlug = baseSlug;
+
+    // Slug çakışma kontrolü
+    const { data: conflict } = await supabase
+      .from("jeweler_profiles")
+      .select("user_id")
+      .eq("slug", finalSlug)
+      .maybeSingle();
+
+    if (conflict && conflict.user_id !== user.id) {
+       finalSlug = `${baseSlug}-${Math.random().toString(36).substring(0, 4)}`;
+    }
+
+    // Create or Update profile
+    const { error } = await supabase
+      .from("jeweler_profiles")
+      .upsert({
+        user_id: user.id,
+        name,
+        slug: finalSlug,
+        address,
+        instagram: instagram || "",
+        website: website || "",
+        is_approved: false,
+        sort_order: 0,
+        phone: "",
+        map_url: "",
+        description: ""
+      }, { onConflict: 'user_id' });
+
+    if (error) throw error;
+    
+    revalidatePath("/kuyumcu-paneli");
+  } catch (err: any) {
+    console.error("FATAL: submitProfile failed:", err);
+    throw new Error(err.message || "Profil oluşturulurken beklenmedik bir hata oluştu.");
   }
-  
-  revalidatePath("/kuyumcu-paneli");
 }
 
 export async function updateOffset(formData: FormData) {
