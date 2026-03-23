@@ -113,8 +113,15 @@ export default async function KuyumcuPaneli() {
                 <Store className="text-gold-primary" size={20} />
                 {profile.name}
               </h2>
-              <div className="flex items-center gap-1">
-                 <span className="text-[10px] font-black bg-gold-primary/20 text-gold-light px-2 py-0.5 rounded border border-gold-primary/20 uppercase tracking-tighter">Doğrulanmiş Kuyumcu</span>
+              <div className="flex flex-wrap gap-2">
+                 {profile.is_verified && (
+                   <span className="text-[10px] font-black bg-gold-primary/20 text-gold-light px-2 py-0.5 rounded border border-gold-primary/20 uppercase tracking-tighter">Yildizli Kuyumcu</span>
+                 )}
+                 {profile.is_approved ? (
+                   <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-tighter">Onayli Mağaza</span>
+                 ) : (
+                   <span className="text-[10px] font-black bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-tighter italic">Onay Bekliyor</span>
+                 )}
               </div>
             </div>
             <div className="space-y-3 pt-4 border-t border-[#222] text-sm text-gray-400">
