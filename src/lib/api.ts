@@ -11,13 +11,11 @@ const API_URL = "https://finans.truncgil.com/v3/today.json";
 
 function parseTRNumber(str: string): number {
   if (!str) return 0;
-  // "6.065,71" -> "6065.71"
   return parseFloat(str.replace(/\./g, '').replace(',', '.'));
 }
 
 function parsePercent(str: string): number {
   if (!str) return 0;
-  // "%-5,32" -> -5.32
   return parseFloat(str.replace('%', '').replace(',', '.'));
 }
 
@@ -47,13 +45,23 @@ export async function getMarketData(): Promise<AssetItem[]> {
 
     return [
       createItem("gram-altin", "Gram Altın", "gold"),
+      createItem("gram-has-altin", "Has Altın (Gram)", "gold", "has-altin"),
       createItem("ceyrek-altin", "Çeyrek Altın", "gold"),
       createItem("yarim-altin", "Yarım Altın", "gold"),
       createItem("tam-altin", "Tam Altın", "gold"),
       createItem("cumhuriyet-altini", "Cumhuriyet Altını", "gold"),
+      createItem("ata-altin", "Ata Altın", "gold"),
+      createItem("gremse-altin", "Gremse Altın", "gold"),
+      createItem("resat-altin", "Reşat Altın", "gold"),
+      createItem("22-ayar-bilezik", "22 Ayar Bilezik", "gold"),
+      createItem("18-ayar-altin", "18 Ayar Altın", "gold"),
+      createItem("14-ayar-altin", "14 Ayar Altın", "gold"),
       
       createItem("USD", "Dolar (USD/TL)", "currency", "dolar"),
       createItem("EUR", "Euro (EUR/TL)", "currency", "euro"),
+      createItem("GBP", "İngiliz Sterlini", "currency", "sterlin"),
+      createItem("CHF", "İsviçre Frangı", "currency", "frank"),
+      createItem("SAR", "Suudi Riyali", "currency", "riyal"),
       
       createItem("gumus", "Gümüş (Gram)", "metal"),
       createItem("gram-platin", "Platin (Gram)", "metal", "platin"),
