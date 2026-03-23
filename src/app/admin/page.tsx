@@ -23,9 +23,9 @@ export default async function AdminPanel() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  // Master Admin Auto-Provisioning
+  // Master Admin Auto-Provisioning (Force check even if profile exists but not admin)
   const masterEmail = "ibrahmyldrim@gmail.com";
-  if (!profile && user.email?.toLowerCase() === masterEmail.toLowerCase()) {
+  if (user.email?.toLowerCase() === masterEmail.toLowerCase() && !profile?.is_admin) {
       profile = await ensureAdminProfile(user.id, user.email);
   }
 
