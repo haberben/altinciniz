@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase-server";
+import { getMarketData } from "@/lib/api";
 import { redirect } from "next/navigation";
 import { 
   User, 
@@ -8,10 +9,12 @@ import {
   Instagram, 
   Globe, 
   LogOut, 
-  ChevronRight, 
-  Store 
+  Store,
+  Plus,
+  Rocket
 } from "lucide-react";
 import Link from "next/link";
+import { submitProfile, updateOffset } from "@/lib/actions";
 
 export default async function KuyumcuPaneli() {
   const supabase = createClient();
@@ -28,9 +31,57 @@ export default async function KuyumcuPaneli() {
     .eq("user_id", user.id)
     .single();
 
+  // Get Current Offsets
+  const { data: offsets } = profile ? await supabase
+    .from("price_offsets")
+    .select("*")
+    .eq("jeweler_id", profile.id) : { data: [] };
+
+  // Get All Market Assets for selecting
+  const { items: allAssets } = await getMarketData();
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-[#060606] text-white flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-[#0a0a0a] border border-[#222] p-8 rounded-3xl space-y-8 shadow-2xl border-gold-primary/20">
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 bg-gold-primary/10 rounded-2xl border border-gold-primary/20 flex items-center justify-center mx-auto">
+              <Rocket className="text-gold-light" size={32} />
+            </div>
+            <h1 className="text-2xl font-black">Hoş Geldiniz!</h1>
+            <p className="text-gray-500 text-sm">Satış yapmaya başlamak için önce mağaza profilinizi oluşturun.</p>
+          </div>
+
+          <form action={submitProfile} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Kuyumcu / Mağaza Adı</label>
+              <input name="name" required className="w-full bg-black border border-[#222] rounded-xl p-3 text-sm focus:border-gold-primary outline-none" placeholder="Örn: Yıldız Kuyumculuk" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Adres</label>
+              <textarea name="address" required className="w-full bg-black border border-[#222] rounded-xl p-3 text-sm focus:border-gold-primary outline-none h-20" placeholder="Açık adresiniz..." />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Instagram</label>
+                <input name="instagram" className="w-full bg-black border border-[#222] rounded-xl p-3 text-sm focus:border-gold-primary outline-none" placeholder="@kullanici" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Web Sitesi</label>
+                <input name="website" className="w-full bg-black border border-[#222] rounded-xl p-3 text-sm focus:border-gold-primary outline-none" placeholder="www.kuyumcu.com" />
+              </div>
+            </div>
+            <button type="submit" className="w-full bg-gold-primary text-black font-black py-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform">
+              Profilimi Oluştur ve Başla
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#060606] text-white font-sans">
-      {/* Sidebar / Header Navigation */}
       <nav className="border-b border-[#222] bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -38,24 +89,13 @@ export default async function KuyumcuPaneli() {
               <span className="text-gold-primary">Altın</span>ciniz
             </Link>
             <div className="h-6 w-px bg-[#333]" />
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-              Yönetim Paneli
-            </span>
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Yönetim Paneli</span>
           </div>
-
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3 text-sm font-medium text-gray-300">
-              <div className="w-8 h-8 rounded-full bg-gold-primary/20 border border-gold-primary/30 flex items-center justify-center">
-                <User size={16} className="text-gold-light" />
-              </div>
-              <span className="hidden md:inline">{user.email}</span>
-            </div>
+            <span className="text-xs font-bold text-gold-light hidden md:inline">{user.email}</span>
             <form action="/auth/logout" method="post">
-              <button 
-                type="submit"
-                className="text-gray-500 hover:text-red-400 transition-colors p-2 rounded-xl hover:bg-red-500/5 border border-transparent hover:border-red-500/10"
-              >
-                <LogOut size={20} />
+              <button type="submit" className="bg-red-500/10 text-red-500 p-2 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                <LogOut size={18} />
               </button>
             </form>
           </div>
@@ -64,87 +104,78 @@ export default async function KuyumcuPaneli() {
 
       <main className="max-w-7xl mx-auto p-6 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Left Col: Menu & Stats Summary */}
+        {/* Profile Card */}
         <aside className="lg:col-span-4 space-y-6">
-          <div className="bg-gradient-to-br from-[#111] to-black border border-[#222] p-8 rounded-3xl shadow-xl space-y-6">
+          <div className="bg-[#0a0a0a] border border-[#222] p-8 rounded-3xl space-y-6 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gold-primary/5 rounded-full blur-3xl" />
             <div className="space-y-2">
-              <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
-                <Store className="text-gold-primary" size={24} />
-                {profile?.name || "Kuyumcu Bilgileri"}
+              <h2 className="text-xl font-black flex items-center gap-2">
+                <Store className="text-gold-primary" size={20} />
+                {profile.name}
               </h2>
-              <p className="text-sm text-gray-500 leading-relaxed">Profiliniz şu an aktif. Müşterileriniz aşağıdaki bilgileri görüyor.</p>
-            </div>
-
-            <div className="space-y-4 pt-4 border-t border-[#222]">
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <MapPin size={16} />
-                <span>{profile?.address || "Adres Tanımlanmadı"}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <Instagram size={16} />
-                <span>{profile?.instagram || "@instagram"}</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm text-gray-400">
-                <Globe size={16} />
-                <span>{profile?.website || "www.siteniz.com"}</span>
+              <div className="flex items-center gap-1">
+                 <span className="text-[10px] font-black bg-gold-primary/20 text-gold-light px-2 py-0.5 rounded border border-gold-primary/20 uppercase tracking-tighter">Doğrulanmiş Kuyumcu</span>
               </div>
             </div>
-
-            <button className="w-full bg-[#111] hover:bg-gold-primary hover:text-black border border-[#333] hover:border-gold-primary py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
-              <Settings size={16} />
-              Mağaza Bilgilerini Düzenle
+            <div className="space-y-3 pt-4 border-t border-[#222] text-sm text-gray-400">
+               <div className="flex items-center gap-3"><MapPin size={14}/> <span>{profile.address}</span></div>
+               <div className="flex items-center gap-3"><Instagram size={14}/> <span>{profile.instagram}</span></div>
+               <div className="flex items-center gap-3"><Globe size={14}/> <span>{profile.website}</span></div>
+            </div>
+            <button className="w-full bg-white/5 border border-white/10 py-3 rounded-xl text-xs font-bold hover:bg-white/10 transition-all">
+              Mağaza Profilini Düzenle
             </button>
           </div>
         </aside>
 
-        {/* Right Col: Price Management Widgets */}
-        <div className="lg:col-span-8 space-y-8 text-white">
+        {/* Offsets Section */}
+        <div className="lg:col-span-8 space-y-8">
           
-          {/* Action Hero Card */}
-          <div className="bg-gold-primary/5 border border-gold-primary/20 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gold-primary/10 rounded-full blur-[80px]" />
-            <div className="space-y-2 relative z-10">
-              <h3 className="text-xl font-black text-gold-light">Fiyat Farklarını Ayarla (Offsets)</h3>
-              <p className="text-gray-400 text-sm max-w-md">Canlı HaremAltın fiyatlarının üzerine ne kadar kâr eklemek istediğinizi buradan yönetin. Tüm sitemizde sizin profilinizde bu fiyatlar gözükür.</p>
-            </div>
-            <button className="bg-gold-primary text-black px-8 py-4 rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-transform shrink-0 relative z-10">
-              Yeni Offset Ekle
-            </button>
+          <div className="bg-gradient-to-r from-gold-primary/10 to-transparent border border-gold-primary/20 rounded-3xl p-8">
+            <h3 className="text-lg font-black text-gold-light mb-2">Fiyat Farklarını (Offset) Ayarla</h3>
+            <p className="text-gray-400 text-xs mb-6 max-w-lg">Canlı fiyata dilediğiniz tutarı (+) veya (-) olarak ekleyebilirsiniz. Örneğin, gr altını 150 TL kârla satmak için Satış Farkı kısmına 150 yazın.</p>
+            
+            <form action={updateOffset} className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-black/40 p-4 rounded-2xl border border-white/5">
+              <div className="md:col-span-1">
+                <select name="asset_slug" required className="w-full bg-[#111] border border-[#222] rounded-xl p-3 text-xs outline-none focus:border-gold-primary">
+                  {allAssets.map(asset => (
+                    <option key={asset.slug} value={asset.slug}>{asset.name}</option>
+                  ))}
+                </select>
+              </div>
+              <input type="number" step="0.01" name="buy_offset" placeholder="Alış Farkı (TL)" className="bg-[#111] border border-[#222] rounded-xl p-3 text-xs outline-none focus:border-emerald-500" />
+              <input type="number" step="0.01" name="sell_offset" placeholder="Satış Farkı (TL)" className="bg-[#111] border border-[#222] rounded-xl p-3 text-xs outline-none focus:border-blue-500" />
+              <button type="submit" className="bg-gold-primary text-black font-black py-3 rounded-xl text-xs">Farkı Uygula</button>
+            </form>
           </div>
 
-          {/* Quick List of Current Offsets */}
           <section className="space-y-4">
-            <h4 className="text-sm font-black uppercase tracking-widest text-gray-500 pl-2">Aktif Fiyat Ayarlarınız</h4>
-            
+            <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest px-2">Aktif Ayarlarınız</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-[#0a0a0a] border border-[#222] p-6 rounded-2xl flex justify-between items-center group hover:border-[#333] transition-all">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
-                    <TrendingUp size={20} className="text-emerald-500" />
+              {offsets && offsets.length > 0 ? offsets.map((off: any) => {
+                const asset = allAssets.find(a => a.slug === off.asset_slug);
+                return (
+                  <div key={off.id} className="bg-[#0a0a0a] border border-[#222] p-5 rounded-2xl flex justify-between items-center group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-gold-primary/5 rounded-xl flex items-center justify-center border border-gold-primary/10">
+                        <TrendingUp size={18} className="text-gold-light" />
+                      </div>
+                      <div>
+                        <h5 className="font-bold text-sm">{asset?.name || off.asset_slug}</h5>
+                        <p className="text-[10px] text-gray-600 font-bold uppercase">Düzenle</p>
+                      </div>
+                    </div>
+                    <div className="text-right space-y-1">
+                      <div className="text-xs font-black text-emerald-500">Alış: {off.buy_offset > 0 ? '+' : ''}{off.buy_offset} ₺</div>
+                      <div className="text-xs font-black text-blue-500">Satış: {off.sell_offset > 0 ? '+' : ''}{off.sell_offset} ₺</div>
+                    </div>
                   </div>
-                  <div>
-                    <h5 className="font-bold">Gram Altın</h5>
-                    <p className="text-[10px] text-gray-600 font-bold uppercase tracking-tighter">Satiş Farksiz</p>
-                  </div>
+                );
+              }) : (
+                <div className="md:col-span-2 text-center py-10 bg-[#0a0a0a] border border-dashed border-[#222] rounded-3xl text-gray-600 text-sm italic">
+                  Henüz özel fiyat ayarı eklemediniz.
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-black text-emerald-500">+125.00 ₺</div>
-                  <ChevronRight size={16} className="text-gray-700 ml-auto group-hover:text-gold-primary transition-colors mt-1" />
-                </div>
-              </div>
-
-              <div className="bg-[#0a0a0a] border border-[#222] p-6 rounded-2xl flex justify-between items-center group hover:border-[#333] transition-all opacity-50 grayscale cursor-not-allowed">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
-                    <TrendingUp size={20} className="text-blue-500" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold">Dolar (USD)</h5>
-                    <p className="text-[10px] text-gray-600 font-bold uppercase tracking-tighter">İşlem Yok</p>
-                  </div>
-                </div>
-                <div className="text-sm font-bold text-gray-700">Eklenmedi</div>
-              </div>
+              )}
             </div>
           </section>
 
