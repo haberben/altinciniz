@@ -1,7 +1,7 @@
 "use client";
 
 import type { AssetItem } from "@/lib/api";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Activity } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -20,17 +20,17 @@ export default function Ticker({ items }: { items: AssetItem[] }) {
     <div className="w-full bg-[#0a0a0a] border-b border-[#222] overflow-hidden sticky top-0 z-50">
       <div className="flex w-full whitespace-nowrap" style={{ animation: "marquee 40s linear infinite" }}>
         {/* We duplicate the items array so the ticker loops smoothly */}
-        {[...items, ...items, ...items].map((item, index) => (
+        {[...items, ...items, ...items, ...items].map((item, index) => (
           <Link
             key={index}
             href={`/${item.slug}`}
             className="inline-flex items-center px-6 py-2 border-r border-[#222] hover:bg-[#111] transition-colors"
           >
             <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mr-3">{item.name}</span>
-            <span className="text-white text-sm font-semibold mr-3">{formatPrice(item.price)}</span>
-            <span className={`flex items-center text-xs font-bold ${item.isUp ? "text-emerald-400" : "text-red-400"}`}>
-              {item.isUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-              %{Math.abs(item.changePercent).toFixed(2)}
+            <span className="text-gold-light text-sm font-black mr-3">{formatPrice(item.priceSelling)}</span>
+            <span className="flex items-center text-[10px] font-bold text-emerald-500 uppercase">
+              <Activity size={12} className="mr-1" />
+              Canlı
             </span>
           </Link>
         ))}

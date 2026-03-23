@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, ArrowDownRight, Sparkles } from "lucide-react";
+import { Sparkles, Activity } from "lucide-react";
 import type { AssetItem } from "@/lib/api";
 
 type Props = {
@@ -29,9 +29,9 @@ export default function PriceCard({ item, featured = false }: Props) {
             {featured && <Sparkles className="text-gold-light" size={20} />}
             {item.name}
           </h2>
-          <div className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-bold shadow-sm backdrop-blur-md ${item.isUp ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20" : "bg-red-500/15 text-red-400 border border-red-500/20"}`}>
-            {item.isUp ? <ArrowUpRight size={14} strokeWidth={3} /> : <ArrowDownRight size={14} strokeWidth={3} />}
-            <span>%{Math.abs(item.changePercent).toFixed(2)}</span>
+          <div className="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] uppercase font-bold text-gray-400 bg-white/5 border border-white/10">
+            <Activity size={12} className="text-gold-light" />
+            <span>Canlı</span>
           </div>
         </div>
         

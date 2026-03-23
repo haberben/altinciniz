@@ -4,8 +4,6 @@ export interface AssetItem {
   price: number; 
   priceBuying: number;
   priceSelling: number;
-  changePercent: number;
-  isUp: boolean;
   type: 'gold' | 'currency' | 'metal';
 }
 
@@ -24,17 +22,27 @@ export async function getMarketData(): Promise<MarketResponse> {
     const json = await res.json();
     const dataArray = json.data;
 
-    // updatedAt format is ISO string, let's localize it safely
-    let updateDate = new Date().toLocaleString('tr-TR');
+    // Vercel sunucuları Amerika'da (iad1) olduğu için saati zorla İstanbul'a çekiyoruz
+    const dateOptions: Intl.DateTimeFormatOptions = { 
+      timeZone: 'Europe/Istanbul', 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      second: '2-digit' 
+    };
+
+    let updateDate = new Date().toLocaleTimeString('tr-TR', dateOptions);
     if (json.updatedAt) {
-        updateDate = new Date(json.updatedAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        updateDate = new Date(json.updatedAt).toLocaleTimeString('tr-TR', dateOptions);
+    } else if (dataArray && dataArray.length > 0 && dataArray[0].timestamp) {
+        // Fallback to the first item's timestamp if root updatedAt is missing
+        updateDate = new Date(dataArray[0].timestamp).toLocaleTimeString('tr-TR', dateOptions);
     }
 
     const createItem = (key: string, name: string, type: 'gold' | 'currency' | 'metal', customSlug?: string): AssetItem => {
       const item = dataArray.find((i: any) => i.symbol === key);
       const slug = customSlug || key.toLowerCase().replace(/_/g, '-');
       
-      if (!item) return { name, slug, price: 0, priceBuying: 0, priceSelling: 0, changePercent: 0, isUp: true, type };
+      if (!item) return { name, slug, price: 0, priceBuying: 0, priceSelling: 0, type };
       
       const priceBuying = parseFloat(item.bid) || 0;
       const priceSelling = parseFloat(item.ask) || 0;
@@ -45,8 +53,6 @@ export async function getMarketData(): Promise<MarketResponse> {
         price: priceSelling || priceBuying, 
         priceBuying: priceBuying,
         priceSelling: priceSelling,
-        changePercent: 0, // HaremAPI temel fiyat endpointinde anlık % değişim verisi bulunmuyor
-        isUp: true,
         type
       };
     };
@@ -79,6 +85,6 @@ export async function getMarketData(): Promise<MarketResponse> {
     return { items, updateDate: `Bugün ${updateDate}` };
   } catch (error) {
     console.error("API Fetch Error:", error);
-    return { items: [], updateDate: new Date().toLocaleString('tr-TR') };
+    return { items: [], updateDate: new Date().toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul' }) };
   }
 }

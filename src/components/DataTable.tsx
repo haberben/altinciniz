@@ -1,5 +1,4 @@
 import type { AssetItem } from "@/lib/api";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import Link from "next/link";
 
 export default function DataTable({ items, title }: { items: AssetItem[], title: string }) {
@@ -19,7 +18,7 @@ export default function DataTable({ items, title }: { items: AssetItem[], title:
               <th className="px-6 py-4">Piyasa / Ürün</th>
               <th className="px-6 py-4 text-right border-l border-[#222]/50">Alış (TL)</th>
               <th className="px-6 py-4 text-right">Satış (TL)</th>
-              <th className="px-6 py-4 text-center border-l border-[#222]/50">Yön/Değişim</th>
+              <th className="px-4 py-4 text-center border-l border-[#222]/50">Durum</th>
               <th className="px-4 py-4 text-center">İşlem</th>
             </tr>
           </thead>
@@ -28,7 +27,6 @@ export default function DataTable({ items, title }: { items: AssetItem[], title:
               <tr key={item.slug} className="hover:bg-white/5 transition-colors group pl-4">
                 <td className="px-6 py-4">
                   <div className="flex items-center">
-                    <div className={`w-2 h-2 rounded-full mr-3 ${item.isUp ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
                     <span className="text-[15px] font-bold text-white tracking-wide">{item.name}</span>
                   </div>
                 </td>
@@ -42,11 +40,8 @@ export default function DataTable({ items, title }: { items: AssetItem[], title:
                     {formatPrice(item.priceSelling)}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-center border-l border-[#222]/30">
-                  <div className={`inline-flex items-center justify-center space-x-1 px-3 py-1.5 rounded-lg text-sm font-bold w-24 ${item.isUp ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}`}>
-                    {item.isUp ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                    <span>%{Math.abs(item.changePercent).toFixed(2)}</span>
-                  </div>
+                <td className="px-4 py-4 text-center border-l border-[#222]/30">
+                  <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">Canlı</span>
                 </td>
                 <td className="px-4 py-4 text-center">
                   <Link href={`/${item.slug}`} className="text-xs font-bold px-4 py-2 bg-[#111] hover:bg-gold-primary hover:text-black text-gray-300 rounded-lg transition-all border border-[#333] hover:border-gold-primary">

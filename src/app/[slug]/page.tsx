@@ -2,7 +2,7 @@ import { getMarketData } from "@/lib/api";
 import { notFound } from "next/navigation";
 import type { Metadata } from 'next';
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, ArrowDownRight, TrendingUp, AlertTriangle } from "lucide-react";
+import { ArrowLeft, TrendingUp, AlertTriangle, Activity } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
 
 export const revalidate = 60; // 60 saniye cache
@@ -91,7 +91,10 @@ export default async function DetaySayfasi({ params }: { params: { slug: string 
             <div className="flex flex-col gap-4 min-w-[320px]">
               
               <div className="flex items-center justify-between text-xs font-bold text-gray-500 bg-[#0a0a0a] px-4 py-3 rounded-xl border border-[#222]">
-                <span className="uppercase tracking-widest">Piyasa Verisi</span>
+                <span className="uppercase tracking-widest flex items-center">
+                  <Activity size={14} className="text-emerald-500 mr-2 animate-pulse" />
+                  Piyasa Verisi
+                </span>
                 <span className="text-gray-600">{updateDate}</span>
               </div>
 
@@ -111,11 +114,6 @@ export default async function DetaySayfasi({ params }: { params: { slug: string 
                   <span className="text-3xl font-black text-gold-light drop-shadow-lg relative z-10">{formatPrice(item.priceSelling)}</span>
                 </div>
 
-              </div>
-
-              <div className={`inline-flex items-center space-x-2 px-5 py-3 rounded-xl text-lg font-black w-full justify-center shadow-lg ${item.isUp ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"}`}>
-                {item.isUp ? <ArrowUpRight size={24} strokeWidth={3} /> : <ArrowDownRight size={24} strokeWidth={3} />}
-                <span>Günlük Değişim: %{Math.abs(item.changePercent).toFixed(2)}</span>
               </div>
             </div>
         </div>
