@@ -1,7 +1,7 @@
+"use server";
+
 import { createClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
-
-"use server";
 
 // Türkçe Karakterleri İngilizce Karakterlere Çeviren Fonksiyon
 function turkishToEnglish(text: string) {
