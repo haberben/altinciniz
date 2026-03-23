@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { submitProfile, updateOffset } from "@/lib/actions";
+import JewelerRegisterForm from "@/components/JewelerRegisterForm";
 
 export default async function KuyumcuPaneli() {
   const supabase = createClient();
@@ -52,29 +53,7 @@ export default async function KuyumcuPaneli() {
             <p className="text-gray-500 text-sm">Satış yapmaya başlamak için önce mağaza profilinizi oluşturun.</p>
           </div>
 
-          <form action={submitProfile} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Kuyumcu / Mağaza Adı</label>
-              <input name="name" required className="w-full bg-black border border-[#222] rounded-xl p-3 text-sm focus:border-gold-primary outline-none" placeholder="Örn: Yıldız Kuyumculuk" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Adres</label>
-              <textarea name="address" required className="w-full bg-black border border-[#222] rounded-xl p-3 text-sm focus:border-gold-primary outline-none h-20" placeholder="Açık adresiniz..." />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Instagram</label>
-                <input name="instagram" className="w-full bg-black border border-[#222] rounded-xl p-3 text-sm focus:border-gold-primary outline-none" placeholder="@kullanici" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Web Sitesi</label>
-                <input name="website" className="w-full bg-black border border-[#222] rounded-xl p-3 text-sm focus:border-gold-primary outline-none" placeholder="www.kuyumcu.com" />
-              </div>
-            </div>
-            <button type="submit" className="w-full bg-gold-primary text-black font-black py-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform">
-              Profilimi Oluştur ve Başla
-            </button>
-          </form>
+          <JewelerRegisterForm />
         </div>
       </div>
     );
