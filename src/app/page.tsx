@@ -6,7 +6,7 @@ import Converter from "@/components/Converter";
 import DataTable from "@/components/DataTable";
 import { TrendingUp, Clock, ShieldAlert, BarChart3, Coins } from "lucide-react";
 
-export const revalidate = 60; // Ana sayfayı her 60 saniyede bir yeniden oluştur (ISR)
+export const revalidate = 15; // 15 saniyede bir yeniden oluştur (Hızlı ISR)
 
 export default async function Home() {
   const { items: data, updateDate } = await getMarketData();

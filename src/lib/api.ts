@@ -17,7 +17,7 @@ const API_URL = `https://haremapi.tr/api/v1/prices?api_key=${API_KEY}`;
 
 export async function getMarketData(): Promise<MarketResponse> {
   try {
-    const res = await fetch(API_URL, { next: { revalidate: 60 } });
+    const res = await fetch(API_URL, { next: { revalidate: 15 } });
     if (!res.ok) throw new Error("Failed to fetch HaremAPI");
     const json = await res.json();
     const dataArray = json.data;

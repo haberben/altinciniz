@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, TrendingUp, AlertTriangle, Activity } from "lucide-react";
 import AdBanner from "@/components/AdBanner";
 
-export const revalidate = 60; // 60 saniye cache
+export const revalidate = 15; // 15 saniye cache
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const { items } = await getMarketData();
