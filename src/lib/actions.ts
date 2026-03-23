@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase-server";
 import { revalidatePath } from "next/cache";
 
+"use server";
+
 // Türkçe Karakterleri İngilizce Karakterlere Çeviren Fonksiyon
 function turkishToEnglish(text: string) {
     return text
@@ -19,7 +21,6 @@ function turkishToEnglish(text: string) {
 }
 
 export async function submitProfile(prevState: any, formData: FormData) {
-  "use server";
   
   try {
     const supabase = createClient();
@@ -81,7 +82,6 @@ export async function submitProfile(prevState: any, formData: FormData) {
 }
 
 export async function updateOffset(formData: FormData) {
-  "use server";
 
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -117,7 +117,6 @@ export async function updateOffset(formData: FormData) {
 }
 
 export async function approveJeweler(jewelerId: string, approved: boolean) {
-  "use server";
   const supabase = createClient();
   
   const { data: { user } } = await supabase.auth.getUser();
@@ -148,7 +147,6 @@ export async function approveJeweler(jewelerId: string, approved: boolean) {
 }
 
 export async function toggleVIP(jewelerId: string, verified: boolean) {
-  "use server";
   const supabase = createClient();
   
   const { data: { user } } = await supabase.auth.getUser();
@@ -209,7 +207,6 @@ export async function ensureAdminProfile(userId: string, email: string) {
 }
 
 export async function updateJewelerAdmin(formData: FormData) {
-  "use server";
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
@@ -264,7 +261,6 @@ export async function updateJewelerAdmin(formData: FormData) {
 }
 
 export async function createJewelerAdmin(prevState: any, formData: FormData) {
-  "use server";
   try {
     const supabase = createClient();
     const { data: { user: adminUser } } = await supabase.auth.getUser();
