@@ -38,15 +38,38 @@ export default async function KuyumcuProfili({ params }: { params: { slug: strin
   const customMarketData = rawMarketData.map(item => {
     const offset = offsets?.find(o => o.asset_slug === item.slug);
     if (offset) {
+      // Fixed price mode: overrides market entirely
+      const fixedSell = offset.fixed_sell_price != null ? parseFloat(offset.fixed_sell_price as any) : null;
+      const fixedBuy  = offset.fixed_buy_price  != null ? parseFloat(offset.fixed_buy_price  as any) : null;
+
+      if (fixedSell != null || fixedBuy != null) {
+        return {
+          ...item,
+          priceBuying:  fixedBuy  ?? item.priceBuying,
+          priceSelling: fixedSell ?? item.priceSelling,
+          isCustom: true,
+          isFixed: true,
+        };
+      }
+
+      // Offset mode: enforce minimum sell offset floor
+      const minSellOffset = parseFloat(offset.min_sell_offset as any) || 0;
+      let sellOffset = parseFloat(offset.sell_offset as any) || 0;
+      if (sellOffset < minSellOffset) sellOffset = minSellOffset;
+
+      const buyOffset = parseFloat(offset.buy_offset as any) || 0;
+
       return {
         ...item,
-        priceBuying: item.priceBuying + (parseFloat(offset.buy_offset as any) || 0),
-        priceSelling: item.priceSelling + (parseFloat(offset.sell_offset as any) || 0),
-        isCustom: true
+        priceBuying:  item.priceBuying  + buyOffset,
+        priceSelling: item.priceSelling + sellOffset,
+        isCustom: true,
+        isFixed: false,
       };
     }
-    return { ...item, isCustom: false };
+    return { ...item, isCustom: false, isFixed: false };
   });
+
 
   // Only show the page if approved OR if the current user is the owner/admin
   const { data: { user: currentUser } } = await supabase.auth.getUser();

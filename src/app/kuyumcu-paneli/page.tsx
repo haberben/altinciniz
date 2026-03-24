@@ -123,47 +123,96 @@ export default async function KuyumcuPaneli() {
         <div className="lg:col-span-8 space-y-8">
           
           <div className="bg-gradient-to-r from-gold-primary/10 to-transparent border border-gold-primary/20 rounded-3xl p-8">
-            <h3 className="text-lg font-black text-gold-light mb-2">Fiyat Farklarını (Offset) Ayarla</h3>
-            <p className="text-gray-400 text-xs mb-6 max-w-lg">Canlı fiyata dilediğiniz tutarı (+) veya (-) olarak ekleyebilirsiniz. Örneğin, gr altını 150 TL kârla satmak için Satış Farkı kısmına 150 yazın.</p>
+            <h3 className="text-lg font-black text-gold-light mb-2">Fiyat Yönetimi</h3>
+            <p className="text-gray-400 text-xs mb-6 max-w-lg">Canlı fiyata fark ekleyin, minimum alt sınır belirleyin veya istediğiniz varlığın fiyatını tamamen sabitleyin.</p>
             
-            <form action={updateOffset} className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-black/40 p-4 rounded-2xl border border-white/5">
-              <div className="md:col-span-1">
+            <form action={updateOffset} className="space-y-4 bg-black/40 p-5 rounded-2xl border border-white/5">
+
+              {/* Varlık Seçimi */}
+              <div>
+                <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Varlık</label>
                 <select name="asset_slug" required className="w-full bg-[#111] border border-[#222] rounded-xl p-3 text-xs outline-none focus:border-gold-primary">
                   {allAssets.map(asset => (
                     <option key={asset.slug} value={asset.slug}>{asset.name}</option>
                   ))}
                 </select>
               </div>
-              <input type="number" step="0.01" name="buy_offset" placeholder="Alış Farkı (TL)" className="bg-[#111] border border-[#222] rounded-xl p-3 text-xs outline-none focus:border-emerald-500" />
-              <input type="number" step="0.01" name="sell_offset" placeholder="Satış Farkı (TL)" className="bg-[#111] border border-[#222] rounded-xl p-3 text-xs outline-none focus:border-blue-500" />
-              <button type="submit" className="bg-gold-primary text-black font-black py-3 rounded-xl text-xs">Farkı Uygula</button>
+
+              {/* Fiyat Farkı (Offset) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Alış Farkı (TL)</label>
+                  <input type="number" step="0.01" name="buy_offset" placeholder="Örn: 50" className="w-full bg-[#111] border border-[#222] rounded-xl p-3 text-xs outline-none focus:border-emerald-500" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Satış Farkı (TL)</label>
+                  <input type="number" step="0.01" name="sell_offset" placeholder="Örn: 150" className="w-full bg-[#111] border border-[#222] rounded-xl p-3 text-xs outline-none focus:border-blue-500" />
+                </div>
+              </div>
+
+              {/* Minimum Satış Farkı */}
+              <div className="bg-amber-500/5 border border-amber-500/20 p-4 rounded-xl space-y-2">
+                <label className="block text-[10px] font-black text-amber-400 uppercase tracking-widest">⚡ Minimum Satış Farkı (Alt Sınır)</label>
+                <p className="text-[10px] text-gray-500">Satış fiyatı hiçbir zaman piyasa + bu değerin altına inmez. Hayır olarak bırakırsanız alt sınır uygulanmaz.</p>
+                <input type="number" step="0.01" min="0" name="min_sell_offset" placeholder="Örn: 100" className="w-full bg-[#111] border border-amber-500/30 rounded-xl p-3 text-xs outline-none focus:border-amber-400" />
+              </div>
+
+              {/* Sabit Fiyat Modu */}
+              <div className="bg-purple-500/5 border border-purple-500/20 p-4 rounded-xl space-y-3">
+                <div>
+                  <label className="block text-[10px] font-black text-purple-400 uppercase tracking-widest mb-1">🔒 Sabit Satış Fiyatı</label>
+                  <p className="text-[10px] text-gray-500 mb-2">Piyasa ne olursa olsun bu fiyatı kullan. Boş bırakırsanız piyasa + fark hesaplanır.</p>
+                  <input type="number" step="0.01" min="0" name="fixed_sell_price" placeholder="Örn: 4250.00 — boş = piyasa fiyatı" className="w-full bg-[#111] border border-purple-500/30 rounded-xl p-3 text-xs outline-none focus:border-purple-400" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-purple-300 uppercase tracking-widest mb-1">🔒 Sabit Alış Fiyatı</label>
+                  <input type="number" step="0.01" min="0" name="fixed_buy_price" placeholder="Örn: 4100.00 — boş = piyasa fiyatı" className="w-full bg-[#111] border border-purple-500/30 rounded-xl p-3 text-xs outline-none focus:border-purple-400" />
+                </div>
+              </div>
+
+              <button type="submit" className="w-full bg-gold-primary text-black font-black py-3 rounded-xl text-xs hover:opacity-90 transition-opacity">Kaydet & Uygula</button>
             </form>
           </div>
 
           <section className="space-y-4">
             <h4 className="text-xs font-black text-gray-500 uppercase tracking-widest px-2">Aktif Ayarlarınız</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {offsets && offsets.length > 0 ? offsets.map((off: any) => {
                 const asset = allAssets.find(a => a.slug === off.asset_slug);
+                const hasFixed = off.fixed_sell_price != null || off.fixed_buy_price != null;
+                const hasMinFloor = off.min_sell_offset > 0;
                 return (
-                  <div key={off.id} className="bg-[#0a0a0a] border border-[#222] p-5 rounded-2xl flex justify-between items-center group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-gold-primary/5 rounded-xl flex items-center justify-center border border-gold-primary/10">
-                        <TrendingUp size={18} className="text-gold-light" />
+                  <div key={off.id} className="bg-[#0a0a0a] border border-[#222] p-5 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gold-primary/5 rounded-xl flex items-center justify-center border border-gold-primary/10">
+                          <TrendingUp size={18} className="text-gold-light" />
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-sm">{asset?.name || off.asset_slug}</h5>
+                          {hasFixed && <span className="text-[10px] font-black text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20 uppercase">🔒 SABİT FİYAT</span>}
+                          {!hasFixed && hasMinFloor && <span className="text-[10px] font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 uppercase">⚡ ALT SINIR</span>}
+                        </div>
                       </div>
-                      <div>
-                        <h5 className="font-bold text-sm">{asset?.name || off.asset_slug}</h5>
-                        <p className="text-[10px] text-gray-600 font-bold uppercase">Düzenle</p>
+                      <div className="text-right space-y-1">
+                        {hasFixed ? (
+                          <>
+                            {off.fixed_buy_price && <div className="text-xs font-black text-emerald-400">Alış: {Number(off.fixed_buy_price).toLocaleString('tr-TR')} ₺ (SABİT)</div>}
+                            {off.fixed_sell_price && <div className="text-xs font-black text-purple-400">Satış: {Number(off.fixed_sell_price).toLocaleString('tr-TR')} ₺ (SABİT)</div>}
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-xs font-black text-emerald-500">Alış: {off.buy_offset > 0 ? '+' : ''}{off.buy_offset} ₺</div>
+                            <div className="text-xs font-black text-blue-400">Satış: {off.sell_offset > 0 ? '+' : ''}{off.sell_offset} ₺</div>
+                            {hasMinFloor && <div className="text-[10px] font-bold text-amber-500">Min: +{off.min_sell_offset} ₺</div>}
+                          </>
+                        )}
                       </div>
-                    </div>
-                    <div className="text-right space-y-1">
-                      <div className="text-xs font-black text-emerald-500">Alış: {off.buy_offset > 0 ? '+' : ''}{off.buy_offset} ₺</div>
-                      <div className="text-xs font-black text-blue-500">Satış: {off.sell_offset > 0 ? '+' : ''}{off.sell_offset} ₺</div>
                     </div>
                   </div>
                 );
               }) : (
-                <div className="md:col-span-2 text-center py-10 bg-[#0a0a0a] border border-dashed border-[#222] rounded-3xl text-gray-600 text-sm italic">
+                <div className="text-center py-10 bg-[#0a0a0a] border border-dashed border-[#222] rounded-3xl text-gray-600 text-sm italic">
                   Henüz özel fiyat ayarı eklemediniz.
                 </div>
               )}

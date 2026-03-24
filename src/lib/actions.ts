@@ -98,7 +98,19 @@ export async function updateOffset(formData: FormData) {
 
   const assetSlug = formData.get("asset_slug") as string;
   const buyOffset = parseFloat(formData.get("buy_offset") as string) || 0;
-  const sellOffset = parseFloat(formData.get("sell_offset") as string) || 0;
+  let sellOffset = parseFloat(formData.get("sell_offset") as string) || 0;
+  const minSellOffset = parseFloat(formData.get("min_sell_offset") as string) || 0;
+
+  // Enforce: sell offset cannot go below the minimum sell offset
+  if (sellOffset < minSellOffset) {
+    sellOffset = minSellOffset;
+  }
+
+  // Fixed prices — null if not provided or blank
+  const fixedSellRaw = formData.get("fixed_sell_price") as string;
+  const fixedBuyRaw = formData.get("fixed_buy_price") as string;
+  const fixedSellPrice = fixedSellRaw && fixedSellRaw.trim() !== "" ? parseFloat(fixedSellRaw) : null;
+  const fixedBuyPrice = fixedBuyRaw && fixedBuyRaw.trim() !== "" ? parseFloat(fixedBuyRaw) : null;
 
   const { error } = await supabase
     .from("price_offsets")
@@ -107,6 +119,9 @@ export async function updateOffset(formData: FormData) {
       asset_slug: assetSlug,
       buy_offset: buyOffset,
       sell_offset: sellOffset,
+      min_sell_offset: minSellOffset,
+      fixed_sell_price: fixedSellPrice,
+      fixed_buy_price: fixedBuyPrice,
       updated_at: new Date().toISOString()
     }, { onConflict: 'jeweler_id,asset_slug' });
 
@@ -115,6 +130,7 @@ export async function updateOffset(formData: FormData) {
   revalidatePath("/kuyumcu-paneli");
   revalidatePath("/kuyumcular/[slug]");
 }
+
 
 export async function approveJeweler(jewelerId: string, approved: boolean) {
   const supabase = createClient();
