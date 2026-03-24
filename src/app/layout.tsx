@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,8 +43,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
-      <body className={`${inter.className} bg-background text-white antialiased selection:bg-gold-primary selection:text-black`}>
+    <html lang="tr" data-theme="dark" suppressHydrationWarning>
+      <head>
+        {/* Anti-flash: read localStorage and set data-theme BEFORE React hydrates */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('altinciniz-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else{document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className={`${inter.className} antialiased selection:bg-gold-primary selection:text-black`}>
         {/* JSON-LD Organization Schema */}
         <script
           type="application/ld+json"
@@ -62,7 +71,9 @@ export default function RootLayout({
              })
           }}
         />
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>
