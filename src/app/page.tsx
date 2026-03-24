@@ -6,8 +6,18 @@ import Converter from "@/components/Converter";
 import DataTable from "@/components/DataTable";
 import { TrendingUp, Clock, ShieldAlert, BarChart3, Coins } from "lucide-react";
 import VIPJewelers from "@/components/VIPJewelers";
+import type { Metadata } from "next";
 
 export const revalidate = 15; // 15 saniyede bir yeniden oluştur (Hızlı ISR)
+
+export const metadata: Metadata = {
+  title: "Canlı Gram Altın Fiyatı, Çeyrek Altın Ne Kadar? | Harem Altın & Kapalıçarşı Fiyatları",
+  description: "Anlık gram altın fiyatı bugün ne kadar? Çeyrek altın, yarım altın, tam altın canlı fiyatları. 22 ayar, 24 ayar gram altın fiyatı, harem altın, kapalıçarşı canlı döviz ve altın piyasası.",
+  openGraph: {
+    title: "Canlı Gram Altın Fiyatı & Çeyrek Altın Ne Kadar? – Altıncınız",
+    description: "Gram altın ne kadar 2026? Çeyrek altın fiyatı, yarım altın, tam altın, ons altın canlı takip. Harem altın verileri ve kapalıçarşı anlık fiyatları.",
+  }
+};
 
 export default async function Home() {
   const { items: data, updateDate } = await getMarketData();
@@ -38,26 +48,98 @@ export default async function Home() {
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "Canlı gram altın ne kadar?",
+        "name": "Gram altın ne kadar, bugün gram altın fiyatı?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Gram altın fiyatı, anlık olarak Kapalıçarşı piyasası ve küresel ons altın değerlerine göre saniyeler içinde güncellenmektedir. Ana sayfamızdaki canlı piyasa tablosundan güncel rakamı takip edebilirsiniz."
+          "text": "Gram altın fiyatı anlık olarak Kapalıçarşı piyasası ve küresel ons altın değerlerine göre saniyeler içinde güncellenmektedir. Sayfamızdaki canlı piyasa tablosundan 22 ayar ve 24 ayar gram altın alış-satış fiyatlarını gerçek zamanlı takip edebilirsiniz. Gram altın ne kadar 2026 sorusunun yanıtı için grafiklerimizi inceleyebilirsiniz."
         }
       },
       {
         "@type": "Question",
-        "name": "Çeyrek altın kaç TL?",
+        "name": "Çeyrek altın ne kadar, çeyrek altın fiyatı kaç TL?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Çeyrek altın, vatandaşın en çok tercih ettiği yatırım aracıdır. Anlık çeyrek altın alış ve satış fiyatları canlı tablolarımızda şeffaf şekilde listelenir."
+          "text": "Çeyrek altın 1.75 gram olup 22 ayardır; içerdiği saf altın 1.6065 gramdır. Çeyrek altın fiyatı bu katsayı baz alınarak anlık Kapalıçarşı kurları üzerinden hesaplanır. Bugünkü çeyrek altın fiyatı için canlı tablolarımızı takip edin."
         }
       },
       {
         "@type": "Question",
-        "name": "Altıncınız verileri Harem Altın ile uyumlu mu?",
+        "name": "Harem altın fiyatları ile aynı mı?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Altıncınız, toptan piyasa olan Kapalıçarşı veri akışlarını kullanır. Bu nedenle Harem altın fiyatları başta olmak üzere tüm fiziki toptan piyasalarla birebir uyumlu canlı kurlar sunar."
+          "text": "Evet. Altıncınız, Kapalıçarşı toptan akışlarını kullandığından harem altın fiyatları, altınkaynak ve benzeri toptancılarla birebir uyumlu canlı kurlar sunar."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Yarım altın ve tam altın fiyatı ne kadar?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yarım altın yaklaşık 3.5 gram (22 ayar), tam altın yaklaşık 7 gram gelir. Hem yarım altın ne kadar hem de tam altın ne kadar sorusunun cevabını anlık tablolarımızdan görebilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "24 ayar gram altın ne kadar?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "24 ayar (has) gram altın en saf formdur ve 995-999 saflıktadır. Fiyatı 22 ayar gramdan daha yüksektir. Canlı 24 ayar gram altın fiyatı için sitemizi takip edin."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Ons altın fiyatı ne kadar?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "1 ons altın yaklaşık 31.1 gramdır. Küresel ons altın fiyatı dolar cinsinden işlem görür ve Türkiye gram altın fiyatını doğrudan etkiler. Güncel ons altın fiyatını ve grafiğini sitemizden takip edebilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Kapalıçarşı altın fiyatları nasıl öğrenilir?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Kapalıçarşı serbest piyasa altın fiyatları, Altıncınız üzerinden anlık takip edilebilir. İstanbul Kapalıçarşı taban fiyatları ve kuyumcular odası rakamlara denk veriler sunulmaktadır."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Alış ve satış fiyatı (makas) nedir?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Altın ve dövizde alış fiyatı kuyumcunun sizden satın aldığı, satış fiyatı ise size sattığı değerdir. Aralarındaki fark 'spread' veya 'makas' olarak bilinir. Sitemizde her iki fiyat şeffaf olarak listelenir."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Gram altın mı çeyrek altın mı daha karlı?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Gram altın düşük bütçeyle yatırım yapmayı kolaylaştırır; çeyrek altın ise işçilik maliyeti daha düşük olduğundan uzun vadeli birikimde tercih edilir. Her ikisini de anlık fiyatlarıyla karşılaştırmak için Altıncınız hesaplama aracını kullanabilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "10 gram, 50 gram, 100 gram altın ne kadar?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Hesaplamak için sitemizin piyasa hesaplama aracına gram altın fiyatını girin ve adedinizi yazın. 10 gram altın ne kadar, 50 gram altın kaç TL, 100 gram altın ne kadar gibi sorular için anlık fiyatla çarparak kolayca hesaplayabilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Bilezik gram fiyatı ne kadar, 22 ayar bilezik fiyatı?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "22 ayar bilezik fiyatı gram başına genellikle altın gram fiyatına işçilik eklenerek hesaplanır. 10 gram, 20 gram veya 30 gram bilezik fiyatı için güncel gram altın fiyatını kuyumcunuzla teyit edin."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Cumhuriyet altını ve reşat altın ne kadar?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Cumhuriyet altını yaklaşık 7.2 gram, reşat altın ise 7.2 gram gelmektedir. Her ikisi de 22 ayar olup fiyatı güncel gram altın kuruna göre hesaplanır."
         }
       }
     ]

@@ -9,11 +9,51 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://altinciniz.com'),
   title: {
-    default: "Altıncınız | Canlı Gram Altın, Çeyrek Altın ve Döviz Kurları (Harem Altın Kalitesinde)",
-    template: "%s | Altıncınız"
+    default: "Altıncınız | Canlı Gram Altın Fiyatı, Çeyrek Altın Ne Kadar? Harem Altın & Kapalıçarşı",
+    template: "%s | Altıncınız – Canlı Altın & Döviz"
   },
-  description: "Anlık gram altın, çeyrek altın, yarım altın, tam altın ve canlı döviz kurları. Harem altın fiyatları, Kapalıçarşı piyasası ve en şeffaf altın grafikleri Altıncınız'da.",
-  keywords: ["gram altın", "çeyrek altın", "yarım altın", "tam altın", "harem altın", "harem altın fiyatları", "canlı altın", "kapalıçarşı altın fiyatları", "döviz kurları", "dolar kuru", "euro kuru"],
+  description: "Altıncınız: Anlık gram altın fiyatı, çeyrek altın ne kadar, yarım altın, tam altın ve tüm döviz kurları. Harem altın, Kapalıçarşı, canlı altın fiyatları. 7/24 güncel altın piyasası ve fiyat takibi.",
+  keywords: [
+    // Temel altın aramaları
+    "gram altın ne kadar", "gram altın fiyatı", "gram altın",
+    "çeyrek altın ne kadar", "çeyrek altın fiyatı", "çeyrek altın kaç tl",
+    "yarım altın ne kadar", "yarım altın fiyatı",
+    "tam altın ne kadar", "tam altın fiyatı",
+    "altın fiyatları", "altın fiyatları bugün",
+    // Canlı & anlık
+    "anlık altın fiyat", "canlı altın fiyatları", "altın canlı fiyat", "altın canlı",
+    "altın fiyatları canlı", "altın anlık", "canlı altın",
+    // Harem & Kapalıçarşı
+    "harem altın", "harem altın fiyatları", "altın fiyatları harem altın",
+    "kapalı çarşı altın fiyatları", "kapalı çarşı altın", "kapalıçarşı altın fiyatları",
+    // Ons
+    "ons altın", "ons altın fiyatı", "altın ons", "altın ons fiyatı",
+    // Gramaj bazlı
+    "1 gram altın ne kadar", "10 gram altın ne kadar", "100 gram altın ne kadar",
+    "5 gram altın ne kadar", "bir gram altın ne kadar",
+    // Tarihsel & grafik
+    "altın fiyatları grafik", "gram altın grafik", "altın gram grafik",
+    "altın 1 yıllık grafik", "altın son dakika",
+    // Şehir bazlı
+    "istanbul altın fiyatları", "istanbul kapalı çarşı altın fiyatları",
+    "izmir altın fiyatları", "ankara altın fiyatları", "bursa altın fiyatları",
+    "konya altın fiyatları", "antalya altın fiyatları",
+    // Yatırım & hesaplama
+    "altın hesaplama", "altın yorum", "altın yorumları",
+    "altın yükselecek mi", "altın artacak mı",
+    // Banka altın
+    "vakıfbank altın fiyatları", "ziraat altın", "ziraat bankası altın fiyatları",
+    // Özel türler
+    "cumhuriyet altın fiyatı", "reşat altın ne kadar",
+    "külçe altın", "has altın", "saf altın",
+    "22 ayar altın gram fiyatı", "24 ayar gram altın fiyatı",
+    // Döviz bağlantılı
+    "dolar altın", "altın dolar", "döviz altın",
+    "altın ve döviz",
+    // Genel
+    "altın piyasası", "altın borsa", "altın satış", "altın alış",
+    "Altıncınız", "altinciniz",
+  ],
   authors: [{ name: "Altıncınız" }],
   creator: "Altıncınız",
   openGraph: {
