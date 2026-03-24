@@ -50,6 +50,17 @@ export const metadata: Metadata = {
     // Döviz bağlantılı
     "dolar altın", "altın dolar", "döviz altın",
     "altın ve döviz",
+    // Harem altın
+    "harem altın", "harem gram altın", "harem altın fiyatları",
+    "canlı harem altın fiyatları", "harem altın canlı", "harem altın ne kadar",
+    "harem altın gram", "harem döviz", "harem altın çeyrek", "harem altın gümüş",
+    "kuyumcu altın fiyatları canlı harem", "gram altın harem", "altın gram harem",
+    // Kuyumcu altın fiyatları
+    "kuyumcu altın fiyatları", "kuyumcu altın fiyatları canlı",
+    "kuyumcu gram altın fiyatı", "kuyumcu gram altın fiyatları canlı",
+    "kuyumcu çeyrek altın fiyatı", "kuyumcu 24 ayar gram altın fiyatı",
+    "kuyumcu 22 ayar gram altın", "kuyumcu altın",
+    "kuyumcu gram altın", "canlı kuyumcu ekranı",
     // Genel
     "altın piyasası", "altın borsa", "altın satış", "altın alış",
     "Altıncınız", "altinciniz",
