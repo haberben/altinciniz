@@ -20,6 +20,7 @@ import Link from "next/link";
 import { approveJeweler, toggleVIP, ensureAdminProfile, updateJewelerAdmin, createJewelerAdmin, submitProfile } from "@/lib/actions";
 import AdminLoginForm from "@/components/AdminLoginForm";
 import AdminCreateStoreForm from "@/components/AdminCreateStoreForm";
+import AdminDeleteButton from "@/components/AdminDeleteButton";
 
 /**
  * ADMIN PANEL - PROFESYONEL YÖNETİM SİSTEMİ
@@ -166,6 +167,12 @@ export default async function AdminPanel() {
                            <button className="h-14 px-8 rounded-2xl bg-white/5 border border-white/10 font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
                               Detayları Düzenle <ChevronDown size={14} className="opacity-40" />
                            </button>
+                           <form action={async () => {
+                             "use server";
+                             await deleteJewelerAdmin(jeweler.user_id);
+                           }}>
+                             <AdminDeleteButton />
+                           </form>
                         </div>
                     </div>
                   </div>

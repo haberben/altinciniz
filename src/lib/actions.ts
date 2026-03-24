@@ -344,3 +344,45 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
     return { success: false, error: err.message || "Beklenmedik bir hata oluştu." };
   }
 }
+
+export async function deleteJewelerAdmin(userId: string) {
+  const supabase = createClient();
+  const { data: { user: adminUser } } = await supabase.auth.getUser();
+  if (!adminUser) throw new Error("Unauthorized");
+
+  // Admin Check
+  const { data: adminProfile } = await supabase
+    .from("jeweler_profiles")
+    .select("is_admin")
+    .eq("user_id", adminUser.id)
+    .maybeSingle();
+
+  const isMaster = adminUser.email?.toLowerCase() === "ibrahmyldrim@gmail.com";
+  if (!adminProfile?.is_admin && !isMaster) throw new Error("Unauthorized Admin Only");
+
+  // Prevent self-deletion
+  if (userId === adminUser.id) {
+     throw new Error("Kendinizi silemezsiniz.");
+  }
+
+  // 1. Delete the profile manually first (in case ON DELETE CASCADE is missing)
+  const { error: profileError } = await supabase
+    .from("jeweler_profiles")
+    .delete()
+    .eq("user_id", userId);
+
+  if (profileError) {
+    console.error("Error deleting profile:", profileError);
+  }
+
+  // 2. Delete the auth user
+  const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+  
+  if (authError) {
+    console.error("Error deleting auth user:", authError);
+    throw authError;
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
