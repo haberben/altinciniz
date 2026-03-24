@@ -8,7 +8,8 @@ export default async function VIPJewelers() {
     .select("*")
     .eq("is_verified", true)
     .eq("is_approved", true)
-    .limit(5);
+    .order("sort_order", { ascending: true })
+    .limit(20);
 
   if (!jewelers || jewelers.length === 0) return null;
 

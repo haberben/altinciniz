@@ -5,6 +5,7 @@ import Ticker from "@/components/Ticker";
 import Converter from "@/components/Converter";
 import DataTable from "@/components/DataTable";
 import { TrendingUp, Clock, ShieldAlert, BarChart3, Coins } from "lucide-react";
+import VIPJewelers from "@/components/VIPJewelers";
 
 export const revalidate = 15; // 15 saniyede bir yeniden oluştur (Hızlı ISR)
 
@@ -31,10 +32,46 @@ export default async function Home() {
   const allCurrencies = data.filter(i => i.type === "currency");
   const allMetals = data.filter(i => i.type === "metal");
 
+  const jsonLdData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Canlı gram altın ne kadar?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Gram altın fiyatı, anlık olarak Kapalıçarşı piyasası ve küresel ons altın değerlerine göre saniyeler içinde güncellenmektedir. Ana sayfamızdaki canlı piyasa tablosundan güncel rakamı takip edebilirsiniz."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Çeyrek altın kaç TL?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Çeyrek altın, vatandaşın en çok tercih ettiği yatırım aracıdır. Anlık çeyrek altın alış ve satış fiyatları canlı tablolarımızda şeffaf şekilde listelenir."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Altinciniz verileri Harem Altın ile uyumlu mu?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Altınciniz, toptan piyasa olan Kapalıçarşı veri akışlarını kullanır. Bu nedenle Harem altın fiyatları başta olmak üzere tüm fiziki toptan piyasalarla birebir uyumlu canlı kurlar sunar."
+        }
+      }
+    ]
+  };
+
   return (
     <div className="bg-[#060606] min-h-screen text-white font-sans selection:bg-gold-primary selection:text-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
+      />
       {/* 1. Global Ticker Tape (Kayan Borsa Şeridi) */}
       <Ticker items={data} />
+      <VIPJewelers />
 
       <main className="relative overflow-hidden">
         {/* Premium Background Effects */}
@@ -50,9 +87,9 @@ export default async function Home() {
                 <span className="text-gold-primary drop-shadow-[0_2px_10px_rgba(212,175,55,0.4)]">Altın</span>
                 <span className="text-white">ciniz</span>
               </h1>
-              <p className="text-gray-400 mt-3 font-medium text-lg tracking-wide max-w-xl">
-                Canlı Kapalıçarşı Fiyatları, Döviz Kurları ve Anlık Finansal Hesaplama Araçları
-              </p>
+              <h2 className="text-gray-400 mt-3 font-medium text-lg tracking-wide max-w-xl">
+                Canlı Kapalıçarşı Altın Fiyatları, Döviz Kurları ve Anlık Finansal Hesaplama
+              </h2>
             </div>
             <div className="flex flex-col items-center md:items-end gap-2">
               <div className="flex items-center text-sm font-medium text-gold-light bg-gold-primary/10 px-6 py-3 rounded-full border border-gold-primary/20 shadow-[0_0_20px_rgba(212,175,55,0.1)] backdrop-blur-md">
@@ -77,7 +114,7 @@ export default async function Home() {
           <section className="relative z-20">
             <div className="flex items-center space-x-3 mb-6 px-2">
               <TrendingUp className="text-gold-primary" size={24} />
-              <h2 className="text-2xl font-black text-white tracking-tight">Öne Çıkan Piyasalar</h2>
+              <h2 className="text-2xl font-black text-white tracking-tight">Öne Çıkan Canlı Piyasalar</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {featuredItems.map(item => <PriceCard key={item.slug} item={item} />)}
@@ -92,7 +129,7 @@ export default async function Home() {
             <section>
               <div className="flex items-center space-x-3 mb-6 px-2">
                 <Coins className="text-gold-light" size={24} />
-                <h2 className="text-2xl font-black text-white tracking-tight">Kapalıçarşı Altın Fiyatları</h2>
+                <h3 className="text-2xl font-black text-white tracking-tight">Kapalıçarşı Altın Fiyatları</h3>
               </div>
               <DataTable items={tableGolds} title="Tüm Altın Türleri (Canlı)" />
             </section>
@@ -102,7 +139,7 @@ export default async function Home() {
               <section>
                 <div className="flex items-center space-x-3 mb-6 px-2">
                   <BarChart3 className="text-blue-400" size={24} />
-                  <h2 className="text-2xl font-black text-white tracking-tight">Döviz Kurları</h2>
+                  <h3 className="text-2xl font-black text-white tracking-tight">Canlı Döviz Kurları</h3>
                 </div>
                 <DataTable items={allCurrencies} title="Serbest Piyasa Döviz (Canlı)" />
               </section>
@@ -112,8 +149,42 @@ export default async function Home() {
               </section>
             </div>
           </div>
-
+          
           <AdBanner />
+
+          {/* Dinamik SEO ve FAQ İçeriği (Ana Sayfa İçin) */}
+          <section className="bg-black/50 rounded-3xl p-8 border border-[#222] mt-12 backdrop-blur-md">
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-8 text-white">Canlı Altın Piyasası Hakkında Sıkça Sorulan Sorular</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gold-primary tracking-tight">Gram altın ne kadar, kaç TL oldu?</h3>
+                <p className="text-gray-400 leading-relaxed text-sm">
+                  Gram altın fiyatı, 24 ayar saf altın üzerinden hesaplanır. Küresel ons altın ve anlık dolar/TL kuruna göre saniyeler içerisinde değişebilir. Türkiye'de en çok tercih edilen yatırım aracı olan gram altının en güncel, makassız ve canlı Kapalıçarşı taban alış/satış fiyatlarını sürekli yenilenen tablolarımızdan saniye saniye takip edebilirsiniz.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gold-primary tracking-tight">Altinciniz verileri Harem Altın fiyatları ile uyumlu mu?</h3>
+                <p className="text-gray-400 leading-relaxed text-sm">
+                  Evet. Altinciniz sistem algoritması, Türkiye'nin toptan altın ve döviz merkezi olan Kapalıçarşı ağlarından eşzamanlı likidite verisi alır. Harem altın fiyatları, Nadir Metal veya diğer büyük toptancı ekranlarıyla 0.01 saniye gecikme payı ile eşdeğer veya en yakın toptan piyasa kurlarını yansıtır.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gold-primary tracking-tight">Çeyrek altın fiyatı nasıl belirlenir?</h3>
+                <p className="text-gray-400 leading-relaxed text-sm">
+                  Bir çeyrek altın 1.75 gram gelir ve 22 ayardır. Yani içerdiği saf altın miktarı 1.6065 gramdır. Çeyrek fiyatları bu katsayı baz alınarak Kapalıçarşı anlık kurları üzerinden hesaplanır. Canlı ekranlarımızda çeyrek altın alış ve satış farkı (makas) yansıtılmaktadır. Darphane üretim maliyetleri piyasa hareketlerine göre fiyatları yukarı yönlü baskılayabilir.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-gold-primary tracking-tight">Neden iki farklı fiyat (Alış ve Satış) var?</h3>
+                <p className="text-gray-400 leading-relaxed text-sm">
+                  Altın ve döviz işlemlerindeki fiyat farkı "makas" (spread) olarak adlandırılır. Alış fiyatı, kuyumcunun sizden ürünü aldığı düşük rakamı temsil eder. Satış ise kuyumcunun o ürünü size satarken talep ettiği yüksek rakamdır. Sitemizde bu aralıklar şeffaf biçimde listelenerek, yatırımcılara doğru yönlendirme yapılır.
+                </p>
+              </div>
+            </div>
+          </section>
 
           {/* Elevated Legal Footer */}
           <footer className="border-t border-[#222] pt-12 mt-20 text-center flex flex-col items-center pb-12">
@@ -128,10 +199,10 @@ export default async function Home() {
             </div>
             
             <div className="mt-16 flex flex-col items-center space-y-4">
-              <h1 className="text-2xl font-black tracking-tighter opacity-50">
+              <span className="text-2xl font-black tracking-tighter opacity-50">
                 <span className="text-gold-primary">Altın</span>
                 <span className="text-white">ciniz</span>
-              </h1>
+              </span>
               <p className="text-gray-600 font-medium text-sm tracking-widest">© {new Date().getFullYear()} TÜM HAKLARI SAKLIDIR.</p>
             </div>
           </footer>

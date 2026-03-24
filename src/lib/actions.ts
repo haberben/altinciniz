@@ -21,6 +21,7 @@ function turkishToEnglish(text: string) {
 }
 
 export async function submitProfile(prevState: any, formData: FormData) {
+  
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -28,9 +29,12 @@ export async function submitProfile(prevState: any, formData: FormData) {
 
     const name = formData.get("name") as string;
     const address = formData.get("address") as string;
+    const instagram = formData.get("instagram") as string;
+    const website = formData.get("website") as string;
 
     if (!name || !address) return { success: false, error: "Mağaza adı ve adres gereklidir." };
     
+    // Güclendirilmiş Slug Jeneratörü
     const baseSlug = turkishToEnglish(name)
       .toLowerCase()
       .replace(/[^a-z0-9]/g, "-")
@@ -39,6 +43,7 @@ export async function submitProfile(prevState: any, formData: FormData) {
 
     let finalSlug = baseSlug;
 
+    // Slug çakışma kontrolü
     const { data: conflict } = await supabase
       .from("jeweler_profiles")
       .select("user_id")
@@ -49,6 +54,7 @@ export async function submitProfile(prevState: any, formData: FormData) {
        finalSlug = `${baseSlug}-${Math.random().toString(36).substring(0, 4)}`;
     }
 
+    // Create or Update profile
     const { error } = await supabase
       .from("jeweler_profiles")
       .upsert({
@@ -56,7 +62,13 @@ export async function submitProfile(prevState: any, formData: FormData) {
         name,
         slug: finalSlug,
         address,
+        instagram: instagram || "",
+        website: website || "",
         is_approved: false,
+        sort_order: 0,
+        phone: "",
+        map_url: "",
+        description: ""
       }, { onConflict: 'user_id' });
 
     if (error) return { success: false, error: error.message };
@@ -70,10 +82,12 @@ export async function submitProfile(prevState: any, formData: FormData) {
 }
 
 export async function updateOffset(formData: FormData) {
+
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  // Get jeweler id
   const { data: profile } = await supabase
     .from("jeweler_profiles")
     .select("id")
@@ -115,6 +129,7 @@ export async function approveJeweler(jewelerId: string, approved: boolean) {
     .maybeSingle();
 
   if (!adminProfile?.is_admin) {
+    console.error("Access Denied: User is not admin", user.email);
     throw new Error("Unauthorized Admin Only");
   }
 
@@ -123,7 +138,10 @@ export async function approveJeweler(jewelerId: string, approved: boolean) {
     .update({ is_approved: approved })
     .eq("id", jewelerId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Approve Jeweler Error:", error);
+    throw error;
+  }
 
   revalidatePath("/admin");
 }
@@ -141,6 +159,7 @@ export async function toggleVIP(jewelerId: string, verified: boolean) {
     .maybeSingle();
 
   if (!adminProfile?.is_admin) {
+    console.error("Access Denied: User is not admin", user.email);
     throw new Error("Unauthorized Admin Only");
   }
 
@@ -149,18 +168,23 @@ export async function toggleVIP(jewelerId: string, verified: boolean) {
     .update({ is_verified: verified })
     .eq("id", jewelerId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("Toggle VIP Error:", error);
+    throw error;
+  }
 
   revalidatePath("/admin");
   revalidatePath("/");
 }
 
+// Automated Admin Provisioning
 export async function ensureAdminProfile(userId: string, email: string) {
   const masterEmail = "ibrahmyldrim@gmail.com";
   if (email.toLowerCase() !== masterEmail.toLowerCase()) return null;
 
   const supabase = createClient();
   
+  // Upsert the master admin profile
   const { data, error } = await supabase
     .from("jeweler_profiles")
     .upsert({
@@ -187,18 +211,26 @@ export async function updateJewelerAdmin(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  // Admin Check
   const { data: adminProfile } = await supabase
     .from("jeweler_profiles")
     .select("is_admin")
     .eq("user_id", user.id)
     .maybeSingle();
 
+  // Master bypass
   const isMaster = user.email?.toLowerCase() === "ibrahmyldrim@gmail.com";
   if (!adminProfile?.is_admin && !isMaster) throw new Error("Unauthorized Admin Only");
 
   const jewelerId = formData.get("id") as string;
   const name = formData.get("name") as string;
   const address = formData.get("address") as string;
+  const phone = formData.get("phone") as string;
+  const instagram = formData.get("instagram") as string;
+  const website = formData.get("website") as string;
+  const map_url = formData.get("map_url") as string;
+  const description = formData.get("description") as string;
+  const sort_order = parseInt(formData.get("sort_order") as string) || 0;
   const is_approved = formData.get("is_approved") === "on";
   const is_verified = formData.get("is_verified") === "on";
 
@@ -207,6 +239,12 @@ export async function updateJewelerAdmin(formData: FormData) {
     .update({
       name,
       address,
+      phone,
+      instagram,
+      website,
+      map_url,
+      description,
+      sort_order,
       is_approved,
       is_verified
     })
@@ -228,6 +266,7 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
     const { data: { user: adminUser } } = await supabase.auth.getUser();
     if (!adminUser) return { success: false, error: "Oturum açılmamış." };
 
+    // Admin Check
     const { data: adminProfile } = await supabase
       .from("jeweler_profiles")
       .select("is_admin")
@@ -244,6 +283,7 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
 
     if (!email || !password || !name) return { success: false, error: "Email, Şifre ve Mağaza Adı gereklidir." };
 
+    // 1. Create Auth User via Admin API
     const { data: newUser, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -253,6 +293,7 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
 
     if (authError) return { success: false, error: `Kullanıcı oluşturma hatası: ${authError.message}` };
 
+    // 2. Generate slug
     const baseSlug = turkishToEnglish(name)
       .toLowerCase()
       .replace(/[^a-z0-9]/g, "-")
@@ -261,6 +302,7 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
     
     let finalSlug = baseSlug;
 
+    // Slug çakışma kontrolü
     const { data: conflict } = await supabase
       .from("jeweler_profiles")
       .select("id")
@@ -271,6 +313,7 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
        finalSlug = `${baseSlug}-${Math.random().toString(36).substring(0, 4)}`;
     }
 
+    // 3. Create Profile linked to the new user
     const { error: profileError } = await supabase
       .from("jeweler_profiles")
       .insert({
@@ -280,9 +323,16 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
         address,
         is_approved: true,
         is_verified: false,
+        sort_order: 0,
+        phone: "",
+        instagram: "",
+        website: "",
+        map_url: "",
+        description: ""
       });
 
     if (profileError) {
+       // Cleanup user if profile fails? (Optional but recommended)
        return { success: false, error: `Profil oluşturma hatası: ${profileError.message}` };
     }
 
