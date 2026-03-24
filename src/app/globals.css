@@ -2,59 +2,186 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === DARK MODE (default) === */
-:root, [data-theme="dark"] {
-  --bg-primary: #060606;
-  --bg-secondary: #0a0a0a;
+/* ============================================================
+   DARK MODE (default)
+   ============================================================ */
+:root,
+[data-theme="dark"] {
+  --bg-page: #060606;
   --bg-card: #0a0a0a;
-  --bg-hover: rgba(255,255,255,0.05);
-  --border-color: rgba(255,255,255,0.08);
+  --bg-surface: #0f0f0f;
+  --bg-input: #111111;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: #222222;
   --text-primary: #ffffff;
   --text-secondary: #9ca3af;
   --text-muted: #4b5563;
   --scrollbar-track: #0a0a0a;
   --scrollbar-thumb: #333;
-  --navbar-bg: rgba(10,10,10,0.8);
-  --input-bg: rgba(255,255,255,0.05);
+  --navbar-bg: rgba(10, 10, 10, 0.85);
+  --shadow-gold: 0 0 40px rgba(212, 175, 55, 0.15);
 }
 
-/* === LIGHT MODE === */
+/* ============================================================
+   LIGHT MODE
+   ============================================================ */
 [data-theme="light"] {
-  --bg-primary: #f5f0e8;
-  --bg-secondary: #fff9ef;
+  --bg-page: #f5f0e8;
   --bg-card: #ffffff;
-  --bg-hover: rgba(0,0,0,0.04);
-  --border-color: rgba(0,0,0,0.1);
-  --text-primary: #1a1a1a;
-  --text-secondary: #555555;
-  --text-muted: #888888;
-  --scrollbar-track: #eee8d8;
-  --scrollbar-thumb: #c8b47a;
-  --navbar-bg: rgba(255,249,239,0.9);
-  --input-bg: rgba(0,0,0,0.04);
+  --bg-surface: #fdf8f0;
+  --bg-input: #f0ece0;
+  --border: rgba(0, 0, 0, 0.09);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --text-primary: #1a1600;
+  --text-secondary: #5a5140;
+  --text-muted: #8a7a60;
+  --scrollbar-track: #e8e0d0;
+  --scrollbar-thumb: #c0a85a;
+  --navbar-bg: rgba(253, 248, 240, 0.92);
+  --shadow-gold: 0 0 40px rgba(212, 175, 55, 0.2);
 }
 
+/* ============================================================
+   BASE BODY
+   ============================================================ */
 body {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-page);
   color: var(--text-primary);
   min-height: 100vh;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Custom Webkit Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* ============================================================
+   LIGHT MODE — Global color overrides
+   These target the hardcoded Tailwind classes used throughout
+   ============================================================ */
+
+/* Page & card backgrounds */
+[data-theme="light"] .bg-\[\#060606\]         { background-color: #f5f0e8 !important; }
+[data-theme="light"] .bg-\[\#0a0a0a\]         { background-color: #ffffff !important; }
+[data-theme="light"] .bg-\[\#111\]            { background-color: #f0ece0 !important; }
+[data-theme="light"] .bg-\[\#111111\]         { background-color: #f0ece0 !important; }
+[data-theme="light"] .bg-black               { background-color: #fdf8f0 !important; }
+[data-theme="light"] .bg-surface             { background-color: #ffffff !important; }
+[data-theme="light"] .bg-background          { background-color: #f5f0e8 !important; }
+
+/* Frosted overlays */
+[data-theme="light"] .bg-white\/5            { background-color: rgba(0, 0, 0, 0.04) !important; }
+[data-theme="light"] .bg-white\/10           { background-color: rgba(0, 0, 0, 0.06) !important; }
+[data-theme="light"] .bg-white\/20           { background-color: rgba(0, 0, 0, 0.08) !important; }
+[data-theme="light"] .bg-black\/40           { background-color: rgba(0, 0, 0, 0.05) !important; }
+[data-theme="light"] .bg-black\/30           { background-color: rgba(0, 0, 0, 0.04) !important; }
+[data-theme="light"] .bg-black\/80           { background-color: rgba(255, 249, 239, 0.92) !important; }
+
+/* Gradient backgrounds */
+[data-theme="light"] .bg-gradient-to-br.from-surface { background: linear-gradient(to bottom right, #ffffff, #f5f0e8) !important; }
+[data-theme="light"] .from-\[\#1a1500\]\/90  { --tw-gradient-from: rgba(255,240,200,0.9) !important; }
+
+/* Backdrop blur panels */
+[data-theme="light"] [class*="backdrop-blur"] { background-color: rgba(255, 249, 239, 0.85) !important; }
+
+/* Sticky navbar backgrounds */
+[data-theme="light"] .sticky { background-color: var(--navbar-bg) !important; }
+
+/* Borders */
+[data-theme="light"] .border-\[\#222\]        { border-color: rgba(0, 0, 0, 0.1) !important; }
+[data-theme="light"] .border-\[\#333\]        { border-color: rgba(0, 0, 0, 0.12) !important; }
+[data-theme="light"] .divide-\[\#222\]  > *  { border-color: rgba(0, 0, 0, 0.08) !important; }
+[data-theme="light"] .border-white\/5         { border-color: rgba(0, 0, 0, 0.07) !important; }
+[data-theme="light"] .border-white\/10        { border-color: rgba(0, 0, 0, 0.1) !important; }
+[data-theme="light"] .border-white\/20        { border-color: rgba(0, 0, 0, 0.12) !important; }
+[data-theme="light"] .border-\[\#222\]\/50    { border-color: rgba(0, 0, 0, 0.06) !important; }
+[data-theme="light"] .border-\[\#222\]\/30    { border-color: rgba(0, 0, 0, 0.05) !important; }
+
+/* Text colors */
+[data-theme="light"] .text-white              { color: #1a1600 !important; }
+[data-theme="light"] .text-gray-200           { color: #3a3020 !important; }
+[data-theme="light"] .text-gray-300           { color: #5a5040 !important; }
+[data-theme="light"] .text-gray-400           { color: #706050 !important; }
+[data-theme="light"] .text-gray-500           { color: #8a7a60 !important; }
+[data-theme="light"] .text-gray-600           { color: #9a8a70 !important; }
+
+/* Hover states */
+[data-theme="light"] .hover\:bg-white\/5:hover   { background-color: rgba(0, 0, 0, 0.06) !important; }
+[data-theme="light"] .hover\:bg-white\/10:hover  { background-color: rgba(0, 0, 0, 0.08) !important; }
+[data-theme="light"] .hover\:bg-\[\#111\]:hover  { background-color: rgba(212, 175, 55, 0.08) !important; }
+[data-theme="light"] .hover\:text-white:hover    { color: #1a1600 !important; }
+
+/* Input fields */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background-color: #f0ece0 !important;
+  color: #1a1600 !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder { color: #9a8a70 !important; }
+[data-theme="light"] option { background-color: #fdf8f0; color: #1a1600; }
+
+/* Gold buttons should stay gold in light mode */
+[data-theme="light"] .bg-gold-primary         { background-color: #D4AF37 !important; }
+[data-theme="light"] .text-gold-primary       { color: #b8941f !important; }
+[data-theme="light"] .text-gold-light         { color: #c8940a !important; }
+[data-theme="light"] .border-gold-primary\/20 { border-color: rgba(212, 175, 55, 0.3) !important; }
+[data-theme="light"] .border-gold-primary\/30 { border-color: rgba(212, 175, 55, 0.4) !important; }
+[data-theme="light"] .bg-gold-primary\/5      { background-color: rgba(212, 175, 55, 0.08) !important; }
+[data-theme="light"] .bg-gold-primary\/10     { background-color: rgba(212, 175, 55, 0.12) !important; }
+[data-theme="light"] .bg-gold-primary\/20     { background-color: rgba(212, 175, 55, 0.18) !important; }
+
+/* Status badges — keep semantic colors */
+[data-theme="light"] .text-emerald-500        { color: #059669 !important; }
+[data-theme="light"] .bg-emerald-500\/10      { background-color: rgba(5, 150, 105, 0.1) !important; }
+[data-theme="light"] .text-red-500            { color: #dc2626 !important; }
+[data-theme="light"] .text-amber-500          { color: #d97706 !important; }
+[data-theme="light"] .text-blue-500           { color: #2563eb !important; }
+
+/* Table specific */
+[data-theme="light"] thead tr             { background-color: #f0ece0 !important; border-color: rgba(0,0,0,0.1) !important; }
+[data-theme="light"] tbody tr:hover       { background-color: rgba(212, 175, 55, 0.05) !important; }
+[data-theme="light"] td, [data-theme="light"] th { border-color: rgba(0,0,0,0.07) !important; }
+
+/* Shadows */
+[data-theme="light"] .shadow-xl           { box-shadow: 0 4px 24px rgba(0,0,0,0.08) !important; }
+[data-theme="light"] .shadow-2xl          { box-shadow: 0 8px 40px rgba(0,0,0,0.1) !important; }
+[data-theme="light"] [class*="shadow-\[0_0_"] {
+  box-shadow: var(--shadow-gold) !important;
 }
 
-::-webkit-scrollbar-track {
-  background: #0a0a0a; 
-}
- 
-::-webkit-scrollbar-thumb {
-  background: #333; 
-  border-radius: 4px;
-}
+/* Glows / decorative blurs — tone them down in light mode */
+[data-theme="light"] .blur-\[80px\],
+[data-theme="light"] .blur-\[120px\],
+[data-theme="light"] .blur-\[150px\] { opacity: 0.3 !important; }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #D4AF37; 
+/* Admin & Jeweler panel form elements */
+[data-theme="light"] .rounded-\[28px\].bg-white\/5,
+[data-theme="light"] .rounded-2xl.bg-white\/5,
+[data-theme="light"] .rounded-xl.bg-white\/5,
+[data-theme="light"] .rounded-3xl.bg-white\/5 { background-color: #f0ece0 !important; }
+
+/* Gradient section backgrounds on pages */
+[data-theme="light"] .bg-gradient-to-r { background-image: none !important; background-color: rgba(212, 175, 55, 0.06) !important; }
+[data-theme="light"] .bg-gradient-to-b { background-image: none !important; }
+
+/* Italic/uppercase feature banners */
+[data-theme="light"] .italic.uppercase.text-white,
+[data-theme="light"] h1.italic,
+[data-theme="light"] h2.italic,
+[data-theme="light"] h3.italic { color: #1a1600 !important; }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+
+/* Smooth transitions on theme switch for all elements */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease, box-shadow 0.2s ease;
+}
+/* But don't slow down animations */
+[class*="animate-"], [style*="animation"] {
+  transition: none !important;
 }

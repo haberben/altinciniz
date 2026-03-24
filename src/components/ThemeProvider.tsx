@@ -15,20 +15,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("altinciniz-theme") as Theme | null;
-    const initial = saved ?? "dark";
+    const initial: Theme = saved === "light" ? "light" : "dark";
+    applyTheme(initial);
     setTheme(initial);
-    document.documentElement.setAttribute("data-theme", initial);
     setMounted(true);
   }, []);
+
+  function applyTheme(t: Theme) {
+    document.documentElement.setAttribute("data-theme", t);
+    // Remove both classes first, then add the active one
+    document.documentElement.classList.remove("dark", "light");
+    document.documentElement.classList.add(t);
+  }
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark";
     setTheme(next);
     localStorage.setItem("altinciniz-theme", next);
-    document.documentElement.setAttribute("data-theme", next);
+    applyTheme(next);
   };
 
-  // Prevent flash of wrong theme on SSR
   if (!mounted) return <>{children}</>;
 
   return (

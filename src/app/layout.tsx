@@ -45,10 +45,10 @@ export default function RootLayout({
   return (
     <html lang="tr" data-theme="dark" suppressHydrationWarning>
       <head>
-        {/* Anti-flash: read localStorage and set data-theme BEFORE React hydrates */}
+        {/* Anti-flash: read localStorage and apply theme before React hydration */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('altinciniz-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else{document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('altinciniz-theme');var theme=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',theme);document.documentElement.classList.add(theme);}catch(e){}})();`,
           }}
         />
       </head>
