@@ -54,10 +54,10 @@ export default async function Home() {
       },
       {
         "@type": "Question",
-        "name": "Altinciniz verileri Harem Altın ile uyumlu mu?",
+        "name": "Altıncınız verileri Harem Altın ile uyumlu mu?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Altınciniz, toptan piyasa olan Kapalıçarşı veri akışlarını kullanır. Bu nedenle Harem altın fiyatları başta olmak üzere tüm fiziki toptan piyasalarla birebir uyumlu canlı kurlar sunar."
+          "text": "Altıncınız, toptan piyasa olan Kapalıçarşı veri akışlarını kullanır. Bu nedenle Harem altın fiyatları başta olmak üzere tüm fiziki toptan piyasalarla birebir uyumlu canlı kurlar sunar."
         }
       }
     ]
@@ -84,7 +84,7 @@ export default async function Home() {
             <div className="flex flex-col items-center md:items-start">
               <h1 className="text-5xl md:text-6xl font-black tracking-tighter">
                 <span className="text-gold-primary drop-shadow-[0_2px_10px_rgba(212,175,55,0.4)]">Altın</span>
-                <span className="text-white">ciniz</span>
+                <span className="text-white">cınız</span>
               </h1>
               <h2 className="text-gray-400 mt-3 font-medium text-lg tracking-wide max-w-xl">
                 Canlı Kapalıçarşı Altın Fiyatları, Döviz Kurları ve Anlık Finansal Hesaplama
@@ -109,6 +109,11 @@ export default async function Home() {
             <Converter items={data} />
           </section>
 
+          {/* Dinamik Yıldızlı Kuyumcular Vitrini */}
+          <div className="relative z-20 mb-12">
+            <VIPJewelers />
+          </div>
+
           {/* 3. Featured Market Cards (Top 4 Assets) */}
           <section className="relative z-20">
             <div className="flex items-center space-x-3 mb-6 px-2">
@@ -119,11 +124,6 @@ export default async function Home() {
               {featuredItems.map(item => <PriceCard key={item.slug} item={item} />)}
             </div>
           </section>
-
-          {/* Dinamik Yıldızlı Kuyumcular Vitrini */}
-          <div className="relative z-20 mt-6 mb-6">
-            <VIPJewelers />
-          </div>
 
           <AdBanner />
 
@@ -168,9 +168,9 @@ export default async function Home() {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-gold-primary tracking-tight">Altinciniz verileri Harem Altın fiyatları ile uyumlu mu?</h3>
+                <h3 className="text-lg font-bold text-gold-primary tracking-tight">Altıncınız verileri Harem Altın fiyatları ile uyumlu mu?</h3>
                 <p className="text-gray-400 leading-relaxed text-sm">
-                  Evet. Altinciniz sistem algoritması, Türkiye'nin toptan altın ve döviz merkezi olan Kapalıçarşı ağlarından eşzamanlı likidite verisi alır. Harem altın fiyatları, Nadir Metal veya diğer büyük toptancı ekranlarıyla 0.01 saniye gecikme payı ile eşdeğer veya en yakın toptan piyasa kurlarını yansıtır.
+                  Evet. Altıncınız sistem algoritması, Türkiye'nin toptan altın ve döviz merkezi olan Kapalıçarşı ağlarından eşzamanlı likidite verisi alır. Harem altın fiyatları, Nadir Metal veya diğer büyük toptancı ekranlarıyla 0.01 saniye gecikme payı ile eşdeğer veya en yakın toptan piyasa kurlarını yansıtır.
                 </p>
               </div>
 
@@ -197,7 +197,7 @@ export default async function Home() {
               <div className="space-y-3">
                 <h3 className="font-black text-red-500 tracking-wide text-center md:text-left text-xl">YASAL UYARI VE SORUMLULUK REDDİ</h3>
                 <p className="text-gray-400 text-sm leading-relaxed text-center md:text-left">
-                  Burada yer alan yatırım bilgi, yorum ve tavsiyeleri <strong>yatırım danışmanlığı kapsamında değildir.</strong> Sitede yer alan fiyatlar tamamen bilgilendirme amacı taşıyan serbest piyasa (Kapalıçarşı) anlık verilerinden derlenmektedir. Herhangi bir yetkili müessesede (kuyumcu, döviz bürosu) işlem yapacağınız tutarlar buradaki tutarlardan bölgesel arz/talep ve işçilik farklılıkları nedeniyle sapma gösterebilir. Altınciniz.com, fiyat farklılıklarından oluşabilecek hata, ticari zarar veya yaşanacak mağduriyetlerden yasal olarak kesinlikle <strong>sorumlu tutulamaz.</strong>
+                  Burada yer alan yatırım bilgi, yorum ve tavsiyeleri <strong>yatırım danışmanlığı kapsamında değildir.</strong> Sitede yer alan fiyatlar tamamen bilgilendirme amacı taşıyan serbest piyasa (Kapalıçarşı) anlık verilerinden derlenmektedir. Herhangi bir yetkili müessesede (kuyumcu, döviz bürosu) işlem yapacağınız tutarlar buradaki tutarlardan bölgesel arz/talep ve işçilik farklılıkları nedeniyle sapma gösterebilir. Altıncınız.com, fiyat farklılıklarından oluşabilecek hata, ticari zarar veya yaşanacak mağduriyetlerden yasal olarak kesinlikle <strong>sorumlu tutulamaz.</strong>
                 </p>
               </div>
             </div>
@@ -205,7 +205,7 @@ export default async function Home() {
             <div className="mt-16 flex flex-col items-center space-y-4">
               <span className="text-2xl font-black tracking-tighter opacity-50">
                 <span className="text-gold-primary">Altın</span>
-                <span className="text-white">ciniz</span>
+                <span className="text-white">cınız</span>
               </span>
               <p className="text-gray-600 font-medium text-sm tracking-widest">© {new Date().getFullYear()} TÜM HAKLARI SAKLIDIR.</p>
             </div>

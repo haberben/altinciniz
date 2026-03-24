@@ -13,14 +13,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   
   if (!item) {
     return {
-      title: 'Bulunamadı | Altinciniz',
+      title: 'Bulunamadı | Altıncınız',
     };
   }
 
   const formattedPrice = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(item.priceSelling);
 
   return {
-    title: `Canlı ${item.name} Fiyatı: ${formattedPrice} | Altinciniz`,
+    title: `Canlı ${item.name} Fiyatı: ${formattedPrice} | Altıncınız`,
     description: `Anlık ${item.name} fiyatı alış ve satış detayları. Güncel ${item.name} kuru ne kadar, kaç TL oldu? Canlı takip edin.`,
     keywords: `${item.name.toLowerCase()} fiyatı, canlı ${item.name}, ${item.name} ne kadar, ${item.name} kaç tl, harem ${item.name}`,
     alternates: {
@@ -154,7 +154,7 @@ export default async function DetaySayfasi({ params }: { params: { slug: string 
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-gold-primary tracking-tight">Harem Altın {item.name} kurları ile fark var mı?</h3>
             <p className="text-gray-400 leading-relaxed text-sm">
-               Altınciniz, Kapalıçarşı dahil tüm Türkiye'deki toptan altın paritelerine paralel veriler çeker. <strong>Harem altın</strong> ve diğer toptancı verileriyle çok yakın bazda güncel kurları sitemiz üzerinden anlık takip edebilirsiniz.
+               Altıncınız, Kapalıçarşı dahil tüm Türkiye'deki toptan altın paritelerine paralel veriler çeker. <strong>Harem altın</strong> ve diğer toptancı verileriyle çok yakın bazda güncel kurları sitemiz üzerinden anlık takip edebilirsiniz.
             </p>
           </div>
 

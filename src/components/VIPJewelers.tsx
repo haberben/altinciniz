@@ -30,8 +30,13 @@ export default async function VIPJewelers() {
               href={`/kuyumcular/${j.slug}`}
               className="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl px-4 py-2 transition-all group shrink-0"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-primary/20 to-black border border-gold-primary/20 flex items-center justify-center text-[10px] font-black text-gold-light">
-                {j.name.substring(0, 1)}
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gold-primary/20 to-black border border-gold-primary/20 flex items-center justify-center text-[10px] font-black text-gold-light overflow-hidden shrink-0">
+                {j.logo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={j.logo_url} alt={j.name} className="w-full h-full object-cover" />
+                ) : (
+                  j.name.substring(0, 1)
+                )}
               </div>
               <div className="space-y-0.5">
                 <p className="text-sm font-bold leading-none">{j.name}</p>

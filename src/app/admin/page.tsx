@@ -213,6 +213,10 @@ export default async function AdminPanel() {
                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center gap-2"><Globe size={12}/> Web Sitesi</label>
                            <input name="website" defaultValue={jeweler.website} placeholder="www.kuyumcu.com" className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
                         </div>
+                        <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Logo Bağlantısı (URL)</label>
+                           <input name="logo_url" defaultValue={jeweler.logo_url || ""} placeholder="https://ornek.com/logo.png" className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 outline-none focus:border-gold-primary transition-all font-bold text-sm" />
+                        </div>
 
                         {/* Location & Desc */}
                         <div className="space-y-2 col-span-1 md:col-span-2">

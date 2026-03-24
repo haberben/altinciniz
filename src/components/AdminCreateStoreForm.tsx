@@ -71,6 +71,11 @@ export default function AdminCreateStoreForm() {
         <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">ADRES</label>
         <input name="address" required placeholder="Şehir, Mahalle vb." className="w-full h-16 bg-white/5 border border-white/10 rounded-[28px] px-8 outline-none focus:border-gold-primary transition-all font-bold" />
       </div>
+
+      <div className="space-y-2">
+        <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">LOGO BAĞLANTISI (İSTEĞE BAĞLI)</label>
+        <input name="logo_url" placeholder="https://ornek.com/logo.png" className="w-full h-16 bg-white/5 border border-white/10 rounded-[28px] px-8 outline-none focus:border-gold-primary transition-all font-bold" />
+      </div>
       
       <SubmitButton />
     </form>

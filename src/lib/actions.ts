@@ -233,6 +233,7 @@ export async function updateJewelerAdmin(formData: FormData) {
   const sort_order = parseInt(formData.get("sort_order") as string) || 0;
   const is_approved = formData.get("is_approved") === "on";
   const is_verified = formData.get("is_verified") === "on";
+  const logo_url = formData.get("logo_url") as string || "";
 
   const { error } = await supabase
     .from("jeweler_profiles")
@@ -246,7 +247,8 @@ export async function updateJewelerAdmin(formData: FormData) {
       description,
       sort_order,
       is_approved,
-      is_verified
+      is_verified,
+      logo_url
     })
     .eq("id", jewelerId);
 
@@ -280,6 +282,7 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
     const address = formData.get("address") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const logo_url = formData.get("logo_url") as string || "";
 
     if (!email || !password || !name) return { success: false, error: "Email, Şifre ve Mağaza Adı gereklidir." };
 
@@ -328,7 +331,8 @@ export async function createJewelerAdmin(prevState: any, formData: FormData) {
         instagram: "",
         website: "",
         map_url: "",
-        description: ""
+        description: "",
+        logo_url
       });
 
     if (profileError) {

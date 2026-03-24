@@ -65,7 +65,7 @@ export default async function KuyumcuPaneli() {
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/" className="text-xl font-black tracking-tighter">
-              <span className="text-gold-primary">Altın</span>ciniz
+              <span className="text-gold-primary">Altın</span>cınız
             </Link>
             <div className="h-6 w-px bg-[#333]" />
             <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Yönetim Paneli</span>
