@@ -17,7 +17,7 @@ import {
   Trash
 } from "lucide-react";
 import Link from "next/link";
-import { approveJeweler, toggleVIP, ensureAdminProfile, updateJewelerAdmin, createJewelerAdmin, submitProfile } from "@/lib/actions";
+import { approveJeweler, toggleVIP, ensureAdminProfile, updateJewelerAdmin, createJewelerAdmin, submitProfile, deleteJewelerAdmin } from "@/lib/actions";
 import AdminLoginForm from "@/components/AdminLoginForm";
 import AdminCreateStoreForm from "@/components/AdminCreateStoreForm";
 import AdminDeleteButton from "@/components/AdminDeleteButton";

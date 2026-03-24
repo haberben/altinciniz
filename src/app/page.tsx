@@ -71,7 +71,6 @@ export default async function Home() {
       />
       {/* 1. Global Ticker Tape (Kayan Borsa Şeridi) */}
       <Ticker items={data} />
-      <VIPJewelers />
 
       <main className="relative overflow-hidden">
         {/* Premium Background Effects */}
@@ -120,6 +119,11 @@ export default async function Home() {
               {featuredItems.map(item => <PriceCard key={item.slug} item={item} />)}
             </div>
           </section>
+
+          {/* Dinamik Yıldızlı Kuyumcular Vitrini */}
+          <div className="relative z-20 mt-6 mb-6">
+            <VIPJewelers />
+          </div>
 
           <AdBanner />
 
