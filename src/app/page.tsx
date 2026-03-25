@@ -4,17 +4,19 @@ import AdBanner from "@/components/AdBanner";
 import Ticker from "@/components/Ticker";
 import Converter from "@/components/Converter";
 import DataTable from "@/components/DataTable";
-import { TrendingUp, Clock, ShieldAlert, BarChart3, Coins } from "lucide-react";
+import Link from "next/link";
+import { TrendingUp, Clock, ShieldAlert, BarChart3, Coins, Calculator } from "lucide-react";
 import VIPJewelers from "@/components/VIPJewelers";
+import RichSEOContent from "@/components/RichSEOContent";
 import type { Metadata } from "next";
 
 export const revalidate = 15; // 15 saniyede bir yeniden oluştur (Hızlı ISR)
 
 export const metadata: Metadata = {
-  title: "Canlı Gram Altın Fiyatı, Çeyrek Altın Ne Kadar? | Harem Altın & Kapalıçarşı Fiyatları",
+  title: "Gram Altın Fiyatı (Canlı) – Bugün Gram Altın Ne Kadar? | Altıncınız",
   description: "Anlık gram altın fiyatı bugün ne kadar? Çeyrek altın, yarım altın, tam altın canlı fiyatları. 22 ayar, 24 ayar gram altın fiyatı, harem altın, kapalıçarşı canlı döviz ve altın piyasası.",
   openGraph: {
-    title: "Canlı Gram Altın Fiyatı & Çeyrek Altın Ne Kadar? – Altıncınız",
+    title: "Gram Altın Fiyatı (Canlı) – Bugün Gram Altın Ne Kadar? – Altıncınız",
     description: "Gram altın ne kadar 2026? Çeyrek altın fiyatı, yarım altın, tam altın, ons altın canlı takip. Harem altın verileri ve kapalıçarşı anlık fiyatları.",
   }
 };
@@ -163,14 +165,24 @@ export default async function Home() {
           
           {/* Header Section */}
           <header className="flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left border-b border-white/5 pb-8">
-            <div className="flex flex-col items-center md:items-start">
-              <h1 className="text-5xl md:text-6xl font-black tracking-tighter">
-                <span className="text-gold-primary drop-shadow-[0_2px_10px_rgba(212,175,55,0.4)]">Altın</span>
-                <span className="text-white">cınız</span>
+            <div className="flex flex-col items-center md:items-start text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-none mb-4">
+                <span className="text-gold-primary drop-shadow-[0_2px_10px_rgba(212,175,55,0.4)]">Gram Altın Fiyatı</span>
+                <span className="text-white ml-2">(Canlı)</span>
               </h1>
               <h2 className="text-gray-400 mt-3 font-medium text-lg tracking-wide max-w-xl">
                 Canlı Kapalıçarşı Altın Fiyatları, Döviz Kurları ve Anlık Finansal Hesaplama
               </h2>
+              <div className="mt-6 flex flex-wrap gap-4">
+                <Link href="/hesaplama" className="bg-gold-primary hover:bg-gold-light text-black px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-gold-primary/20 flex items-center gap-2">
+                  <Calculator size={18} />
+                  Gram Altın Hesaplama
+                </Link>
+                <Link href="/gram-altin" className="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2">
+                  <TrendingUp size={18} className="text-gold-primary" />
+                  Canlı Takip
+                </Link>
+              </div>
             </div>
             <div className="flex flex-col items-center md:items-end gap-2">
               <div className="flex items-center text-sm font-medium text-gold-light bg-gold-primary/10 px-6 py-3 rounded-full border border-gold-primary/20 shadow-[0_0_20px_rgba(212,175,55,0.1)] backdrop-blur-md">
@@ -270,6 +282,7 @@ export default async function Home() {
                 </p>
               </div>
             </div>
+            <RichSEOContent />
           </section>
 
           {/* Elevated Legal Footer */}

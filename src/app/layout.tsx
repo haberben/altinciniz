@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://altinciniz.com'),
   title: {
-    default: "Altıncınız | Canlı Gram Altın Fiyatı, Çeyrek Altın Ne Kadar? Harem Altın & Kapalıçarşı",
+    default: "Gram Altın Fiyatı (Canlı) – Bugün Gram Altın Ne Kadar? | Altıncınız",
     template: "%s | Altıncınız – Canlı Altın & Döviz"
   },
   description: "Altıncınız: Anlık gram altın fiyatı, çeyrek altın ne kadar, yarım altın, tam altın ve tüm döviz kurları. Harem altın, Kapalıçarşı, canlı altın fiyatları. 7/24 güncel altın piyasası ve fiyat takibi.",

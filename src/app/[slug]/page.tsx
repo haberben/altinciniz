@@ -20,9 +20,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const formattedPrice = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(item.priceSelling);
 
   return {
-    title: `Canlı ${item.name} Fiyatı: ${formattedPrice} | Altıncınız`,
-    description: `Anlık ${item.name} fiyatı alış ve satış detayları. Güncel ${item.name} kuru ne kadar, kaç TL oldu? Canlı takip edin.`,
-    keywords: `${item.name.toLowerCase()} fiyatı, canlı ${item.name}, ${item.name} ne kadar, ${item.name} kaç tl, harem ${item.name}`,
+    title: `Canlı ${item.name} Fiyatı: ${formattedPrice} | Bugün ${item.name} Ne Kadar?`,
+    description: `Anlık ${item.name} fiyatı alış ve satış detayları. Güncel ${item.name} kuru bugün ne kadar, kaç TL oldu? Canlı takip edin.`,
+    keywords: `${item.name.toLowerCase()} fiyatı, canlı ${item.name}, ${item.name} ne kadar, ${item.name} kaç tl, harem ${item.name}, ${item.name} canlı`,
     alternates: {
       canonical: `https://altinciniz.com/${item.slug}`
     }
@@ -102,7 +102,9 @@ export default async function DetaySayfasi({ params }: { params: { slug: string 
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3 text-gold-primary">
                 <TrendingUp size={28} />
-                <span className="font-black uppercase tracking-widest text-sm opacity-80">{item.type}</span>
+                <span className="font-black uppercase tracking-widest text-sm opacity-80">
+                  {item.type === 'gold' ? 'Altın' : item.type === 'currency' ? 'Döviz' : 'Metal'}
+                </span>
               </div>
               <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-4 leading-tight">
                 {item.name} Fiyatı Ne Kadar?
