@@ -32,20 +32,20 @@ export default function RichSEOContent() {
           <div className="relative z-10 space-y-10">
             <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight flex items-center gap-4">
               <Calculator className="text-gold-primary" size={40} />
-              Gram Altın Fiyatı Nasıl Hesaplanır?
+              Altın Hesaplama: 22 Ayar ve 24 Ayar Farkı
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6 text-base text-gray-400">
                 <p>
-                  Gram altın fiyatı, basit bir çarpma işleminden çok daha fazlasıdır. İki devasa küresel piyasanın kesişim noktasında oluşur: <strong>Ons Altın</strong> piyasası ve <strong>USD/TRY</strong> döviz kuru.
+                  Google üzerinde en çok aratılan <strong>"gram altın ne kadar 22 ayar"</strong> ve <strong>"gram altın ne kadar 24 ayar"</strong> soruları genellikle kafa karışıklığına yol açar. 24 ayar altın %99.9 saflıkla "Has Altın" olarak adlandırılırken, 22 ayar altın %91.6 saflıktadır. 
                 </p>
                 <p>
-                  Dünya genelinde altın "Troy Ons" (yaklaşık 31.1 gram) üzerinden ve "ABD Doları" cinsinden fiyatlandırılır. Türkiye'deki gram altın fiyatını bulmak için ons fiyatı grama bölünür ve ardından güncel dolar kuruyla çarpılır.
+                  Hesaplama yaparken, 24 ayar gram fiyatını 0.916 katsayısı ile çarparak yaklaşık 22 ayar değerini bulabilirsiniz. Sitemizdeki <strong>gram altın hesaplama aracı</strong>, bu işlemi sizin için otomatik olarak yapar ve en güncel verileri sunar.
                 </p>
                 <div className="bg-black/60 p-8 rounded-3xl border border-gold-primary/30 text-center font-mono group-hover:border-gold-primary/50 transition-colors">
-                  <span className="text-gray-500 text-xs block mb-3 uppercase tracking-widest font-sans">Altın Matematik Formülü</span>
+                  <span className="text-gray-500 text-xs block mb-3 uppercase tracking-widest font-sans">Ayar Dönüştürme Katsayısı</span>
                   <div className="text-gold-light text-2xl md:text-3xl font-black drop-shadow-sm">
-                    (Ons Altın / 31.1035) × USD/TRY = <span className="text-white">Gram Altın (₺)</span>
+                    24 Ayar Fiyatı × 0.9160 = <span className="text-white">22 Ayar (₺)</span>
                   </div>
                 </div>
               </div>
@@ -102,28 +102,28 @@ export default function RichSEOContent() {
           </div>
         </div>
 
-        {/* Bölüm: 2026 Beklentileri ve Strateji */}
+        {/* Bölüm: Rakip Analizi (Harem, Altınkaynak, Bigpara) */}
         <div className="bg-gradient-to-br from-[#111] to-black border border-white/5 rounded-[40px] p-8 md:p-14 space-y-10">
           <div className="flex flex-col md:flex-row gap-10">
             <div className="md:w-1/3 shrink-0 py-4">
-               <div className="p-8 bg-gold-primary/5 rounded-3xl border border-gold-primary/20 text-center space-y-4">
-                  <Landmark className="text-gold-primary mx-auto" size={48} />
-                  <span className="text-xs font-black text-gold-light uppercase tracking-[0.2em] block">Merkez Bankaları</span>
-                  <p className="text-gray-500 text-xs">Küresel rezervlerin %15'inden fazlası şu an fiziki altında tutuluyor.</p>
+               <div className="p-8 bg-blue-500/5 rounded-3xl border border-blue-500/10 text-center space-y-4">
+                  <Globe className="text-blue-400 mx-auto" size={48} />
+                  <span className="text-xs font-black text-blue-400 uppercase tracking-[0.2em] block">Piyasa Devleri</span>
+                  <p className="text-gray-500 text-xs">Harem Altın, Altınkaynak ve Bigpara gibi dev platformlar piyasanın referans noktalarıdır.</p>
                </div>
             </div>
             <div className="md:w-2/3 space-y-8">
               <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter">
-                2026 Gram Altın Yorumu ve <span className="text-gold-primary">Uzun Vadeli Strateji</span>
+                Harem Altın, Altınkaynak ve <span className="text-gold-primary">Büyük Piyasaların Analizi</span>
               </h2>
               <p>
-                2026 yılına doğru ilerlerken, finans otoriteleri altının "geleneksel tasarruf" rolünün ötesine geçtiğini vurguluyor. Dijitalleşen ekonomi ve kripto varlıklardaki aşırı volatilite, kurumsal yatırımcıları dahi "fiziki karşılığı olan" varlıklara itiyor. 
+                Yatırımcılar sıkça <strong>Harem Altın canlı</strong>, <strong>Altınkaynak altın fiyatları</strong> ve <strong>Bigpara altın</strong> kurlarını karşılaştırır. Bu platformlar toptan piyasayı yansıtırken, Altıncınız olarak biz; bu verileri süzgeçten geçirerek en saf Kapalıçarşı fiyatlarını sunuyoruz. 
               </p>
-              <p className="text-white/80 font-bold">
-                Beklentiler, altının enflasyona karşı koruma kalkanı özelliğini 2026 yılında daha sert bir şekilde hissettireceği yönünde. 
+              <p className="text-white/80 font-bold italic">
+                "Harem Altın ve Kapalıçarşı arasındaki makas aralığını anlık olarak takip etmek, karlı bir yatırım için olmazsa olmazdır."
               </p>
               <p>
-                Yatırım stratejisi oluştururken sadece <strong>bugün gram altın ne kadar</strong> sorusu yetmez. Aylık bazda dolar ve ons korelasyonunu izlemek, kademeli alım (maliyet düşürme) tekniklerini kullanmak ve Kapalıçarşı makas aralıklarını doğru analiz etmek gerekir. Altıncınız olarak sunduğumuz <strong>anlık altın yorum</strong> verileri, bu stratejik kararları almanıza yardımcı olur.
+                2026 yılı beklentilerinde, <strong>gram altın grafik</strong> verileri incelendiğinde rakiplerimizin sunduğu verilerle tam uyumlu, ancak kullanıcı deneyimi açısından daha hızlı bir akış sağlıyoruz. Ons ve dolar kuru pariteleri, Harem piyasasının kalbinden doğrudan ekranınıza yansır.
               </p>
             </div>
           </div>

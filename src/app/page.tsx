@@ -8,16 +8,17 @@ import Link from "next/link";
 import { TrendingUp, Clock, ShieldAlert, BarChart3, Coins, Calculator } from "lucide-react";
 import VIPJewelers from "@/components/VIPJewelers";
 import RichSEOContent from "@/components/RichSEOContent";
+import TrendingSearches from "@/components/TrendingSearches";
 import type { Metadata } from "next";
 
 export const revalidate = 15; // 15 saniyede bir yeniden oluştur (Hızlı ISR)
 
 export const metadata: Metadata = {
   title: "Gram Altın Fiyatı (Canlı) – Bugün Gram Altın Ne Kadar? | Altıncınız",
-  description: "Anlık gram altın fiyatı bugün ne kadar? Çeyrek altın, yarım altın, tam altın canlı fiyatları. 22 ayar, 24 ayar gram altın fiyatı, harem altın, kapalıçarşı canlı döviz ve altın piyasası.",
+  description: "Anlık gram altın fiyatı bugün ne kadar? Çeyrek altın, yarım altın, tam altın canlı fiyatları. 22 ayar, 24 ayar gram altın fiyatı, Harem Altın, Altınkaynak, Bigpara ve Kapalıçarşı canlı altın piyasası.",
   openGraph: {
     title: "Gram Altın Fiyatı (Canlı) – Bugün Gram Altın Ne Kadar? – Altıncınız",
-    description: "Gram altın ne kadar 2026? Çeyrek altın fiyatı, yarım altın, tam altın, ons altın canlı takip. Harem altın verileri ve kapalıçarşı anlık fiyatları.",
+    description: "Gram altın ne kadar 2026? Çeyrek altın, yarım altın, tam altın, ons altın canlı takip. Harem Altın ve Altınkaynak verileriyle Kapalıçarşı anlık fiyatları.",
   }
 };
 
@@ -282,6 +283,8 @@ export default async function Home() {
                 </p>
               </div>
             </div>
+            
+            <TrendingSearches />
             <RichSEOContent />
           </section>
 
