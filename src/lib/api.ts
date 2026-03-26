@@ -18,16 +18,32 @@ const API_URL = `https://haremapi.tr/api/v1/prices?api_key=${API_KEY}`;
 export async function getMarketData(): Promise<MarketResponse> {
   try {
     const res = await fetch(API_URL, { 
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'
+      },
       next: { 
         revalidate: 10,
         tags: ['market-data']
       } 
     });
-    if (!res.ok) throw new Error("Failed to fetch HaremAPI");
-    const json = await res.json();
-    const dataArray = json.data;
+    
+    if (!res.ok) {
+      console.error(`HaremAPI returned ${res.status}: ${res.statusText}`);
+      throw new Error(`Failed to fetch HaremAPI: ${res.status}`);
+    }
 
-    // Vercel sunucuları Amerika'da (iad1) olduğu için saati zorla İstanbul'a çekiyoruz
+    const json = await res.json();
+    
+    // HaremAPI responds with different structures sometimes (root array, nested data array, or data object)
+    let dataArray: any[] = [];
+    if (Array.isArray(json)) {
+      dataArray = json;
+    } else if (json.data) {
+      dataArray = Array.isArray(json.data) ? json.data : Object.values(json.data);
+    }
+
+    // Saati zorla İstanbul'a çekiyoruz
     const dateOptions: Intl.DateTimeFormatOptions = { 
       timeZone: 'Europe/Istanbul', 
       hour: '2-digit', 
@@ -39,7 +55,6 @@ export async function getMarketData(): Promise<MarketResponse> {
     if (json.updatedAt) {
         updateDate = new Date(json.updatedAt).toLocaleTimeString('tr-TR', dateOptions);
     } else if (dataArray && dataArray.length > 0 && dataArray[0].timestamp) {
-        // Fallback to the first item's timestamp if root updatedAt is missing
         updateDate = new Date(dataArray[0].timestamp).toLocaleTimeString('tr-TR', dateOptions);
     }
 
