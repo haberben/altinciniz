@@ -39,6 +39,7 @@ export default function TrendingSearches() {
             <Link
               key={index}
               href={`/${trend.slug}`}
+              prefetch={false}
               className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-gold-primary/10 border border-white/10 hover:border-gold-primary/30 rounded-full text-sm text-gray-400 hover:text-gold-light transition-all duration-300 group"
             >
               <Hash size={14} className="text-gray-600 group-hover:text-gold-primary transition-colors" />

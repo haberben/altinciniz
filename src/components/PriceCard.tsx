@@ -16,6 +16,7 @@ export default function PriceCard({ item, featured = false }: Props) {
   return (
     <Link 
       href={`/${item.slug}`} 
+      prefetch={false}
       className={`block relative group overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-1 
       ${featured 
         ? "col-span-1 bg-gradient-to-br from-[#1a1500]/90 to-black/90 border border-gold-primary/30 shadow-[0_0_40px_rgba(212,175,55,0.15)] hover:shadow-[0_0_60px_rgba(212,175,55,0.3)] backdrop-blur-2xl px-6 py-6" 
