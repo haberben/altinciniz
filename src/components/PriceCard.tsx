@@ -1,5 +1,6 @@
+import React from "react";
 import Link from "next/link";
-import { Sparkles, Activity } from "lucide-react";
+import { Sparkles, Activity, TrendingUp, TrendingDown } from "lucide-react";
 import type { AssetItem } from "@/lib/api";
 
 type Props = {
@@ -29,9 +30,16 @@ export default function PriceCard({ item, featured = false }: Props) {
             {featured && <Sparkles className="text-gold-light" size={20} />}
             {item.name}
           </h2>
-          <div className="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] uppercase font-bold text-gray-400 bg-white/5 border border-white/10">
-            <Activity size={12} className="text-gold-light" />
-            <span>Canlı</span>
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] uppercase font-bold text-gray-400 bg-white/5 border border-white/10">
+              <Activity size={12} className="text-gold-light" />
+              <span>Canlı</span>
+            </div>
+            {/* Technical Signal (Mock Logic for UI Superiority) */}
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${item.priceSelling > item.priceBuying * 1.05 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
+              {item.priceSelling > item.priceBuying * 1.05 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+              {item.priceSelling > item.priceBuying * 1.05 ? 'Güçlü Al' : 'Nötr'}
+            </div>
           </div>
         </div>
         

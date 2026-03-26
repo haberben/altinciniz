@@ -7,6 +7,8 @@ import { Search, TrendingUp, Hash } from 'lucide-react';
 const trends = [
   { label: "Gram Altın Fiyatı", slug: "gram-altin" },
   { label: "Gram Altın Ne Kadar Bugün?", slug: "gram-altin" },
+  { label: "Gram Altın 2026 Tahminleri", slug: "altin/gram-altin-fiyati-2026" },
+  { label: "Dün Altın Ne Kadardı?", slug: "altin/gram-altin-dun-ne-kadardi" },
   { label: "24 Ayar Gram Altın", slug: "gram-altin" },
   { label: "22 Ayar Gram Altın", slug: "22-ayar-bilezik" },
   { label: "Gram Altın Grafik", slug: "gram-altin" },
@@ -14,9 +16,8 @@ const trends = [
   { label: "Yarım Gram Altın Fiyatı", slug: "gram-altin" },
   { label: "Gram Altın Satış Fiyatı", slug: "gram-altin" },
   { label: "Çeyrek Altın Ne Kadar?", slug: "ceyrek-altin" },
-  { label: "Canlı Döviz Kurları", slug: "" },
   { label: "Altın Hesaplama Robotu", slug: "hesaplama" },
-  { label: "Harem Altın Canlı", slug: "gram-altin" }
+  { label: "22 Ayar Bilezik 2026", slug: "altin/22-ayar-bilezik-fiyatlari-2026" }
 ];
 
 export default function TrendingSearches() {

@@ -9,6 +9,8 @@ import { TrendingUp, Clock, ShieldAlert, BarChart3, Coins, Calculator } from "lu
 import VIPJewelers from "@/components/VIPJewelers";
 import RichSEOContent from "@/components/RichSEOContent";
 import TrendingSearches from "@/components/TrendingSearches";
+import InvestmentPulse from "@/components/InvestmentPulse";
+import HistoricalChart from "@/components/HistoricalChart";
 import type { Metadata } from "next";
 
 export const revalidate = 15; // 15 saniyede bir yeniden oluştur (Hızlı ISR)
@@ -285,6 +287,33 @@ export default async function Home() {
             </div>
             
             <TrendingSearches />
+
+            {/* UI Section: Investment Performance ("1000 TL Ne Oldu?") */}
+            <InvestmentPulse data={data} />
+
+            {/* Orta Kısım: Grafik ve Çevirici */}
+            <section className="max-w-[1400px] mx-auto px-4 md:px-8 py-20 relative">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <HistoricalChart 
+                  currentPrice={data.find(i => i.slug === 'gram-altin')?.price || 0} 
+                  label="Gram Altın" 
+                />
+                <div className="space-y-8">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gold-primary/10 rounded-xl">
+                      <Calculator size={24} className="text-gold-primary" />
+                    </div>
+                    <h2 className="text-2xl font-black text-white tracking-tight text-left">Altın Çevirici</h2>
+                  </div>
+                  <Converter items={data} />
+                </div>
+              </div>
+            </section>
+
+            {/* Kuyumcular Bölümü */}
+            <VIPJewelers />
+
+            {/* SEO Content */}
             <RichSEOContent />
           </section>
 
