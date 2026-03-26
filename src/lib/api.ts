@@ -41,6 +41,9 @@ export async function getMarketData(): Promise<MarketResponse> {
       dataArray = json;
     } else if (json.data) {
       dataArray = Array.isArray(json.data) ? json.data : Object.values(json.data);
+    } else if (typeof json === 'object') {
+      // If it's a root object of symbols (without 'data' key)
+      dataArray = Object.values(json).filter((item: any) => item && typeof item === 'object' && (item.symbol || item.code || item.bid));
     }
 
     // Saati zorla İstanbul'a çekiyoruz
@@ -59,7 +62,7 @@ export async function getMarketData(): Promise<MarketResponse> {
     }
 
     const createItem = (key: string, name: string, type: 'gold' | 'currency' | 'metal', customSlug?: string): AssetItem => {
-      const item = dataArray.find((i: any) => i.symbol === key);
+      const item = dataArray.find((i: any) => i.symbol === key || i.code === key);
       const slug = customSlug || key.toLowerCase().replace(/_/g, '-');
       
       if (!item) return { name, slug, price: 0, priceBuying: 0, priceSelling: 0, type };
@@ -104,7 +107,20 @@ export async function getMarketData(): Promise<MarketResponse> {
 
     return { items, updateDate: `Bugün ${updateDate}` };
   } catch (error) {
-    console.error("API Fetch Error:", error);
-    return { items: [], updateDate: new Date().toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul' }) };
+    console.error("API Fetch Error, using fallback:", error);
+    
+    // Static Fallback to prevent 404s and black screens
+    return {
+      items: [
+        { name: "Gram Altın", slug: "gram-altin", price: 6697, priceBuying: 6563, priceSelling: 6697, type: "gold" },
+        { name: "Çeyrek Altın", slug: "ceyrek-altin", price: 11123, priceBuying: 10732, priceSelling: 11123, type: "gold" },
+        { name: "Dolar", slug: "usd", price: 45.07, priceBuying: 44.81, priceSelling: 45.07, type: "currency" },
+        { name: "Euro", slug: "eur", price: 52.07, priceBuying: 51.64, priceSelling: 52.07, type: "currency" },
+        { name: "22 Ayar Bilezik", slug: "22-ayar-bilezik", price: 6342, priceBuying: 5971, priceSelling: 6342, type: "gold" },
+        { name: "Has Altın (Külçe)", slug: "has-altin", price: 6731, priceBuying: 6530, priceSelling: 6731, type: "gold" },
+        { name: "Gümüş (Gram)", slug: "gumus", price: 103.68, priceBuying: 95.06, priceSelling: 103.68, type: "metal" }
+      ],
+      updateDate: `Sistem Meşgul (Tahmini: ${new Date().toLocaleTimeString('tr-TR')})`
+    };
   }
 }
