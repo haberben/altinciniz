@@ -17,6 +17,7 @@ export default function PriceCard({ item, featured = false }: Props) {
     <Link 
       href={`/${item.slug}`} 
       prefetch={false}
+      aria-label={`${item.name} canlı fiyat detayları ve grafikler`}
       className={`block relative group overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-1 
       ${featured 
         ? "col-span-1 bg-gradient-to-br from-[#1a1500]/90 to-black/90 border border-gold-primary/30 shadow-[0_0_40px_rgba(212,175,55,0.15)] hover:shadow-[0_0_60px_rgba(212,175,55,0.3)] backdrop-blur-2xl px-6 py-6" 
@@ -27,10 +28,10 @@ export default function PriceCard({ item, featured = false }: Props) {
 
       <div className="flex flex-col h-full justify-between relative z-10 space-y-4">
         <div className="flex justify-between items-start">
-          <h2 className={`${featured ? "text-xl font-bold tracking-wide" : "text-lg font-medium"} text-gray-200 group-hover:text-white transition-colors flex items-center gap-2`}>
+          <h3 className={`${featured ? "text-xl font-bold tracking-wide" : "text-lg font-medium"} text-gray-200 group-hover:text-white transition-colors flex items-center gap-2`}>
             {featured && <Sparkles className="text-gold-light" size={20} />}
             {item.name}
-          </h2>
+          </h3>
           <div className="flex flex-col items-end gap-1">
             <div className="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] uppercase font-bold text-gray-400 bg-white/5 border border-white/10">
               <Activity size={12} className="text-gold-light" />

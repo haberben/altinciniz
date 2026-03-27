@@ -50,7 +50,7 @@ export default function RichSEOContent() {
                 </div>
               </div>
               <div className="bg-white/5 rounded-3xl p-8 border border-white/5 space-y-6">
-                <h4 className="text-white font-black text-lg uppercase tracking-tight">Hesaplama Örneği:</h4>
+                <h3 className="text-white font-black text-lg uppercase tracking-tight">Hesaplama Örneği:</h3>
                 <ul className="space-y-4 text-[15px]">
                   <li className="flex justify-between border-b border-white/5 pb-2">
                     <span className="text-gray-500">Ons Altın Fiyatı:</span>
@@ -133,17 +133,17 @@ export default function RichSEOContent() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-4 hover:border-gold-primary/30 transition-colors">
               <ShieldCheck className="text-gold-primary" size={32} />
-              <h4 className="text-white font-black italic uppercase tracking-tighter">Şeffaf Veri</h4>
+              <h3 className="text-white font-black italic uppercase tracking-tighter">Şeffaf Veri</h3>
               <p className="text-sm text-gray-500">Manipülasyondan uzak, doğrudan Kapalıçarşı merkezli canlı likidite akışlarını yansıtıyoruz.</p>
            </div>
            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-4 hover:border-gold-primary/30 transition-colors">
               <Globe className="text-blue-400" size={32} />
-              <h4 className="text-white font-black italic uppercase tracking-tighter">Küresel Entegrasyon</h4>
+              <h3 className="text-white font-black italic uppercase tracking-tighter">Küresel Entegrasyon</h3>
               <p className="text-sm text-gray-500">Global ons ve yerel dolar paritelerini saniyeler içinde işleyerek Türkiye kurlarını hesaplıyoruz.</p>
            </div>
            <div className="p-8 bg-white/5 border border-white/10 rounded-3xl space-y-4 hover:border-gold-primary/30 transition-colors">
               <Calculator className="text-emerald-400" size={32} />
-              <h4 className="text-white font-black italic uppercase tracking-tighter">Akıllı Araçlar</h4>
+              <h3 className="text-white font-black italic uppercase tracking-tighter">Akıllı Araçlar</h3>
               <p className="text-sm text-gray-500">Sadece fiyat göstermiyor, elinizdeki birikimi anında TL'ye çeviren gelişmiş araçlar sunuyoruz.</p>
            </div>
         </div>
@@ -157,33 +157,33 @@ export default function RichSEOContent() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-[#0f0f0f] p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all group">
-              <h4 className="font-black text-white mb-4 group-hover:text-gold-primary transition-colors flex items-center gap-2">
+              <h3 className="font-black text-white mb-4 group-hover:text-gold-primary transition-colors flex items-center gap-2">
                  <HelpCircle size={18} /> 22 ayar gram altın ile 24 ayar farkı nedir?
-              </h4>
+              </h3>
               <p className="text-sm text-gray-400 leading-relaxed">
                 24 ayar altın, %99.9 saflıktadır ve genellikle "has altın" olarak bilinir. 22 ayar ise %91.6 oranında altın içerir, kalanı genellikle bakır veya gümüş gibi metallerdir (bileziklerde dayanıklılık için tercih edilir). Yatırım için makas payı düşük olan 24 ayar has gram tercih edilir.
               </p>
             </div>
             <div className="bg-[#0f0f0f] p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all group">
-              <h4 className="font-black text-white mb-4 group-hover:text-gold-primary transition-colors flex items-center gap-2">
+              <h3 className="font-black text-white mb-4 group-hover:text-gold-primary transition-colors flex items-center gap-2">
                  <HelpCircle size={18} /> Harem Altın verileri neden önemlidir?
-              </h4>
+              </h3>
               <p className="text-sm text-gray-400 leading-relaxed">
                 Harem Altın, Kapalıçarşı'nın en büyük toptan altın merkezlerinden biridir. Türkiye'deki çoğu kuyumcu kendi fiyatlarını bu toptan akışlara göre belirler. Altıncınız, Harem Altın anlık verileriyle uyumlu bir akış sağlayarak size "kuyumcuya gitmeden önceki gerçek fiyatı" gösterir.
               </p>
             </div>
             <div className="bg-[#0f0f0f] p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all group">
-              <h4 className="font-black text-white mb-4 group-hover:text-gold-primary transition-colors flex items-center gap-2">
+              <h3 className="font-black text-white mb-4 group-hover:text-gold-primary transition-colors flex items-center gap-2">
                  <HelpCircle size={18} /> Altın fiyatları ne zaman güncellenir?
-              </h4>
+              </h3>
               <p className="text-sm text-gray-400 leading-relaxed">
                  Sitemizdeki veriler 24 saat boyunca, ancak piyasa saatlerinde (09:00 - 18:00) 15-30 saniye aralıklarla, piyasa dışı saatlerde ise küresel ons hareketlerine göre güncellenir. "Canlı" ibaresi olan tüm rakamlar son global ve yerel takas değerlerini yansıtır.
               </p>
             </div>
             <div className="bg-[#0f0f0f] p-8 rounded-3xl border border-white/5 hover:border-white/10 transition-all group">
-              <h4 className="font-black text-white mb-4 group-hover:text-gold-primary transition-colors flex items-center gap-2">
+              <h3 className="font-black text-white mb-4 group-hover:text-gold-primary transition-colors flex items-center gap-2">
                  <HelpCircle size={18} /> Altın alırken nelere dikkat edilmeli?
-              </h4>
+              </h3>
               <p className="text-sm text-gray-400 leading-relaxed">
                  Alım-satım farkı (makas), işçilik maliyeti ve sertifika en kritik unsurlardır. Külçe altınlarda işçilik azdır, bu da yatırım için karlı kılar. Sitemizden <strong>canlı gram altın takibi</strong> yaparak makasın en dar olduğu anları yakalayabilirsiniz.
               </p>

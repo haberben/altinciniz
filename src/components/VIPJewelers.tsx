@@ -26,9 +26,9 @@ export default async function VIPJewelers() {
               <div className="bg-gold-primary/20 p-1.5 rounded-lg border border-gold-primary/25">
                 <Star size={13} className="text-gold-light fill-gold-light" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-gold-light/80">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-gold-light/80">
                 Öne Çıkan Kuyumcular
-              </span>
+              </h3>
             </div>
 
             {/* VIP Cards Grid */}
@@ -76,13 +76,16 @@ export default async function VIPJewelers() {
                 <div className="bg-white/5 p-1.5 rounded-lg border border-white/5">
                   <Store size={13} className="text-gray-500" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">
-                  Kuyumcular
-                </span>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-600">
+                  Tüm Kuyumcular
+                </h3>
               </div>
 
               {/* Scrollable strip — native touch scroll, hidden scrollbar */}
-              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 flex-1 cursor-grab active:cursor-grabbing">
+              <div 
+                className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1 flex-1 cursor-grab active:cursor-grabbing"
+                aria-label="Kuyumcular Listesi"
+              >
                 {regularJewelers.map((j) => (
                   <Link
                     key={j.id}

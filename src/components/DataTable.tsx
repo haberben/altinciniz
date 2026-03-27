@@ -9,10 +9,10 @@ export default function DataTable({ items, title }: { items: AssetItem[], title:
   return (
     <div className="w-full bg-surface border border-[#222] rounded-2xl overflow-hidden shadow-xl backdrop-blur-md">
       <div className="bg-[#111] px-6 py-5 border-b border-[#222]">
-        <h3 className="text-xl font-bold text-gray-200 tracking-wide">{title}</h3>
+        <h4 className="text-xl font-bold text-gray-200 tracking-wide">{title}</h4>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[500px]">
+        <table className="w-full text-left border-collapse min-w-[500px]" aria-label={title}>
           <thead>
             <tr className="bg-[#0a0a0a] text-gray-500 text-[11px] font-black uppercase tracking-widest border-b border-[#222]">
               <th className="px-6 py-4">Piyasa / Ürün</th>

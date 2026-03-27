@@ -287,9 +287,12 @@ export default async function Home() {
             </div>
             
             <TrendingSearches />
+          </section>
 
-            {/* UI Section: Investment Performance ("1000 TL Ne Oldu?") */}
+          {/* UI Section: Investment Performance ("1000 TL Ne Oldu?") */}
+          <section className="mt-12">
             <InvestmentPulse data={data} />
+          </section>
 
             {/* Orta Kısım: Grafik ve Çevirici */}
             <section className="max-w-[1400px] mx-auto px-4 md:px-8 py-20 relative">
@@ -310,12 +313,13 @@ export default async function Home() {
               </div>
             </section>
 
-            {/* Kuyumcular Bölümü */}
+          {/* Kuyumcular Bölümü */}
+          <section className="mt-12">
             <VIPJewelers />
-
-            {/* SEO Content */}
-            <RichSEOContent />
           </section>
+
+          {/* SEO Content */}
+          <RichSEOContent />
 
           {/* Elevated Legal Footer */}
           <footer className="border-t border-[#222] pt-12 mt-20 text-center flex flex-col items-center pb-12">
