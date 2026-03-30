@@ -11,7 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         '/admin',      // Keep admin paths hidden from search engines
         '/admin/*',
         '/api/*',      // Internal API endpoints
-        '/_next/*',    // Next.js build files
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,

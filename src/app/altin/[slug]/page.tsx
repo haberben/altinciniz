@@ -41,6 +41,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${title} | Altıncınız`,
     description: description,
+    alternates: {
+      canonical: `/altin/${params.slug}`,
+    },
   };
 }
 

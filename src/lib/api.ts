@@ -12,6 +12,16 @@ export interface MarketResponse {
   updateDate: string;
 }
 
+function getTRTime() {
+  return new Intl.DateTimeFormat('tr-TR', {
+    timeZone: 'Europe/Istanbul',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).format(new Date());
+}
+
 const API_KEY = "hapi_6eb9f72089734ea7aa46655f7f000689";
 const HAREM_API_URL = `https://haremapi.tr/api/v1/prices?api_key=${API_KEY}`;
 const TRUNCGIL_API_URL = "https://finans.truncgil.com/today.json";
@@ -122,13 +132,13 @@ export async function getMarketData(): Promise<MarketResponse> {
   // 1. Primary: HaremAPI
   const haremItems = await fetchHaremData();
   if (haremItems && haremItems.length > 0) {
-    return { items: haremItems, updateDate: `Canlı (Harem) ${new Date().toLocaleTimeString('tr-TR')}` };
+    return { items: haremItems, updateDate: getTRTime() };
   }
 
   // 2. Secondary: Truncgil
   const truncgilItems = await fetchTruncgilData();
   if (truncgilItems && truncgilItems.length > 0) {
-    return { items: truncgilItems, updateDate: `Canlı (Yedek) ${new Date().toLocaleTimeString('tr-TR')}` };
+    return { items: truncgilItems, updateDate: getTRTime() };
   }
 
   // 3. Last Resort: Static Fallback
@@ -142,6 +152,6 @@ export async function getMarketData(): Promise<MarketResponse> {
       { name: "Has Altın (Külçe)", slug: "has-altin", price: 6731, priceBuying: 6530, priceSelling: 6731, type: "gold" },
       { name: "Gümüş (Gram)", slug: "gumus", price: 103.68, priceBuying: 95.06, priceSelling: 103.68, type: "metal" }
     ],
-    updateDate: `Sistem Meşgul (Tahmini: ${new Date().toLocaleTimeString('tr-TR')})`
+    updateDate: getTRTime()
   };
 }
