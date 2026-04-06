@@ -1,9 +1,4 @@
-// ─────────────────────────────────────────────────────────────
-// Altıncınız — Piyasa Veri Katmanı
-// Kaynak sırası:
-//   1. finans.truncgil.com (JSON API, birincil ve en güvenilir)
-//   2. Statik fallback (truncgil de cevap vermezse)
-// ─────────────────────────────────────────────────────────────
+import { unstable_noStore as noStore } from 'next/cache';
 
 export interface AssetItem {
   name: string;
@@ -14,6 +9,7 @@ export interface AssetItem {
   type: 'gold' | 'currency' | 'metal';
   changePercent?: number;
   changeAmount?: number;
+  updateTime?: string;
   dayHigh?: number;
   dayLow?: number;
 }
@@ -41,165 +37,236 @@ function getTRTime(): string {
   }).format(new Date());
 }
 
-/** "6.869,34" → 6869.34 | "%-0.28" → -0.28 */
-function parseTR(raw: string | undefined): number {
+/** 
+ * En güvenli sayı çevirme fonksiyonu:
+ * "6.746,64" -> 6746.64 (TR format)
+ * "6746.64"  -> 6746.64 (EN format)
+ * "11517"    -> 11517.00
+ */
+function safeParseFloat(raw: string | undefined): number {
   if (!raw) return 0;
-  const clean = raw.replace('%', '').replace(/\./g, '').replace(',', '.').trim();
+  // Sadece rakam, virgül, nokta, eksi işaretleri kalsın
+  const clean = raw.replace(/[^\d.,-]/g, '').trim();
+  if (!clean) return 0;
+
+  // Eğer sayının içinde virgül varsa TR formatındadır (1.234,45 -> nokta binlik, virgül ondalık)
+  if (clean.includes(',')) {
+    const withoutThousands = clean.replace(/\./g, ''); 
+    return parseFloat(withoutThousands.replace(',', '.'));
+  }
+  
+  // Virgül yoksa doğrudan float parse (6746.64 veya 11517)
   return parseFloat(clean) || 0;
 }
 
-/** Gram-altın bant: 500–50.000, çeyrek: 2.000–250.000 vb. */
-function isValidPrice(price: number, type: AssetItem['type']): boolean {
-  if (!price || isNaN(price) || price <= 0) return false;
-  if (type === 'currency') return price > 0.5 && price < 500;
-  if (type === 'metal') return price > 1 && price < 100_000;
-  // gold
-  return price > 500 && price < 5_000_000;
-}
-
 // ─────────────────────────────────────────────────────────────
-// Truncgil JSON API (birincil kaynak)
+// KAYNAK 1: anlikaltinfiyatlari.com
 // ─────────────────────────────────────────────────────────────
-const TRUNCGIL_URL = 'https://finans.truncgil.com/today.json';
+async function fetchSource1(): Promise<AssetItem[]> {
+  const url = 'https://anlikaltinfiyatlari.com/altin/kapalicarsi';
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, next: { revalidate: 30 } });
+  const html = await res.text();
+  
+  const items: AssetItem[] = [];
+  const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) || [];
 
-type TruncgilEntry = { Alış?: string; Satış?: string; 'Değişim'?: string; Yüksek?: string; Düşük?: string };
+  rows.forEach(row => {
+    // <td> taglarını temizle ve map et
+    const cells = Array.from(row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)).map(m => m[1]);
+    if (cells.length < 5) return;
 
-async function fetchTruncgil(): Promise<AssetItem[] | null> {
-  try {
-    const res = await fetch(TRUNCGIL_URL, {
-      next: { revalidate: 30 },
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Altinciniz/1.0)' },
-    });
-    if (!res.ok) return null;
-    const json: Record<string, TruncgilEntry | string> = await res.json();
+    // regex stripping for pure text
+    const cleanText = (htmlStr: string) => htmlStr.replace(/<[^>]+>/g, ' ').trim().replace(/\s+/g, ' ');
 
-    const map = (
-      key: string,
-      name: string,
-      type: AssetItem['type'],
-      slug: string
-    ): AssetItem | null => {
-      const entry = json[key] as TruncgilEntry | undefined;
-      if (!entry) return null;
+    const nameRaw = cleanText(cells[0] || '');
+    const updateTime = cleanText(cells[1] || '');
+    const buyRaw = cleanText(cells[2] || '');
+    const sellRaw = cleanText(cells[3] || '');
+    const changeRaw = cleanText(cells[4] || '');
 
-      // Truncgil: "Alış" = yatırımcının aldığı fiyat (yüksek = kuyumcu satış)
-      //           "Satış" = yatırımcının sattığı fiyat (düşük = kuyumcu alış)
-      const a = parseTR(entry['Alış']);
-      const b = parseTR(entry['Satış']);
-      const priceBuying = Math.min(a, b);
-      const priceSelling = Math.max(a, b);
+    if (!nameRaw) return;
 
-      if (!isValidPrice(priceSelling, type)) return null;
-
-      const changeRaw = parseTR(entry['Değişim']);
-      const dayHigh = parseTR(entry['Yüksek']);
-      const dayLow = parseTR(entry['Düşük']);
-
-      return {
-        name,
-        slug,
-        price: priceSelling,
-        priceBuying,
-        priceSelling,
-        type,
-        changePercent: isNaN(changeRaw) ? undefined : changeRaw,
-        dayHigh: dayHigh > 0 ? dayHigh : undefined,
-        dayLow: dayLow > 0 ? dayLow : undefined,
-      };
+    const parseNameSlug = (n: string): { slug: string, type: AssetItem['type'] } | null => {
+      const lower = n.toLowerCase();
+      if (lower.includes('gram') && !lower.includes('has')) return { slug: 'gram-altin', type: 'gold' };
+      if (lower.includes('has')) return { slug: 'has-altin', type: 'gold' };
+      if (lower.includes('çeyrek') && !lower.includes('eski')) return { slug: 'ceyrek-altin', type: 'gold' };
+      if (lower.includes('yarım') && !lower.includes('eski')) return { slug: 'yarim-altin', type: 'gold' };
+      if (lower.includes('tam') && !lower.includes('eski')) return { slug: 'tam-altin', type: 'gold' };
+      if (lower.includes('cumhuriyet')) return { slug: 'cumhuriyet-altini', type: 'gold' };
+      if (lower.includes('ata') && !lower.includes('beşli')) return { slug: 'ata-altin', type: 'gold' };
+      if (lower.includes('beşli')) return { slug: 'besli-ata', type: 'gold' };
+      if (lower.includes('gremse')) return { slug: 'gremse-altin', type: 'gold' };
+      if (lower.includes('22 ayar')) return { slug: '22-ayar-bilezik', type: 'gold' };
+      if (lower.includes('18 ayar')) return { slug: '18-ayar-altin', type: 'gold' };
+      if (lower.includes('14 ayar')) return { slug: '14-ayar-altin', type: 'gold' };
+      if (n === 'Dolar') return { slug: 'usd', type: 'currency' };
+      if (n === 'Euro') return { slug: 'eur', type: 'currency' };
+      if (lower.includes('gümüş')) return { slug: 'gumus', type: 'metal' };
+      if (lower.includes('ons')) return { slug: 'altin-ons', type: 'metal' };
+      return null;
     };
 
-    const results: AssetItem[] = [
-      // ── Altın ──────────────────────────────────────────────
-      map('gram-altin',     'Gram Altın',          'gold',     'gram-altin'),
-      map('gram-has-altin', 'Has Altın (24 Ayar)', 'gold',     'has-altin'),
-      map('ceyrek-altin',   'Çeyrek Altın',        'gold',     'ceyrek-altin'),
-      map('yarim-altin',    'Yarım Altın',         'gold',     'yarim-altin'),
-      map('tam-altin',      'Tam Altın',           'gold',     'tam-altin'),
-      map('ata-altin',      'Ata Altın',           'gold',     'ata-altin'),
-      map('besli-altin',    "Ata 5'li (Beşli)",    'gold',     'besli-ata'),
-      map('gremse-altin',   'Gremse (2.5)',        'gold',     'gremse-altin'),
-      map('22-ayar-bilezik','22 Ayar Altın',       'gold',     '22-ayar-bilezik'),
-      map('14-ayar-altin',  '14 Ayar Altın',       'gold',     '14-ayar-altin'),
-      map('cumhuriyet-altin','Cumhuriyet Altını',  'gold',     'cumhuriyet-altini'),
-      // ── Döviz ─────────────────────────────────────────────
-      map('USD',  'Dolar',              'currency', 'usd'),
-      map('EUR',  'Euro',              'currency', 'eur'),
-      map('GBP',  'İngiliz Sterlini',  'currency', 'gbp'),
-      map('CHF',  'İsviçre Frangı',    'currency', 'chf'),
-      map('SAR',  'Suudi Riyali',      'currency', 'sar'),
-      map('RUB',  'Rus Rublesi',       'currency', 'rub'),
-      // ── Değerli Madenler ───────────────────────────────────
-      map('gumus',           'Gümüş (Gram)',       'metal', 'gumus'),
-      map('altin-ons',       'Altın Ons ($)',      'metal', 'altin-ons'),
-      map('gumus-ons',       'Gümüş Ons ($)',      'metal', 'gumus-ons'),
-    ].filter(Boolean) as AssetItem[];
+    const mapping = parseNameSlug(nameRaw);
+    if (!mapping) return;
 
-    if (results.length < 5) return null;
-    return results;
-  } catch {
-    return null;
-  }
+    const buying = Math.min(safeParseFloat(buyRaw), safeParseFloat(sellRaw));
+    const selling = Math.max(safeParseFloat(buyRaw), safeParseFloat(sellRaw));
+    
+    if (selling < 1) return; // ignore bad data
+
+    // Değişim "%" ifadesinin arasındaki sayıyı al
+    const percentMatch = changeRaw.match(/([+-]?[\d.,]+)\s*%/);
+    const changePercent = percentMatch ? safeParseFloat(percentMatch[1]) : undefined;
+
+    items.push({
+      name: nameRaw,
+      slug: mapping.slug,
+      price: selling,
+      priceBuying: buying,
+      priceSelling: selling,
+      type: mapping.type,
+      changePercent,
+      updateTime: updateTime.length === 8 ? updateTime : undefined
+    });
+  });
+
+  return items;
 }
 
 // ─────────────────────────────────────────────────────────────
-// Statik fallback (son çare)
+// KAYNAK 2: canlialtinfiyatlari.com
 // ─────────────────────────────────────────────────────────────
-const STATIC_FALLBACK: AssetItem[] = [
-  { name: 'Gram Altın',          slug: 'gram-altin',       price: 6870, priceBuying: 6740, priceSelling: 6870, type: 'gold' },
-  { name: 'Has Altın (24 Ayar)', slug: 'has-altin',        price: 6820, priceBuying: 6700, priceSelling: 6820, type: 'gold' },
-  { name: 'Çeyrek Altın',        slug: 'ceyrek-altin',     price: 11500, priceBuying: 11150, priceSelling: 11500, type: 'gold' },
-  { name: 'Yarım Altın',         slug: 'yarim-altin',      price: 23000, priceBuying: 22300, priceSelling: 23000, type: 'gold' },
-  { name: 'Tam Altın',           slug: 'tam-altin',        price: 45700, priceBuying: 44300, priceSelling: 45700, type: 'gold' },
-  { name: 'Ata Altın',           slug: 'ata-altin',        price: 46500, priceBuying: 45200, priceSelling: 46500, type: 'gold' },
-  { name: "Ata 5'li (Beşli)",    slug: 'besli-ata',        price: 232000, priceBuying: 225000, priceSelling: 232000, type: 'gold' },
-  { name: 'Gremse (2.5)',        slug: 'gremse-altin',     price: 113000, priceBuying: 110000, priceSelling: 113000, type: 'gold' },
-  { name: '22 Ayar Altın',       slug: '22-ayar-bilezik',  price: 6450, priceBuying: 6160, priceSelling: 6450, type: 'gold' },
-  { name: '14 Ayar Altın',       slug: '14-ayar-altin',    price: 4930, priceBuying: 3700, priceSelling: 4930, type: 'gold' },
-  { name: 'Cumhuriyet Altını',   slug: 'cumhuriyet-altini',price: 46800, priceBuying: 45500, priceSelling: 46800, type: 'gold' },
-  { name: 'Dolar',               slug: 'usd',              price: 44.60, priceBuying: 44.45, priceSelling: 44.60, type: 'currency' },
-  { name: 'Euro',                slug: 'eur',              price: 51.58, priceBuying: 51.09, priceSelling: 51.58, type: 'currency' },
-  { name: 'İngiliz Sterlini',    slug: 'gbp',              price: 59.08, priceBuying: 58.49, priceSelling: 59.08, type: 'currency' },
-  { name: 'İsviçre Frangı',      slug: 'chf',              price: 55.91, priceBuying: 55.35, priceSelling: 55.91, type: 'currency' },
-  { name: 'Suudi Riyali',        slug: 'sar',              price: 11.89, priceBuying: 11.77, priceSelling: 11.89, type: 'currency' },
-  { name: 'Gümüş (Gram)',        slug: 'gumus',            price: 109, priceBuying: 101, priceSelling: 109, type: 'metal' },
-  { name: 'Altın Ons ($)',       slug: 'altin-ons',        price: 4665, priceBuying: 4664, priceSelling: 4665, type: 'metal' },
-];
+async function fetchSource2(): Promise<{ items: AssetItem[], banks: BankItem[] }> {
+  const url = 'https://canlialtinfiyatlari.com/kuyumcular-odasi-altin-fiyatlari.html';
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, next: { revalidate: 30 } });
+  const html = await res.text();
+  
+  const items: AssetItem[] = [];
+  const banks: BankItem[] = [];
+  
+  // Tablo satırlarını bulalım
+  const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/g) || [];
 
-// Banka karşılaştırma verileri (statik — truncgil'de banka verisi yok)
-export const BANK_DATA: BankItem[] = [
-  { name: 'Altınkaynak',     buying: 0, selling: 0, spread: 0 },
-  { name: 'Vakıfbank',       buying: 0, selling: 0, spread: 0 },
-  { name: 'Ziraat Bankası',  buying: 0, selling: 0, spread: 0 },
-  { name: 'Kuveyt Türk',     buying: 0, selling: 0, spread: 0 },
-  { name: 'Yapı Kredi',      buying: 0, selling: 0, spread: 0 },
-  { name: 'İş Bankası',      buying: 0, selling: 0, spread: 0 },
-  { name: 'Garanti BBVA',    buying: 0, selling: 0, spread: 0 },
-  { name: 'Halkbank',        buying: 0, selling: 0, spread: 0 },
-  { name: 'Denizbank',       buying: 0, selling: 0, spread: 0 },
-  { name: 'Akbank',          buying: 0, selling: 0, spread: 0 },
-];
+  rows.forEach(row => {
+    const cellsText = Array.from(row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)).map(m => m[1]);
+    if (cellsText.length < 4) return; // eksik satırları atla
+    
+    const cleanText = (htmlStr: string) => htmlStr.replace(/<[^>]+>/g, ' ').trim().replace(/\s+/g, ' ');
+
+    const nameRaw = cleanText(cellsText[0]);
+    if (!nameRaw) return;
+
+    // is Bank?
+    const isBank = nameRaw.toLowerCase().includes('bank') || nameRaw.includes('Altınkaynak');
+    if (isBank && cellsText.length >= 3) {
+      const buyR = cleanText(cellsText[1]);
+      const sellR = cleanText(cellsText[2]);
+      const buying = safeParseFloat(buyR);
+      const selling = safeParseFloat(sellR);
+      if (selling > 0) {
+        banks.push({ name: nameRaw, buying, selling, spread: Math.max(0, selling - buying) });
+      }
+      return;
+    }
+
+    // Normal altınlar
+    const updateTime = cleanText(cellsText[1]);
+    const buyR = cleanText(cellsText[2]);
+    const sellR = cleanText(cellsText[3]);
+    let changeRaw = cleanText(cellsText[4] || '');
+
+    const parseNameSlug = (n: string): { slug: string, type: AssetItem['type'], fixedName: string } | null => {
+      const lower = n.toLowerCase();
+      if (lower.includes('gram')) return { slug: 'gram-altin', type: 'gold', fixedName: 'Gram Altın' };
+      if (lower.includes('has')) return { slug: 'has-altin', type: 'gold', fixedName: 'Has Altın' };
+      if (lower.includes('çeyrek') && !lower.includes('eski')) return { slug: 'ceyrek-altin', type: 'gold', fixedName: 'Çeyrek Altın' };
+      if (lower.includes('yarım') && !lower.includes('eski')) return { slug: 'yarim-altin', type: 'gold', fixedName: 'Yarım Altın' };
+      if (lower.includes('tam') && !lower.includes('eski')) return { slug: 'tam-altin', type: 'gold', fixedName: 'Tam Altın' };
+      if (lower.includes('cumhuriyet')) return { slug: 'cumhuriyet-altini', type: 'gold', fixedName: 'Cumhuriyet Altını' };
+      if (lower.includes('ata') && !lower.includes('beşli')) return { slug: 'ata-altin', type: 'gold', fixedName: 'Ata Altın' };
+      if (lower.includes('22 ayar')) return { slug: '22-ayar-bilezik', type: 'gold', fixedName: '22 Ayar Altın' };
+      if (lower.includes('14 ayar')) return { slug: '14-ayar-altin', type: 'gold', fixedName: '14 Ayar Altın' };
+      if (n === 'Dolar') return { slug: 'usd', type: 'currency', fixedName: 'Dolar' };
+      if (n === 'Euro') return { slug: 'eur', type: 'currency', fixedName: 'Euro' };
+      if (lower.includes('gümüş')) return { slug: 'gumus', type: 'metal', fixedName: 'Gümüş (Gram)' };
+      if (lower.includes('ons')) return { slug: 'altin-ons', type: 'metal', fixedName: 'Altın Ons' };
+      return null;
+    };
+
+    const mapping = parseNameSlug(nameRaw);
+    if (!mapping) return;
+
+    const buying = Math.min(safeParseFloat(buyR), safeParseFloat(sellR));
+    const selling = Math.max(safeParseFloat(buyR), safeParseFloat(sellR));
+    
+    if (selling < 1) return;
+
+    const percentMatch = changeRaw.match(/([+-]?[\d.,]+)/);
+    const changePercent = percentMatch ? safeParseFloat(percentMatch[1]) : undefined;
+
+    items.push({
+      name: mapping.fixedName,
+      slug: mapping.slug,
+      price: selling,
+      priceBuying: buying,
+      priceSelling: selling,
+      type: mapping.type,
+      changePercent,
+      updateTime: updateTime.length === 8 ? updateTime : undefined
+    });
+  });
+
+  return { items, banks };
+}
 
 // ─────────────────────────────────────────────────────────────
-// Ana veri fonksiyonu
+// Ana veri sağlayıcı (Rotasyonlu taze veri çekimi)
 // ─────────────────────────────────────────────────────────────
 export async function getMarketData(): Promise<MarketResponse> {
-  const items = await fetchTruncgil();
+  try {
+    // Epoch zamanını 30 saniyelik dilimlere böl
+    // 0. dilim -> source 1
+    // 1. dilim -> source 2
+    const epoch30s = Math.floor(Date.now() / 30000);
+    const useSource2 = epoch30s % 2 !== 0;
 
-  if (items && items.length >= 5) {
-    // Banka spread'lerini gram-altın üzerinden hesapla (yaklaşık)
-    const gramSell = items.find(i => i.slug === 'gram-altin')?.priceSelling ?? 0;
-    const gramBuy  = items.find(i => i.slug === 'gram-altin')?.priceBuying  ?? 0;
-    const banks: BankItem[] = gramSell > 0
-      ? BANK_DATA.map((b, idx) => {
-          const premium = [0, 162, 172, 176, 180, 181, 245, 263, 274, 344][idx] ?? 180;
-          const bSell = gramSell + premium;
-          const bBuy  = gramBuy  - (premium * 0.3);
-          return { name: b.name, buying: Math.round(bBuy), selling: Math.round(bSell), spread: Math.round(bSell - bBuy) };
-        })
-      : [];
+    if (useSource2) {
+      try {
+        const { items, banks } = await fetchSource2();
+        if (items.length > 5) return { items, banks, updateDate: getTRTime() };
+      } catch (e) {
+        console.error("Source 2 failed, falling back to Source 1");
+      }
+    }
 
-    return { items, banks, updateDate: getTRTime() };
+    // Default or Fallback to Source 1
+    const items1 = await fetchSource1();
+    if (items1 && items1.length > 5) {
+      // Source 1'in banka verisi olmadığı için fake premium üzerinden yaklaşık hesaplayalım
+      const gramSell = items1.find(i => i.slug === 'gram-altin')?.priceSelling ?? 0;
+      const gramBuy  = items1.find(i => i.slug === 'gram-altin')?.priceBuying  ?? 0;
+      const banksExt: BankItem[] = [
+        { name: 'Altınkaynak', premium: 0 },
+        { name: 'Vakıfbank', premium: 162 },
+        { name: 'Ziraat Bankası', premium: 172 },
+        { name: 'Kuveyt Türk', premium: 176 },
+        { name: 'Yapı Kredi', premium: 180 },
+        { name: 'İş Bankası', premium: 181 },
+      ].map(b => {
+        const sel = gramSell + b.premium;
+        const buy = gramBuy - (b.premium * 0.3);
+        return { name: b.name, buying: buy, selling: sel, spread: sel - buy };
+      });
+
+      return { items: items1, banks: banksExt, updateDate: getTRTime() };
+    }
+  } catch (err) {
+    console.error("MarketData error:", err);
   }
 
-  return { items: STATIC_FALLBACK, updateDate: getTRTime() };
+  // Everything failed -> statik fallback
+  return { items: [
+    { name: 'Gram Altın', slug: 'gram-altin', price: 6870, priceBuying: 6740, priceSelling: 6870, type: 'gold' }
+  ], updateDate: getTRTime() };
 }
