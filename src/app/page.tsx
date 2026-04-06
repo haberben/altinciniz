@@ -4,6 +4,7 @@ import GoldTabTable from "@/components/GoldTabTable";
 import DataTable from "@/components/DataTable";
 import BankTable from "@/components/BankTable";
 import Converter from "@/components/Converter";
+import AutoRefresh from "@/components/AutoRefresh";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -65,6 +66,7 @@ export default async function Home() {
 
   return (
     <>
+      <AutoRefresh intervalMs={30000} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* Ticker */}

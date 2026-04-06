@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { getMarketData } from '@/lib/api';
 import Link from 'next/link';
 import PriceCard from '@/components/PriceCard';
+import AutoRefresh from '@/components/AutoRefresh';
 
 interface Props {
   params: { slug: string };
@@ -55,6 +56,7 @@ export default async function ProgrammaticSEOPage({ params }: Props) {
 
   return (
     <main style={{ minHeight: "100vh", padding: "40px 0" }}>
+      <AutoRefresh intervalMs={30000} />
       <div className="page-wrapper">
         
         {/* Breadcrumb */}
