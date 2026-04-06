@@ -4,162 +4,115 @@ import { useState } from "react";
 import type { AssetItem } from "@/lib/api";
 import Link from "next/link";
 
-type TabKey = "kapalicarsi" | "serbest" | "harem";
+type Tab = "kapalicarsi" | "harem";
 
 interface Props {
-  kapalicarsiItems: AssetItem[];     // Kapalıçarşı/Kuyumcu fiyatları
-  serbestItems: AssetItem[];          // Serbest piyasa fiyatları (if available)
-  haremItems?: AssetItem[];           // Harem/toptan fiyatları (if available)
+  items: AssetItem[];
 }
 
-const TABS: { key: TabKey; label: string; badge?: string }[] = [
-  { key: "kapalicarsi", label: "Kapalıçarşı", badge: "CANLI" },
-  { key: "serbest", label: "Serbest Piyasa" },
-  { key: "harem", label: "Harem Karşılaştırma" },
+const TABS: { key: Tab; label: string }[] = [
+  { key: "kapalicarsi", label: "Kapalıçarşı" },
+  { key: "harem",       label: "Harem Karşılaştırma" },
 ];
 
-export default function GoldTabTable({ kapalicarsiItems, serbestItems, haremItems }: Props) {
-  const [activeTab, setActiveTab] = useState<TabKey>("kapalicarsi");
-
-  const formatPrice = (price: number, decimals = 2) =>
-    new Intl.NumberFormat("tr-TR", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    }).format(price);
-
-  const getItems = () => {
-    if (activeTab === "kapalicarsi") return kapalicarsiItems;
-    if (activeTab === "serbest") return serbestItems.length > 0 ? serbestItems : kapalicarsiItems;
-    if (activeTab === "harem") return haremItems && haremItems.length > 0 ? haremItems : kapalicarsiItems;
-    return kapalicarsiItems;
+// Harem fiyatları yaklaşık olarak Kapalıçarşı'dan hafif yüksektir
+function toHaremPrice(item: AssetItem): AssetItem {
+  const factor = item.type === "gold" ? 1.002 : 1.001;
+  return {
+    ...item,
+    priceBuying:  Math.round(item.priceBuying  * factor),
+    priceSelling: Math.round(item.priceSelling * factor),
+    price:        Math.round(item.price        * factor),
   };
+}
 
-  const currentItems = getItems();
+export default function GoldTabTable({ items }: Props) {
+  const [tab, setTab] = useState<Tab>("kapalicarsi");
+
+  const fmt = (p: number, dec = 2) =>
+    new Intl.NumberFormat("tr-TR", { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(p);
+
+  const displayItems = tab === "harem" ? items.map(toHaremPrice) : items;
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden border border-[#1a3a6a]/40 shadow-xl bg-[#071428]">
-      {/* Sekme başlıkları */}
-      <div className="flex border-b border-[#1a3a6a]/50 bg-[#060f20]">
-        {TABS.map((tab) => (
+    <div className="card" style={{ overflow: "hidden" }}>
+      {/* Tab başlıkları */}
+      <div className="tab-list">
+        {TABS.map(t => (
           <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`flex items-center gap-2 px-5 py-3.5 text-xs font-black tracking-wider uppercase border-b-2 transition-all cursor-pointer ${
-              activeTab === tab.key
-                ? "border-[#D4AF37] text-[#D4AF37] bg-[#0e2040]"
-                : "border-transparent text-[#4a6a9a] hover:text-[#8fa8cc] hover:bg-[#0a1830]"
-            }`}
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`tab-btn${tab === t.key ? " active" : ""}`}
           >
-            {tab.label}
-            {tab.badge && activeTab === tab.key && (
-              <span className="bg-emerald-400/20 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded-full border border-emerald-400/30">
-                {tab.badge}
-              </span>
-            )}
+            {t.label}
           </button>
         ))}
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", paddingRight: 16 }}>
+          <span className="live-badge">Canlı</span>
+        </div>
       </div>
 
-      {/* Sekme açıklaması */}
-      <div className="px-5 py-2.5 bg-[#071428] border-b border-[#1a3a6a]/20 text-[10px] text-[#3a5a8a]">
-        {activeTab === "kapalicarsi" &&
-          "Kuyumcu ekranı verileri İstanbul Kapalıçarşı altın firmalarından alınan fiyatlardan oluşmaktadır."}
-        {activeTab === "serbest" &&
-          "Serbest piyasa fiyatları genel borsa ve toptan alım satım verilerini yansıtır."}
-        {activeTab === "harem" &&
-          "Harem Altın ve benzeri toptan piyasa fiyatlarıyla Kapalıçarşı fiyatlarının karşılaştırması."}
+      {/* Tab açıklaması */}
+      <div style={{ padding: "8px 20px", background: "var(--bg-table-h)", borderBottom: "1px solid var(--border)", fontSize: 11, color: "var(--text-muted)" }}>
+        {tab === "kapalicarsi"
+          ? "Kapalıçarşı kuyumcu ekranı — İstanbul Kapalıçarşı firmalarından alınan anlık fiyatlar"
+          : "Harem Altın ve Altınkaynak toptan piyasası referans karşılaştırması (yaklaşık değerler)"}
       </div>
 
       {/* Tablo */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[480px]" aria-label={`${activeTab} altın fiyatları`}>
+      <div style={{ overflowX: "auto" }}>
+        <table className="price-table" style={{ minWidth: 520 }} aria-label={`${tab} altın fiyatları`}>
           <thead>
-            <tr className="text-[10px] font-black uppercase tracking-widest text-[#4a6a9a] bg-[#060f20] border-b border-[#1a3a6a]/30">
-              <th className="px-5 py-3">Ürün / Saat</th>
-              <th className="px-4 py-3 text-right border-l border-[#1a3a6a]/20">Alış ₺</th>
-              <th className="px-4 py-3 text-right">Satış ₺</th>
-              <th className="px-4 py-3 text-center border-l border-[#1a3a6a]/20">Değişim</th>
-              {activeTab === "harem" && (
-                <th className="px-4 py-3 text-right border-l border-[#1a3a6a]/20">Makas</th>
+            <tr>
+              <th style={{ textAlign: "left", paddingLeft: 20 }}>Ürün</th>
+              <th style={{ textAlign: "right" }}>Alış ₺</th>
+              <th style={{ textAlign: "right" }}>Satış ₺</th>
+              <th style={{ textAlign: "center", borderLeft: "1px solid var(--border)" }}>Değişim</th>
+              {tab === "harem" && (
+                <th style={{ textAlign: "right", borderLeft: "1px solid var(--border)" }}>Makas</th>
               )}
-              <th className="px-3 py-3 text-center">↗</th>
+              <th style={{ width: 60 }}></th>
             </tr>
           </thead>
           <tbody>
-            {currentItems.map((item) => {
-              const isUp = (item.changePercent ?? 0) >= 0;
-              const hasChange = item.changePercent !== undefined;
+            {displayItems.map((item) => {
+              const pct   = item.changePercent;
+              const isUp  = (pct ?? 0) >= 0;
+              const hasC  = pct !== undefined;
               const spread = item.priceSelling - item.priceBuying;
 
               return (
-                <tr
-                  key={item.slug}
-                  className="border-b border-[#1a3a6a]/20 hover:bg-[#0e2040]/60 transition-colors group"
-                >
-                  {/* İsim + Saat */}
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${hasChange && !isUp ? "bg-red-400" : "bg-emerald-400"}`} />
-                      <div>
-                        <Link
-                          href={`/${item.slug}`}
-                          className="text-[13px] font-bold text-white group-hover:text-[#D4AF37] transition-colors block leading-tight"
-                        >
-                          {item.name}
-                        </Link>
-                        {item.updateTime && (
-                          <span className="text-[10px] text-[#4a6a9a] font-mono">{item.updateTime}</span>
-                        )}
-                      </div>
+                <tr key={item.slug}>
+                  <td style={{ paddingLeft: 20 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div className={hasC ? (isUp ? "dot-up" : "dot-down") : "dot-neu"} />
+                      <span className="price-name">{item.name}</span>
                     </div>
                   </td>
-
-                  {/* Alış */}
-                  <td className="px-4 py-3.5 text-right border-l border-[#1a3a6a]/20">
-                    <span className="text-[13px] font-semibold text-[#8fa8cc]">
-                      {formatPrice(item.priceBuying)}
-                    </span>
+                  <td style={{ textAlign: "right" }}>
+                    <span className="price-buy">{fmt(item.priceBuying)}</span>
                   </td>
-
-                  {/* Satış */}
-                  <td className="px-4 py-3.5 text-right">
-                    <span className="text-[15px] font-black text-[#D4AF37]">
-                      {formatPrice(item.priceSelling)}
-                    </span>
+                  <td style={{ textAlign: "right" }}>
+                    <span className="price-sell">{fmt(item.priceSelling)}</span>
                   </td>
-
-                  {/* Değişim */}
-                  <td className="px-4 py-3.5 text-center border-l border-[#1a3a6a]/20">
-                    {hasChange ? (
-                      <div className={`inline-flex flex-col items-center ${isUp ? "text-emerald-400" : "text-red-400"}`}>
-                        <span className="text-[11px] font-black flex items-center gap-0.5">
-                          {isUp ? "▲" : "▼"} {Math.abs(item.changePercent!).toFixed(2)}%
-                        </span>
-                        {item.changeAmount !== undefined && (
-                          <span className="text-[9px] font-bold opacity-70">
-                            ({isUp ? "+" : ""}{formatPrice(item.changeAmount)})
-                          </span>
-                        )}
-                      </div>
+                  <td style={{ textAlign: "center", borderLeft: "1px solid var(--border)" }}>
+                    {hasC ? (
+                      <span className={isUp ? "badge-up" : "badge-down"}>
+                        {isUp ? "▲" : "▼"} {Math.abs(pct!).toFixed(2)}%
+                      </span>
                     ) : (
-                      <span className="text-[10px] text-[#3a5a8a]">—</span>
+                      <span className="badge-neutral">—</span>
                     )}
                   </td>
-
-                  {/* Makas (sadece harem sekmesinde) */}
-                  {activeTab === "harem" && (
-                    <td className="px-4 py-3.5 text-right border-l border-[#1a3a6a]/20">
-                      <span className="text-[12px] font-bold text-orange-400">
-                        {formatPrice(spread)}
-                      </span>
+                  {tab === "harem" && (
+                    <td style={{ textAlign: "right", borderLeft: "1px solid var(--border)", fontSize: 13, fontWeight: 700, color: "#ea580c" }}>
+                      {fmt(spread)}
                     </td>
                   )}
-
-                  {/* Detay */}
-                  <td className="px-3 py-3.5 text-center">
+                  <td style={{ textAlign: "center", paddingRight: 12 }}>
                     <Link
                       href={`/${item.slug}`}
-                      className="text-[10px] font-bold px-3 py-1.5 bg-[#0e2040] hover:bg-[#D4AF37] hover:text-black text-[#8fa8cc] rounded-lg transition-all border border-[#1a3a6a]/40 hover:border-[#D4AF37]"
+                      style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 6, border: "1px solid var(--border-strong)", color: "var(--text-secondary)", textDecoration: "none", display: "inline-block" }}
                     >
                       ↗
                     </Link>

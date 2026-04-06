@@ -3,165 +3,333 @@
 @tailwind utilities;
 
 /* ============================================================
-   DARK MODE (default) — Navy/Gold Professional Theme
+   DESIGN TOKENS — Referans site temasıyla uyumlu
    ============================================================ */
-:root,
-[data-theme="dark"] {
-  --bg-page: #050d1f;
-  --bg-card: #071428;
-  --bg-surface: #0e2040;
-  --bg-input: #0a1830;
-  --border: rgba(26, 58, 106, 0.5);
-  --border-strong: #1a3a6a;
-  --text-primary: #ffffff;
-  --text-secondary: #8fa8cc;
-  --text-muted: #4a6a9a;
-  --scrollbar-track: #050d1f;
-  --scrollbar-thumb: #1a3a6a;
-  --navbar-bg: rgba(7, 20, 40, 0.95);
-  --shadow-gold: 0 0 40px rgba(212, 175, 55, 0.15);
+:root {
+  /* Arka planlar */
+  --bg-page:    #f0f2f5;
+  --bg-card:    #ffffff;
+  --bg-header:  #1b2f52;
+  --bg-nav:     #152542;
+  --bg-table-h: #f8fafc;
+  --bg-row-alt: #fafbfc;
+
+  /* Metin */
+  --text-primary:   #1b2f52;
+  --text-secondary: #4a5568;
+  --text-muted:     #94a3b8;
+
+  /* Aksan */
+  --gold:         #D4AF37;
+  --gold-dark:    #b8941f;
+  --gold-bg:      rgba(212,175,55,0.10);
+  --gold-border:  rgba(212,175,55,0.30);
+
+  /* Durum renkleri */
+  --up:     #16a34a;
+  --up-bg:  rgba(22,163,74,0.08);
+  --down:   #dc2626;
+  --down-bg:rgba(220,38,38,0.08);
+
+  /* Kenarlık */
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Gölge */
+  --shadow-sm: 0 1px 3px rgba(27,47,82,0.08);
+  --shadow-md: 0 4px 12px rgba(27,47,82,0.10);
+
+  /* Scrollbar */
+  --scrollbar-track: #e2e8f0;
+  --scrollbar-thumb: #94a3b8;
 }
 
 /* ============================================================
-   LIGHT MODE
+   BASE
    ============================================================ */
-[data-theme="light"] {
-  --bg-page: #f0f4fb;
-  --bg-card: #ffffff;
-  --bg-surface: #e8eef8;
-  --bg-input: #dde5f5;
-  --border: rgba(26, 58, 106, 0.15);
-  --border-strong: rgba(26, 58, 106, 0.25);
-  --text-primary: #0a1628;
-  --text-secondary: #2a4a6a;
-  --text-muted: #5a7a9a;
-  --scrollbar-track: #e8eef8;
-  --scrollbar-thumb: #6a9aCC;
-  --navbar-bg: rgba(240, 244, 251, 0.95);
-  --shadow-gold: 0 0 40px rgba(212, 175, 55, 0.2);
-}
+* { box-sizing: border-box; }
 
-/* ============================================================
-   BASE BODY
-   ============================================================ */
+html { scroll-behavior: smooth; }
+
 body {
   background-color: var(--bg-page);
   color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-
-/* ============================================================
-   LIGHT MODE — Global overrides
-   ============================================================ */
-[data-theme="light"] .bg-\[\#050d1f\]    { background-color: #f0f4fb !important; }
-[data-theme="light"] .bg-\[\#071428\]    { background-color: #ffffff !important; }
-[data-theme="light"] .bg-\[\#0e2040\]    { background-color: #e8eef8 !important; }
-[data-theme="light"] .bg-\[\#060f20\]    { background-color: #dde5f5 !important; }
-[data-theme="light"] .bg-\[\#0a1830\]    { background-color: #dde5f5 !important; }
-[data-theme="light"] .bg-black           { background-color: #f0f4fb !important; }
-
-/* Borders */
-[data-theme="light"] .border-\[\#1a3a6a\]\/40  { border-color: rgba(26, 58, 106, 0.2) !important; }
-[data-theme="light"] .border-\[\#1a3a6a\]\/50  { border-color: rgba(26, 58, 106, 0.25) !important; }
-[data-theme="light"] .border-\[\#1a3a6a\]\/30  { border-color: rgba(26, 58, 106, 0.15) !important; }
-
-/* Text colors */
-[data-theme="light"] .text-white          { color: #0a1628 !important; }
-[data-theme="light"] .text-\[\#8fa8cc\]   { color: #2a4a6a !important; }
-[data-theme="light"] .text-\[\#4a6a9a\]   { color: #5a7a9a !important; }
-[data-theme="light"] .text-gray-400       { color: #5a7a9a !important; }
-[data-theme="light"] .text-gray-200       { color: #2a4a6a !important; }
-
-/* Gold stays gold */
-[data-theme="light"] .text-\[\#D4AF37\]          { color: #b8941f !important; }
-[data-theme="light"] .bg-\[\#D4AF37\]            { background-color: #D4AF37 !important; }
-[data-theme="light"] .text-gold-primary           { color: #b8941f !important; }
-[data-theme="light"] .bg-gold-primary             { background-color: #D4AF37 !important; }
-[data-theme="light"] .border-gold-primary\/20     { border-color: rgba(212, 175, 55, 0.3) !important; }
-[data-theme="light"] .bg-gold-primary\/10         { background-color: rgba(212, 175, 55, 0.12) !important; }
-
-/* Status colors */
-[data-theme="light"] .text-emerald-400    { color: #059669 !important; }
-[data-theme="light"] .text-red-400        { color: #dc2626 !important; }
-[data-theme="light"] .text-red-500        { color: #dc2626 !important; }
-[data-theme="light"] .text-blue-400       { color: #2563eb !important; }
-
-/* Hover */
-[data-theme="light"] .hover\:bg-\[\#0e2040\]:hover    { background-color: rgba(26, 58, 106, 0.08) !important; }
-[data-theme="light"] .hover\:bg-\[\#0e2040\]\/60:hover { background-color: rgba(26, 58, 106, 0.06) !important; }
-
-/* Tables */
-[data-theme="light"] thead tr             { background-color: #dde5f5 !important; }
-[data-theme="light"] tbody tr:hover       { background-color: rgba(26, 58, 106, 0.04) !important; }
-
-/* Input */
-[data-theme="light"] input,
-[data-theme="light"] select,
-[data-theme="light"] textarea {
-  background-color: #dde5f5 !important;
-  color: #0a1628 !important;
-  border-color: rgba(26, 58, 106, 0.2) !important;
-}
-[data-theme="light"] input::placeholder { color: #5a7a9a !important; }
-[data-theme="light"] option { background-color: #f0f4fb; color: #0a1628; }
-
-/* Shadows */
-[data-theme="light"] .shadow-xl  { box-shadow: 0 4px 24px rgba(10, 22, 40, 0.08) !important; }
-[data-theme="light"] .shadow-2xl { box-shadow: 0 8px 40px rgba(10, 22, 40, 0.12) !important; }
-
-/* Legacy dark hex overrides (for components not yet updated) */
-[data-theme="light"] .bg-\[\#060606\]    { background-color: #f0f4fb !important; }
-[data-theme="light"] .bg-\[\#0a0a0a\]    { background-color: #ffffff !important; }
-[data-theme="light"] .bg-\[\#111\]       { background-color: #e8eef8 !important; }
-[data-theme="light"] .bg-\[\#111111\]    { background-color: #e8eef8 !important; }
-[data-theme="light"] .border-\[\#222\]   { border-color: rgba(26, 58, 106, 0.12) !important; }
-[data-theme="light"] .border-\[\#333\]   { border-color: rgba(26, 58, 106, 0.15) !important; }
-[data-theme="light"] .text-gray-500      { color: #5a7a9a !important; }
-[data-theme="light"] .text-gray-600      { color: #6a8aaa !important; }
-[data-theme="light"] .bg-white\/5         { background-color: rgba(26, 58, 106, 0.05) !important; }
-[data-theme="light"] .bg-white\/10        { background-color: rgba(26, 58, 106, 0.08) !important; }
-[data-theme="light"] .border-white\/5     { border-color: rgba(26, 58, 106, 0.08) !important; }
-[data-theme="light"] .border-white\/10    { border-color: rgba(26, 58, 106, 0.12) !important; }
-[data-theme="light"] .hover\:bg-white\/5:hover  { background-color: rgba(26, 58, 106, 0.06) !important; }
-[data-theme="light"] .hover\:bg-white\/10:hover { background-color: rgba(26, 58, 106, 0.09) !important; }
-[data-theme="light"] .hover\:text-white:hover   { color: #0a1628 !important; }
-
-/* Sticky nav light mode */
-[data-theme="light"] .sticky { background-color: var(--navbar-bg) !important; }
-[data-theme="light"] .bg-gradient-to-br { background: none; background-color: rgba(26, 58, 106, 0.04) !important; }
 
 /* ============================================================
    SCROLLBAR
    ============================================================ */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
-::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* ============================================================
+   HEADER DARK ZONE (ticker + nav)
+   ============================================================ */
+.site-ticker {
+  background: #0f1e38;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.site-nav {
+  background: var(--bg-header);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+/* ============================================================
+   CARD / SECTION
+   ============================================================ */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.hover-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--bg-header);
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.card-header-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+/* ============================================================
+   PRICE TABLE
+   ============================================================ */
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.price-table thead tr {
+  background: var(--bg-table-h);
+  border-bottom: 2px solid var(--border);
+}
+
+.price-table thead th {
+  padding: 10px 16px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.price-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+
+.price-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.price-table tbody tr:hover {
+  background: rgba(212,175,55,0.04);
+}
+
+.price-table td {
+  padding: 11px 16px;
+  line-height: 1.4;
+}
+
+/* Price values */
+.price-buy  { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+.price-sell { font-size: 15px; font-weight: 800; color: var(--text-primary); }
+.price-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.price-time { font-size: 10px; color: var(--text-muted); font-family: 'Monaco', monospace; }
+
+/* Change badge */
+.badge-up   { color: var(--up);   background: var(--up-bg);   padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
+.badge-down { color: var(--down); background: var(--down-bg); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
+.badge-neutral { color: var(--text-muted); font-size: 11px; }
+
+/* Gold dot indicator */
+.dot-up   { width: 7px; height: 7px; border-radius: 50%; background: var(--up);   flex-shrink: 0; }
+.dot-down { width: 7px; height: 7px; border-radius: 50%; background: var(--down); flex-shrink: 0; }
+.dot-neu  { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
+
+/* ============================================================
+   LIVE BADGE
+   ============================================================ */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--up);
+  background: var(--up-bg);
+  border: 1px solid rgba(22,163,74,0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+.live-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--up);
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ============================================================
+   NAVIGATION TABS
+   ============================================================ */
+.tab-list {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: var(--bg-header);
+  border-radius: 12px 12px 0 0;
+}
+
+.tab-btn {
+  padding: 12px 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: rgba(255,255,255,0.85);
+}
+
+.tab-btn.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+  background: rgba(212,175,55,0.06);
+}
+
+/* ============================================================
+   CONVERTER
+   ============================================================ */
+.converter-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.converter-wrap input,
+.converter-wrap select {
+  width: 100%;
+  background: var(--bg-page);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.converter-wrap input:focus,
+.converter-wrap select:focus {
+  border-color: var(--gold);
+}
+
+/* ============================================================
+   PAGE LAYOUT
+   ============================================================ */
+.page-wrapper {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.page-content {
+  padding: 24px 0 48px;
+  display: grid;
+  gap: 20px;
+}
+
+/* ============================================================
+   RESPONSIVE OVERRIDES
+   ============================================================ */
+@media (max-width: 768px) {
+  .price-table thead th { padding: 8px 10px; }
+  .price-table td { padding: 9px 10px; }
+}
 
 /* ============================================================
    SCROLLBAR HIDE UTILITY
    ============================================================ */
-.scrollbar-none::-webkit-scrollbar { display: none; }
-.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* ============================================================
-   TRANSITIONS (smooth theme switch)
-   ============================================================ */
-*, *::before, *::after {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease, box-shadow 0.2s ease;
-}
-[class*="animate-"], [style*="animation"] {
-  transition: none !important;
-}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ============================================================
    ANIMATIONS
    ============================================================ */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+.animate-in { animation: fadeIn 0.3s ease-out; }
+
+/* ============================================================
+   SEO CONTENT
+   ============================================================ */
+.seo-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 24px;
+  box-shadow: var(--shadow-sm);
 }
+
+.seo-section h2 { font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; }
+.seo-section h3 { font-size: 14px; font-weight: 700; color: var(--gold-dark); margin-bottom: 6px; }
+.seo-section p  { font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
+
+/* ============================================================
+   DARK MODE için en azından site-ticker/nav kalır
+   (kullanıcı isterse toggle ekleyebiliriz ileride)
+   ============================================================ */

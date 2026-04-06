@@ -1,53 +1,54 @@
 import type { BankItem } from "@/lib/api";
 
 export default function BankTable({ banks }: { banks: BankItem[] }) {
-  if (!banks || banks.length === 0) return null;
+  if (!banks?.length) return null;
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price);
+  const fmt = (p: number) =>
+    new Intl.NumberFormat("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(p);
+
+  const validBanks = banks.filter(b => b.selling > 0);
+  if (!validBanks.length) return null;
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden border border-[#1a3a6a]/40 shadow-xl bg-[#071428]">
-      <div className="flex items-center justify-between px-5 py-3.5 bg-[#0e2040] border-b border-[#1a3a6a]/50">
-        <h4 className="text-sm font-black text-white uppercase tracking-wider">Banka Gram Altın Fiyatları</h4>
-        <span className="text-[10px] font-bold text-[#4a6a9a] bg-[#0a1830] px-2.5 py-1 rounded-full border border-[#1a3a6a]/30">
+    <div className="card" style={{ overflow: "hidden" }}>
+      <div className="card-header">
+        <span className="card-header-title">Banka Gram Altın Fiyatları</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em" }}>
           ALIŞ / SATIŞ / MAKAS
         </span>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[400px]" aria-label="Banka altın fiyatları">
+      <div style={{ overflowX: "auto" }}>
+        <table className="price-table" style={{ minWidth: 400 }} aria-label="Banka altın fiyatları">
           <thead>
-            <tr className="text-[10px] font-black uppercase tracking-widest text-[#4a6a9a] bg-[#060f20] border-b border-[#1a3a6a]/30">
-              <th className="px-5 py-3">Banka</th>
-              <th className="px-4 py-3 text-right border-l border-[#1a3a6a]/20">Alış</th>
-              <th className="px-4 py-3 text-right">Satış</th>
-              <th className="px-4 py-3 text-right border-l border-[#1a3a6a]/20">Makas</th>
+            <tr>
+              <th style={{ textAlign: "left", paddingLeft: 20 }}>Banka</th>
+              <th style={{ textAlign: "right" }}>Alış ₺</th>
+              <th style={{ textAlign: "right" }}>Satış ₺</th>
+              <th style={{ textAlign: "right", borderLeft: "1px solid var(--border)" }}>Makas</th>
             </tr>
           </thead>
           <tbody>
-            {banks.map((bank, i) => (
-              <tr key={i} className="border-b border-[#1a3a6a]/20 hover:bg-[#0e2040]/60 transition-colors">
-                <td className="px-5 py-3">
-                  <div>
-                    <span className="text-[13px] font-bold text-white">{bank.name}</span>
-                    {bank.updateTime && (
-                      <span className="block text-[10px] text-[#4a6a9a] font-mono">{bank.updateTime}</span>
-                    )}
-                  </div>
+            {validBanks.map((bank, i) => (
+              <tr key={i}>
+                <td style={{ paddingLeft: 20 }}>
+                  <span className="price-name">{bank.name}</span>
                 </td>
-                <td className="px-4 py-3 text-right border-l border-[#1a3a6a]/20">
-                  <span className="text-[13px] font-semibold text-[#8fa8cc]">{formatPrice(bank.buying)}</span>
+                <td style={{ textAlign: "right" }}>
+                  <span className="price-buy">{fmt(bank.buying)}</span>
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <span className="text-[14px] font-black text-[#D4AF37]">{formatPrice(bank.selling)}</span>
+                <td style={{ textAlign: "right" }}>
+                  <span className="price-sell">{fmt(bank.selling)}</span>
                 </td>
-                <td className="px-4 py-3 text-right border-l border-[#1a3a6a]/20">
-                  <span className="text-[12px] font-bold text-red-400">{formatPrice(bank.spread)}</span>
+                <td style={{ textAlign: "right", borderLeft: "1px solid var(--border)", fontSize: 13, fontWeight: 700, color: "#dc2626", paddingRight: 16 }}>
+                  {fmt(bank.spread)}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+      <div style={{ padding: "10px 20px", background: "var(--bg-table-h)", borderTop: "1px solid var(--border)", fontSize: 11, color: "var(--text-muted)" }}>
+        * Banka fiyatları gram altın baz alınarak hesaplanmıştır. Güncel fiyatlar için bankanızı arayınız.
       </div>
     </div>
   );

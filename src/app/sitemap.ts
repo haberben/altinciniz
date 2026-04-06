@@ -41,18 +41,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.7,
     },
-    {
-      url: `${baseUrl}/kuyumcu-paneli`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/giris`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
   ];
 
   // 2. Dynamic Gold/Currency Routes
@@ -82,27 +70,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  // 3. Dynamic Jeweler Profiles
-  let jewelerRoutes: MetadataRoute.Sitemap = [];
-  try {
-    if (supabase) {
-      const { data: profiles } = await supabase
-        .from('jeweler_profiles')
-        .select('slug, updated_at')
-        .filter('is_approved', 'eq', true);
-
-      if (profiles) {
-        jewelerRoutes = profiles.map((profile) => ({
-          url: `${baseUrl}/kuyumcular/${profile.slug}`,
-          lastModified: profile.updated_at ? new Date(profile.updated_at) : new Date(),
-          changeFrequency: 'daily',
-          priority: 0.7,
-        }));
-      }
-    }
-  } catch (error) {
-    console.error("Sitemap: Failed to fetch jeweler profiles", error);
-  }
-
-  return [...staticRoutes, ...assetRoutes, ...jewelerRoutes];
+  return [...staticRoutes, ...assetRoutes];
 }

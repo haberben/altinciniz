@@ -97,14 +97,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr" data-theme="dark" suppressHydrationWarning>
+    <html lang="tr" suppressHydrationWarning>
       <head>
-        {/* Anti-flash: read localStorage and apply theme before React hydration */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('altinciniz-theme');var theme=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',theme);document.documentElement.classList.add(theme);}catch(e){}})();`,
-          }}
-        />
+
       </head>
       <body className={`${inter.className} antialiased selection:bg-gold-primary selection:text-black`}>
         {/* JSON-LD Organization Schema */}
