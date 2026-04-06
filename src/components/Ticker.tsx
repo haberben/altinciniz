@@ -1,57 +1,122 @@
 "use client";
 
 import type { AssetItem } from "@/lib/api";
-import { Activity } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import ThemeToggle from "./ThemeToggle";
+import { TrendingUp, TrendingDown } from "lucide-react";
+
+const KEY_SLUGS = ["altin-ons", "gram-altin", "gumus", "usd", "eur"];
+const KEY_LABELS: Record<string, string> = {
+  "altin-ons": "ALTIN ONS",
+  "gram-altin": "GRAM ALTIN",
+  "gumus": "GÜMÜŞ",
+  "usd": "DOLAR",
+  "eur": "EURO",
+};
 
 export default function Ticker({ items }: { items: AssetItem[] }) {
-  // SSR (Server Side Rendering) hatasını önlemek için mounted kontrolü
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  if (!mounted || !items || items.length === 0) return <div className="h-10 bg-[#0a0a0a] border-b border-[#222]" />;
+  if (!mounted || !items || items.length === 0)
+    return <div className="h-14 bg-[#071428] border-b border-[#1a3a6a]" />;
 
+  const formatPrice = (price: number, decimals = 2) =>
+    new Intl.NumberFormat("tr-TR", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(price);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price);
-  };
+  // Üstte gösterilecek kritik varlıklar
+  const keyItems = KEY_SLUGS
+    .map(slug => items.find(i => i.slug === slug))
+    .filter(Boolean) as AssetItem[];
+
+  // Kayan şerit için tüm varlıklar
+  const tickerItems = items.filter(i => i.price > 0);
 
   return (
-    <div className="w-full bg-[#0a0a0a] border-b border-[#222] overflow-hidden sticky top-0 z-50 flex items-center" style={{ background: "var(--bg-secondary)", borderColor: "var(--border-color)" }}>
-      {/* Scrolling ticker tape */}
-      <div className="flex flex-1 w-0 whitespace-nowrap overflow-hidden" style={{ animation: "marquee 40s linear infinite" }}>
-        {/* We duplicate the items array so the ticker loops smoothly */}
-        {[...items, ...items, ...items, ...items].map((item, index) => (
-          <Link
-            key={index}
-            href={`/${item.slug}`}
-            className="inline-flex items-center px-6 py-2 border-r transition-colors hover:bg-white/5"
-            style={{ borderColor: "var(--border-color)" }}
-          >
-            <span className="text-xs font-bold uppercase tracking-wider mr-3" style={{ color: "var(--text-secondary)" }}>{item.name}</span>
-            <span className="text-gold-light text-sm font-black mr-3">{formatPrice(item.priceSelling)}</span>
-            <span className="flex items-center text-[10px] font-bold text-emerald-500 uppercase">
-              <Activity size={12} className="mr-1" />
-              Canlı
-            </span>
-          </Link>
-        ))}
+    <div className="sticky top-0 z-50 w-full bg-[#071428] border-b border-[#1a3a6a] shadow-lg">
+      {/* ÜST BAR: Kritik bilgi kutuları */}
+      <div className="flex items-stretch border-b border-[#1a3a6a]/50 overflow-x-auto scrollbar-none">
+        {keyItems.map((item) => {
+          const isUp = (item.changePercent ?? 0) >= 0;
+          const pct = item.changePercent;
+          return (
+            <Link
+              key={item.slug}
+              href={`/${item.slug}`}
+              className="flex-shrink-0 flex flex-col px-4 py-2 border-r border-[#1a3a6a]/50 hover:bg-[#0e2040] transition-colors min-w-[120px]"
+            >
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#8fa8cc]">
+                  {KEY_LABELS[item.slug] ?? item.name}
+                </span>
+              </div>
+              <span className="text-sm font-black text-white leading-tight mt-0.5">
+                {formatPrice(item.priceSelling, item.type === "currency" ? 4 : 2)}
+              </span>
+              {pct !== undefined ? (
+                <div className={`flex items-center gap-0.5 text-[10px] font-bold mt-0.5 ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+                  {isUp ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
+                  {isUp ? "+" : ""}{pct.toFixed(2)}%
+                </div>
+              ) : (
+                <div className="text-[10px] text-gray-600 mt-0.5">—</div>
+              )}
+            </Link>
+          );
+        })}
+
+        {/* Theme Toggle sağ köşe */}
+        <div className="ml-auto flex-shrink-0 flex items-center px-4 border-l border-[#1a3a6a]/50">
+          <ThemeToggle />
+        </div>
       </div>
 
-      {/* Theme Toggle — always visible on the right */}
-      <div className="shrink-0 px-4 border-l" style={{ borderColor: "var(--border-color)", background: "var(--bg-secondary)" }}>
-        <ThemeToggle />
+      {/* ALT BAR: Kayan ticker şeridi */}
+      <div className="flex items-center h-8 overflow-hidden">
+        <div
+          className="flex whitespace-nowrap"
+          style={{ animation: "ticker-scroll 60s linear infinite" }}
+        >
+          {[...tickerItems, ...tickerItems].map((item, i) => {
+            const isUp = (item.changePercent ?? 0) >= 0;
+            return (
+              <Link
+                key={`${item.slug}-${i}`}
+                href={`/${item.slug}`}
+                className="inline-flex items-center gap-2 px-4 border-r border-[#1a3a6a]/30 hover:bg-[#0e2040] transition-colors h-8"
+              >
+                <span className="text-[10px] font-bold text-[#6a8aaa] uppercase tracking-wide">
+                  {item.name}
+                </span>
+                <span className="text-[11px] font-black text-[#D4AF37]">
+                  {formatPrice(item.priceSelling, item.type === "currency" ? 4 : 2)}
+                </span>
+                {item.changePercent !== undefined && (
+                  <span className={`text-[9px] font-bold ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+                    {isUp ? "▲" : "▼"} {Math.abs(item.changePercent).toFixed(2)}%
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}} />
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes ticker-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .scrollbar-none::-webkit-scrollbar { display: none; }
+          .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+        `
+      }} />
     </div>
   );
 }
-

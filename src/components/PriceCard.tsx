@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Sparkles, Activity, TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity } from "lucide-react";
 import type { AssetItem } from "@/lib/api";
 
 type Props = {
@@ -9,59 +9,71 @@ type Props = {
 };
 
 export default function PriceCard({ item, featured = false }: Props) {
-  const formatPrice = (p: number) => {
-    return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(p) + ' ₺';
-  };
+  const formatPrice = (p: number, decimals = 2) =>
+    new Intl.NumberFormat("tr-TR", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(p) + " ₺";
+
+  const isUp = (item.changePercent ?? 0) >= 0;
+  const hasChange = item.changePercent !== undefined;
+  const isCurrency = item.type === "currency";
+  const decimals = isCurrency ? 4 : 2;
 
   return (
-    <Link 
-      href={`/${item.slug}`} 
+    <Link
+      href={`/${item.slug}`}
       prefetch={false}
-      aria-label={`${item.name} canlı fiyat detayları ve grafikler`}
-      className={`block relative group overflow-hidden rounded-3xl transition-all duration-500 hover:-translate-y-1 
-      ${featured 
-        ? "col-span-1 bg-gradient-to-br from-[#1a1500]/90 to-black/90 border border-gold-primary/30 shadow-[0_0_40px_rgba(212,175,55,0.15)] hover:shadow-[0_0_60px_rgba(212,175,55,0.3)] backdrop-blur-2xl px-6 py-6" 
-        : "py-6 px-6 bg-white/5 border border-white/10 hover:bg-white/10 shadow-lg backdrop-blur-xl"}`}
+      aria-label={`${item.name} canlı fiyat detayları`}
+      className="block relative group overflow-hidden rounded-2xl transition-all duration-300 hover:-translate-y-0.5 bg-[#071428] border border-[#1a3a6a]/40 hover:border-[#D4AF37]/40 hover:shadow-[0_0_24px_rgba(212,175,55,0.12)] backdrop-blur-sm px-5 py-4"
     >
-      {/* Glow Effect Top-Right */}
-      <div className={`absolute -right-20 -top-20 w-40 h-40 rounded-full blur-[80px] transition-all duration-500 group-hover:bg-gold-primary/30 ${featured ? "bg-gold-primary/20" : "bg-gold-primary/5"}`} />
+      {/* Subtle glow */}
+      <div className="absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[60px] bg-[#D4AF37]/5 group-hover:bg-[#D4AF37]/10 transition-all duration-500 pointer-events-none" />
 
-      <div className="flex flex-col h-full justify-between relative z-10 space-y-4">
-        <div className="flex justify-between items-start">
-          <h3 className={`${featured ? "text-xl font-bold tracking-wide" : "text-lg font-medium"} text-gray-200 group-hover:text-white transition-colors flex items-center gap-2`}>
-            {featured && <Sparkles className="text-gold-light" size={20} />}
+      <div className="relative z-10">
+        {/* Başlık satırı */}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[13px] font-bold text-[#8fa8cc] group-hover:text-white transition-colors">
             {item.name}
           </h3>
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] uppercase font-bold text-gray-400 bg-white/5 border border-white/10">
-              <Activity size={12} className="text-gold-light" />
-              <span>Canlı</span>
-            </div>
-            {/* Technical Signal (Mock Logic for UI Superiority) */}
-            <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${item.priceSelling > item.priceBuying * 1.05 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}>
-              {item.priceSelling > item.priceBuying * 1.05 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-              {item.priceSelling > item.priceBuying * 1.05 ? 'Güçlü Al' : 'Nötr'}
-            </div>
+          <div className="flex items-center gap-1 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full">
+            <Activity size={9} className="text-emerald-400" />
+            <span className="text-[9px] font-black text-emerald-400 uppercase">Canlı</span>
           </div>
         </div>
-        
-        {/* Alış-Satış Kutuları */}
-        <div className="grid grid-cols-2 gap-3 mt-4">
-            <div className={`flex flex-col p-3 rounded-xl border ${featured ? "bg-black/40 border-[#333]" : "bg-black/30 border-[#222]"}`}>
-                <span className="text-[10px] uppercase font-bold text-gray-500 mb-1 tracking-widest">Alış</span>
-                <span className={`${featured ? "text-xl text-white" : "text-lg text-gray-300"} font-black tracking-wide`}>
-                    {formatPrice(item.priceBuying)}
-                </span>
-            </div>
-            <div className={`flex flex-col p-3 rounded-xl border relative ${featured ? "bg-gold-primary/10 border-gold-primary/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]" : "bg-white/5 border-[#333]"}`}>
-                <span className="text-[10px] uppercase font-bold text-gold-light mb-1 tracking-widest">Satış</span>
-                <span className={`${featured ? "text-xl text-gold-light drop-shadow-md" : "text-lg text-white"} font-black tracking-wide`}>
-                    {formatPrice(item.priceSelling)}
-                </span>
-            </div>
+
+        {/* Büyük satış fiyatı */}
+        <div className="text-2xl font-black text-[#D4AF37] tracking-tight mb-1">
+          {formatPrice(item.priceSelling, decimals)}
         </div>
+
+        {/* Alış + Değişim */}
+        <div className="flex items-center justify-between">
+          <div className="text-[11px] text-[#4a6a9a]">
+            Alış:{" "}
+            <span className="text-[#8fa8cc] font-semibold">
+              {formatPrice(item.priceBuying, decimals)}
+            </span>
+          </div>
+          {hasChange && (
+            <div
+              className={`flex items-center gap-0.5 text-[11px] font-black px-2 py-0.5 rounded ${
+                isUp
+                  ? "bg-emerald-400/10 text-emerald-400"
+                  : "bg-red-400/10 text-red-400"
+              }`}
+            >
+              {isUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+              {isUp ? "+" : ""}{item.changePercent!.toFixed(2)}%
+            </div>
+          )}
+        </div>
+
+        {/* Güncelleme saati */}
+        {item.updateTime && (
+          <div className="text-[9px] text-[#2a4a6a] font-mono mt-1.5">{item.updateTime}</div>
+        )}
       </div>
-      
     </Link>
   );
 }

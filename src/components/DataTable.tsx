@@ -1,55 +1,116 @@
 import type { AssetItem } from "@/lib/api";
 import Link from "next/link";
 
-export default function DataTable({ items, title }: { items: AssetItem[], title: string }) {
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price);
-  };
+export default function DataTable({ items, title }: { items: AssetItem[]; title: string }) {
+  const formatPrice = (price: number, decimals = 2) =>
+    new Intl.NumberFormat("tr-TR", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(price);
 
   return (
-    <div className="w-full bg-surface border border-[#222] rounded-2xl overflow-hidden shadow-xl backdrop-blur-md">
-      <div className="bg-[#111] px-6 py-5 border-b border-[#222]">
-        <h4 className="text-xl font-bold text-gray-200 tracking-wide">{title}</h4>
+    <div className="w-full rounded-2xl overflow-hidden border border-[#1a3a6a]/40 shadow-xl bg-[#071428]">
+      {/* Başlık */}
+      <div className="flex items-center justify-between px-5 py-3.5 bg-[#0e2040] border-b border-[#1a3a6a]/50">
+        <h4 className="text-sm font-black text-white uppercase tracking-wider">{title}</h4>
+        <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-full border border-emerald-400/20">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+          CANLI
+        </span>
       </div>
+
+      {/* Tablo */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[500px]" aria-label={title}>
+        <table className="w-full text-left border-collapse min-w-[480px]" aria-label={title}>
           <thead>
-            <tr className="bg-[#0a0a0a] text-gray-500 text-[11px] font-black uppercase tracking-widest border-b border-[#222]">
-              <th className="px-6 py-4">Piyasa / Ürün</th>
-              <th className="px-6 py-4 text-right border-l border-[#222]/50">Alış (TL)</th>
-              <th className="px-6 py-4 text-right">Satış (TL)</th>
-              <th className="px-4 py-4 text-center border-l border-[#222]/50">Durum</th>
-              <th className="px-4 py-4 text-center">İşlem</th>
+            <tr className="text-[10px] font-black uppercase tracking-widest text-[#4a6a9a] bg-[#060f20] border-b border-[#1a3a6a]/30">
+              <th className="px-5 py-3">Ürün / Saat</th>
+              <th className="px-4 py-3 text-right border-l border-[#1a3a6a]/20">Alış ₺</th>
+              <th className="px-4 py-3 text-right">Satış ₺</th>
+              <th className="px-4 py-3 text-center border-l border-[#1a3a6a]/20">Değişim</th>
+              <th className="px-3 py-3 text-center">Detay</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#222]">
-            {items.map((item) => (
-              <tr key={item.slug} className="hover:bg-white/5 transition-colors group pl-4">
-                <td className="px-6 py-4">
-                  <div className="flex items-center">
-                    <span className="text-[15px] font-bold text-white tracking-wide">{item.name}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-right border-l border-[#222]/30">
-                  <span className="text-[15px] font-semibold text-gray-400 tracking-wide">
-                    {formatPrice(item.priceBuying)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <span className="text-[16px] font-black text-gold-light drop-shadow-sm tracking-wide">
-                    {formatPrice(item.priceSelling)}
-                  </span>
-                </td>
-                <td className="px-4 py-4 text-center border-l border-[#222]/30">
-                  <span className="text-[10px] uppercase font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">Canlı</span>
-                </td>
-                <td className="px-4 py-4 text-center">
-                  <Link href={`/${item.slug}`} className="text-xs font-bold px-4 py-2 bg-[#111] hover:bg-gold-primary hover:text-black text-gray-300 rounded-lg transition-all border border-[#333] hover:border-gold-primary">
-                    Detay
-                  </Link>
-                </td>
-              </tr>
-            ))}
+          <tbody>
+            {items.map((item) => {
+              const isUp = (item.changePercent ?? 0) >= 0;
+              const hasChange = item.changePercent !== undefined;
+              const isCurrency = item.type === "currency";
+              const decimals = isCurrency ? 4 : 2;
+
+              return (
+                <tr
+                  key={item.slug}
+                  className="border-b border-[#1a3a6a]/20 hover:bg-[#0e2040]/60 transition-colors group"
+                >
+                  {/* İsim + Saat */}
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                          hasChange && !isUp ? "bg-red-400" : "bg-emerald-400"
+                        }`}
+                      />
+                      <div>
+                        <Link
+                          href={`/${item.slug}`}
+                          className="text-[13px] font-bold text-white group-hover:text-[#D4AF37] transition-colors block leading-tight"
+                        >
+                          {item.name}
+                        </Link>
+                        {item.updateTime && (
+                          <span className="text-[10px] text-[#4a6a9a] font-mono">
+                            {item.updateTime}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Alış */}
+                  <td className="px-4 py-3.5 text-right border-l border-[#1a3a6a]/20">
+                    <span className="text-[13px] font-semibold text-[#8fa8cc]">
+                      {formatPrice(item.priceBuying, decimals)}
+                    </span>
+                  </td>
+
+                  {/* Satış */}
+                  <td className="px-4 py-3.5 text-right">
+                    <span className="text-[15px] font-black text-[#D4AF37] drop-shadow-sm">
+                      {formatPrice(item.priceSelling, decimals)}
+                    </span>
+                  </td>
+
+                  {/* Değişim */}
+                  <td className="px-4 py-3.5 text-center border-l border-[#1a3a6a]/20">
+                    {hasChange ? (
+                      <div className={`inline-flex flex-col items-center ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+                        <span className="text-[11px] font-black flex items-center gap-0.5">
+                          {isUp ? "▲" : "▼"} {Math.abs(item.changePercent!).toFixed(2)}%
+                        </span>
+                        {item.changeAmount !== undefined && (
+                          <span className="text-[9px] font-bold opacity-70">
+                            ({isUp ? "+" : ""}{formatPrice(item.changeAmount, 2)})
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-[#3a5a8a]">—</span>
+                    )}
+                  </td>
+
+                  {/* Detay */}
+                  <td className="px-3 py-3.5 text-center">
+                    <Link
+                      href={`/${item.slug}`}
+                      className="text-[10px] font-bold px-3 py-1.5 bg-[#0e2040] hover:bg-[#D4AF37] hover:text-black text-[#8fa8cc] rounded-lg transition-all border border-[#1a3a6a]/40 hover:border-[#D4AF37]"
+                    >
+                      ↗
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

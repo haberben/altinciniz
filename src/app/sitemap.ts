@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://altinciniz.com';
 
 // Direct supabase client just for fetching slugs (no auth needed for public profiles)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 1. Static Routes
@@ -85,18 +85,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 3. Dynamic Jeweler Profiles
   let jewelerRoutes: MetadataRoute.Sitemap = [];
   try {
-    const { data: profiles } = await supabase
-      .from('jeweler_profiles')
-      .select('slug, updated_at')
-      .filter('is_approved', 'eq', true);
+    if (supabase) {
+      const { data: profiles } = await supabase
+        .from('jeweler_profiles')
+        .select('slug, updated_at')
+        .filter('is_approved', 'eq', true);
 
-    if (profiles) {
-      jewelerRoutes = profiles.map((profile) => ({
-        url: `${baseUrl}/kuyumcular/${profile.slug}`,
-        lastModified: profile.updated_at ? new Date(profile.updated_at) : new Date(),
-        changeFrequency: 'daily',
-        priority: 0.7,
-      }));
+      if (profiles) {
+        jewelerRoutes = profiles.map((profile) => ({
+          url: `${baseUrl}/kuyumcular/${profile.slug}`,
+          lastModified: profile.updated_at ? new Date(profile.updated_at) : new Date(),
+          changeFrequency: 'daily',
+          priority: 0.7,
+        }));
+      }
     }
   } catch (error) {
     console.error("Sitemap: Failed to fetch jeweler profiles", error);
