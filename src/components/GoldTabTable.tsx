@@ -85,13 +85,14 @@ export default function GoldTabTable({ items, serbestItems = [] }: Props) {
           placeholder="Altın ara (Gram, Çeyrek, 22 Ayar...)"
           aria-label="Altın tablosunda ara"
           style={{
-            padding: '6px 12px',
+            padding: '7px 12px',
             fontSize: 12,
             borderRadius: 6,
             border: '1px solid var(--border-strong)',
             background: '#ffffff',
             color: 'var(--text-primary)',
-            minWidth: 220,
+            width: 'min(100%, 260px)',
+            flex: '1 1 200px',
             outline: 'none',
           }}
         />
@@ -99,25 +100,25 @@ export default function GoldTabTable({ items, serbestItems = [] }: Props) {
 
       {/* Tablo */}
       <div style={{ overflowX: 'auto' }}>
-        <table className="price-table" style={{ minWidth: 560 }} aria-label={`${tab} altın fiyatları tablosu`}>
+        <table className="price-table" aria-label={`${tab} altın fiyatları tablosu`}>
           <thead>
             {tab === 'karsilastirma' ? (
               <tr>
-                <th style={{ textAlign: 'left', paddingLeft: 20 }}>Altın Türü</th>
-                <th style={{ textAlign: 'right' }}>Kapalıçarşı Satış</th>
-                <th style={{ textAlign: 'right' }}>Serbest / Harem Satış</th>
+                <th style={{ textAlign: 'left', paddingLeft: 14 }}>Altın Türü</th>
+                <th style={{ textAlign: 'right' }}>Kapalıçarşı</th>
+                <th style={{ textAlign: 'right' }}>Serbest</th>
                 <th style={{ textAlign: 'right', borderLeft: '1px solid var(--border)' }}>Fark</th>
-                <th style={{ textAlign: 'right', borderLeft: '1px solid var(--border)' }}>Kuyumcu Makası</th>
-                <th style={{ width: 68 }}></th>
+                <th className="hide-mobile" style={{ textAlign: 'right', borderLeft: '1px solid var(--border)' }}>Makas</th>
+                <th className="hide-mobile" style={{ width: 64 }}></th>
               </tr>
             ) : (
               <tr>
-                <th style={{ textAlign: 'left', paddingLeft: 20 }}>Altın Türü</th>
+                <th style={{ textAlign: 'left', paddingLeft: 14 }}>Altın Türü</th>
                 <th style={{ textAlign: 'right' }}>Alış</th>
                 <th style={{ textAlign: 'right' }}>Satış</th>
-                <th style={{ textAlign: 'right', borderLeft: '1px solid var(--border)' }}>Makas</th>
+                <th className="hide-mobile" style={{ textAlign: 'right', borderLeft: '1px solid var(--border)' }}>Makas</th>
                 <th style={{ textAlign: 'center', borderLeft: '1px solid var(--border)' }}>Değişim</th>
-                <th style={{ width: 68 }}></th>
+                <th className="hide-mobile" style={{ width: 64 }}></th>
               </tr>
             )}
           </thead>
@@ -140,27 +141,27 @@ export default function GoldTabTable({ items, serbestItems = [] }: Props) {
                 if (tab === 'karsilastirma') {
                   return (
                     <tr key={item.slug}>
-                      <td style={{ paddingLeft: 20 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <td style={{ paddingLeft: 14 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div className={hasC ? (isUp ? 'dot-up' : 'dot-down') : 'dot-neu'} />
                           <Link href={`/${item.slug}`} prefetch={false} className="price-name" style={{ textDecoration: 'none' }}>
                             {item.name}
                           </Link>
                         </div>
                       </td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                         <span className="price-sell">{formatAssetPrice(item.priceSelling, item)}</span>
                       </td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                         <span className="price-buy">{formatAssetPrice(serbestMatch.priceSelling, item)}</span>
                       </td>
-                      <td style={{ textAlign: 'right', borderLeft: '1px solid var(--border)', fontSize: 13, fontWeight: 700, color: marketDiff >= 0 ? '#b45309' : 'var(--up)' }}>
+                      <td style={{ textAlign: 'right', whiteSpace: 'nowrap', borderLeft: '1px solid var(--border)', fontSize: 12, fontWeight: 700, color: marketDiff >= 0 ? '#b45309' : 'var(--up)' }}>
                         {marketDiff >= 0 ? '+' : ''}{formatAssetPrice(marketDiff, item)}
                       </td>
-                      <td style={{ textAlign: 'right', borderLeft: '1px solid var(--border)', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>
+                      <td className="hide-mobile" style={{ textAlign: 'right', borderLeft: '1px solid var(--border)', fontSize: 13, fontWeight: 700, color: 'var(--text-secondary)' }}>
                         {formatAssetPrice(spread, item)}
                       </td>
-                      <td style={{ textAlign: 'center', paddingRight: 12 }}>
+                      <td className="hide-mobile" style={{ textAlign: 'center', paddingRight: 12 }}>
                         <Link href={`/${item.slug}`} prefetch={false} className="detail-link" aria-label={`${item.name} detayı`}>
                           Detay
                         </Link>
@@ -171,8 +172,8 @@ export default function GoldTabTable({ items, serbestItems = [] }: Props) {
 
                 return (
                   <tr key={item.slug}>
-                    <td style={{ paddingLeft: 20 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <td style={{ paddingLeft: 14 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div className={hasC ? (isUp ? 'dot-up' : 'dot-down') : 'dot-neu'} />
                         <div>
                           <Link href={`/${item.slug}`} prefetch={false} className="price-name" style={{ textDecoration: 'none', display: 'block' }}>
@@ -184,16 +185,16 @@ export default function GoldTabTable({ items, serbestItems = [] }: Props) {
                         </div>
                       </div>
                     </td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                       <span className="price-buy">{formatAssetPrice(item.priceBuying, item)}</span>
                     </td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                       <span className="price-sell">{formatAssetPrice(item.priceSelling, item)}</span>
                     </td>
-                    <td style={{ textAlign: 'right', borderLeft: '1px solid var(--border)', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
+                    <td className="hide-mobile" style={{ textAlign: 'right', borderLeft: '1px solid var(--border)', fontSize: 12, fontWeight: 700, color: 'var(--text-muted)' }}>
                       {formatAssetPrice(spread, item)}
                     </td>
-                    <td style={{ textAlign: 'center', borderLeft: '1px solid var(--border)' }}>
+                    <td style={{ textAlign: 'center', whiteSpace: 'nowrap', borderLeft: '1px solid var(--border)' }}>
                       {hasC ? (
                         <span className={isUp ? 'badge-up' : 'badge-down'}>
                           {isUp ? '▲' : '▼'} {Math.abs(pct!).toFixed(2)}%
@@ -202,7 +203,7 @@ export default function GoldTabTable({ items, serbestItems = [] }: Props) {
                         <span className="badge-neutral">—</span>
                       )}
                     </td>
-                    <td style={{ textAlign: 'center', paddingRight: 12 }}>
+                    <td className="hide-mobile" style={{ textAlign: 'center', paddingRight: 12 }}>
                       <Link href={`/${item.slug}`} prefetch={false} className="detail-link" aria-label={`${item.name} detayı`}>
                         Detay
                       </Link>

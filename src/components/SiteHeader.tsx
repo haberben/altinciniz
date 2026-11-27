@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { AssetItem } from '@/lib/api';
 import Ticker from './Ticker';
+import { InstallAppButton } from './InstallAppPrompt';
 
 interface Props {
   items: AssetItem[];
@@ -54,21 +55,23 @@ export default function SiteHeader({ items, updateDate, activePath = '/' }: Prop
             </span>
           </Link>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <InstallAppButton variant="header" />
             <Link
               href="/hesaplama"
               style={{
                 background: 'rgba(212,175,55,0.14)',
                 border: '1px solid rgba(212,175,55,0.45)',
                 color: '#FCE782',
-                padding: '6px 12px',
+                padding: '6px 11px',
                 borderRadius: 8,
                 fontSize: 12,
                 fontWeight: 700,
                 textDecoration: 'none',
+                whiteSpace: 'nowrap',
               }}
             >
-              Altın Hesaplama Aracı
+              Hesaplama
             </Link>
           </div>
         </div>

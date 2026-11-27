@@ -152,14 +152,14 @@ export default async function AssetDetailPage({ params }: { params: { slug: stri
           {/* Ana Fiyat Hero Kartı */}
           <section className="card" style={{ padding: '24px 24px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20 }}>
-              <div style={{ flex: '1 1 320px' }}>
+              <div style={{ flex: '1 1 280px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
                   <span className="live-badge">Canlı</span>
                   {spec.purity && <span className="badge-gold">{spec.purity}</span>}
                   {spec.weight && <span className="badge-gold">{spec.weight}</span>}
                 </div>
 
-                <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 10px', lineHeight: 1.2 }}>
+                <h1 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 10px', lineHeight: 1.2 }}>
                   {spec.name} Fiyatı Ne Kadar?
                 </h1>
                 <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65, margin: '0 0 14px', maxWidth: 640 }}>
@@ -174,20 +174,20 @@ export default async function AssetDetailPage({ params }: { params: { slug: stri
               </div>
 
               {/* Sağ Alış / Satış Kutuları */}
-              <div style={{ flex: '1 1 300px', maxWidth: 440, display: 'grid', gap: 10 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <div style={{ background: 'var(--bg-table-h)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+              <div style={{ flex: '1 1 280px', maxWidth: 440, display: 'grid', gap: 10 }}>
+                <div className="detail-dual-grid">
+                  <div style={{ background: 'var(--bg-table-h)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
                       Alış (Bozdurma)
                     </div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{buyStr}</div>
+                    <div style={{ fontSize: 'clamp(17px, 4.5vw, 22px)', fontWeight: 800, color: 'var(--text-primary)' }}>{buyStr}</div>
                   </div>
 
-                  <div style={{ background: 'var(--gold-bg)', border: '1px solid var(--gold-border)', borderRadius: 10, padding: '14px 16px' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--gold-dark)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+                  <div style={{ background: 'var(--gold-bg)', border: '1px solid var(--gold-border)', borderRadius: 10, padding: '12px 14px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--gold-dark)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
                       Satış Fiyatı
                     </div>
-                    <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)' }}>{sellStr}</div>
+                    <div style={{ fontSize: 'clamp(18px, 4.8vw, 24px)', fontWeight: 900, color: 'var(--text-primary)' }}>{sellStr}</div>
                   </div>
                 </div>
 
@@ -294,7 +294,7 @@ export default async function AssetDetailPage({ params }: { params: { slug: stri
               <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>
                 İlgili Canlı Piyasa Fiyatları
               </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12 }}>
+              <div className="summary-grid">
                 {relatedItems.map((rel) => (
                   <PriceCard key={rel.slug} item={rel} />
                 ))}

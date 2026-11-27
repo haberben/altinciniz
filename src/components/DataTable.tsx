@@ -18,14 +18,14 @@ export default function DataTable({ items, title }: Props) {
       </div>
 
       <div style={{ overflowX: 'auto' }}>
-        <table className="price-table" style={{ minWidth: 440 }} aria-label={title}>
+        <table className="price-table" aria-label={title}>
           <thead>
             <tr>
-              <th style={{ textAlign: 'left', paddingLeft: 20 }}>Ürün</th>
+              <th style={{ textAlign: 'left', paddingLeft: 14 }}>Ürün</th>
               <th style={{ textAlign: 'right' }}>Alış</th>
               <th style={{ textAlign: 'right' }}>Satış</th>
               <th style={{ textAlign: 'center', borderLeft: '1px solid var(--border)' }}>Değişim</th>
-              <th style={{ textAlign: 'center', width: 68 }}></th>
+              <th className="hide-mobile" style={{ textAlign: 'center', width: 64 }}></th>
             </tr>
           </thead>
           <tbody>
@@ -36,8 +36,8 @@ export default function DataTable({ items, title }: Props) {
 
               return (
                 <tr key={item.slug}>
-                  <td style={{ paddingLeft: 20 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <td style={{ paddingLeft: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div className={hasChg ? (isUp ? 'dot-up' : 'dot-down') : 'dot-neu'} />
                       <div>
                         <Link href={`/${item.slug}`} prefetch={false} className="price-name" style={{ textDecoration: 'none', display: 'block' }}>
@@ -50,15 +50,15 @@ export default function DataTable({ items, title }: Props) {
                     </div>
                   </td>
 
-                  <td style={{ textAlign: 'right' }}>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                     <span className="price-buy">{formatAssetPrice(item.priceBuying, item)}</span>
                   </td>
 
-                  <td style={{ textAlign: 'right' }}>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
                     <span className="price-sell">{formatAssetPrice(item.priceSelling, item)}</span>
                   </td>
 
-                  <td style={{ textAlign: 'center', borderLeft: '1px solid var(--border)' }}>
+                  <td style={{ textAlign: 'center', whiteSpace: 'nowrap', borderLeft: '1px solid var(--border)' }}>
                     {hasChg ? (
                       <span className={isUp ? 'badge-up' : 'badge-down'}>
                         {isUp ? '▲' : '▼'} {Math.abs(pct!).toFixed(2)}%
@@ -68,7 +68,7 @@ export default function DataTable({ items, title }: Props) {
                     )}
                   </td>
 
-                  <td style={{ textAlign: 'center', paddingRight: 12 }}>
+                  <td className="hide-mobile" style={{ textAlign: 'center', paddingRight: 12 }}>
                     <Link
                       href={`/${item.slug}`}
                       prefetch={false}

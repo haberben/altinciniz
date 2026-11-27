@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { InstallAppButton } from './InstallAppPrompt';
 
 export default function SiteFooter() {
   const year = new Date().getFullYear();
@@ -87,6 +88,7 @@ export default function SiteFooter() {
               <li><Link href="/iletisim" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>İletişim</Link></li>
               <li><Link href="/gizlilik-politikasi" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Gizlilik ve Çerez Politikası</Link></li>
               <li><Link href="/sitemap.xml" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Site Haritası</Link></li>
+              <li><InstallAppButton variant="footer" /></li>
             </ul>
           </div>
         </div>

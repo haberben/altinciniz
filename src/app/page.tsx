@@ -135,8 +135,8 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Hızlı Özet Kartları */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          {/* Hızlı Özet Kartları (Mobilde 2x2, Masaüstünde 4 Yan Yana) */}
+          <div className="summary-grid">
             {[gramAltin, ceyrek, dolar, euro]
               .filter((x): x is NonNullable<typeof x> => Boolean(x))
               .map((item) => (
@@ -148,7 +148,7 @@ export default async function Home() {
           <GoldTabTable items={tableGolds} serbestItems={serbestItems} />
 
           {/* Döviz ve Değerli Madenler */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+          <div className="market-two-col">
             <DataTable items={currencies} title="Canlı Döviz Kurları" />
             {metals.length > 0 && <DataTable items={metals} title="Değerli Madenler & Ons" />}
           </div>

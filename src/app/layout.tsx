@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
+import InstallAppPrompt from '@/components/InstallAppPrompt';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://altinciniz.com';
@@ -96,6 +97,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
         {children}
+        <InstallAppPrompt />
         <Analytics />
       </body>
     </html>
