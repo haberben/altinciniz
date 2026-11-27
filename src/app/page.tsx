@@ -1,267 +1,240 @@
-import { getMarketData } from "@/lib/api";
-import Ticker from "@/components/Ticker";
-import GoldTabTable from "@/components/GoldTabTable";
-import DataTable from "@/components/DataTable";
-import BankTable from "@/components/BankTable";
-import Converter from "@/components/Converter";
-import AutoRefresh from "@/components/AutoRefresh";
-import Link from "next/link";
-import type { Metadata } from "next";
+import { getMarketData } from '@/lib/api';
+import { formatAssetPrice } from '@/lib/assets';
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
+import PriceCard from '@/components/PriceCard';
+import GoldTabTable from '@/components/GoldTabTable';
+import DataTable from '@/components/DataTable';
+import BankTable from '@/components/BankTable';
+import Converter from '@/components/Converter';
+import AutoRefresh from '@/components/AutoRefresh';
+import Link from 'next/link';
+import type { Metadata } from 'next';
 
-export const revalidate = 30;
+export const revalidate = 15;
 
 export const metadata: Metadata = {
-  title: "Gram Altın Fiyatı (Canlı) – Bugün Gram Altın Ne Kadar? | Altıncınız",
+  title: 'Gram Altın Fiyatı (Canlı) – Bugün Gram Altın ve Çeyrek Altın Ne Kadar? | Altıncınız',
   description:
-    "Anlık gram altın fiyatı bugün ne kadar? Çeyrek altın, yarım altın, tam altın canlı Kapalıçarşı fiyatları. Has altın, 22 ayar, ata altın, beşli ata fiyatları. Döviz kurları ve gümüş fiyatı.",
+    'Anlık Kapalıçarşı gram altın, çeyrek altın, yarım altın, tam altın, cumhuriyet altını ve 22 ayar bilezik fiyatları. Serbest piyasa karşılaştırması, 12 banka makas tablosu ve canlı altın hesaplama.',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: "Gram Altın Fiyatı Canlı | Altıncınız",
+    title: 'Canlı Kapalıçarşı Altın Fiyatları & Döviz Kurları | Altıncınız',
     description:
-      "Kapalıçarşı anlık altın fiyatları, çeyrek altın ne kadar, yarım altın, tam altın canlı takip.",
+      'Gram altın, çeyrek altın, 22 ayar bilezik, banka makasları ve döviz kurları saniyeler içinde güncel.',
   },
 };
 
 export default async function Home() {
-  const { items, banks, updateDate } = await getMarketData();
+  const { items, serbestItems, banks, updateDate, updateDateLong, updatedIso, activeSource } = await getMarketData();
 
   if (!items?.length) {
     return (
-      <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)" }}>
-        Veriler yüklenemiyor. Lütfen daha sonra tekrar deneyin.
+      <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+        Piyasa verileri şu anda yüklenemiyor. Lütfen birkaç saniye sonra sayfayı yenileyin.
       </main>
     );
   }
 
-  // Kategorize
   const goldOrder = [
-    "gram-altin", "has-altin", "22-ayar-bilezik", "14-ayar-altin",
-    "ceyrek-altin", "yarim-altin", "tam-altin",
-    "ata-altin", "besli-ata", "gremse-altin", "cumhuriyet-altini", "altin-ons",
+    'gram-altin', 'has-altin', '22-ayar-bilezik', '18-ayar-altin', '14-ayar-altin',
+    'ceyrek-altin', 'ceyrek-eski', 'yarim-altin', 'yarim-eski',
+    'tam-altin', 'tam-eski', 'cumhuriyet-altini', 'ata-altin', 'besli-ata', 'gremse-altin',
   ];
   const tableGolds = [
-    ...goldOrder.map(s => items.find(i => i.slug === s)).filter(Boolean),
-    ...items.filter(i => i.type === "gold" && !goldOrder.includes(i.slug)),
+    ...goldOrder.map((s) => items.find((i) => i.slug === s)).filter(Boolean),
+    ...items.filter((i) => i.type === 'gold' && !goldOrder.includes(i.slug)),
   ] as typeof items;
 
-  const currencies = items.filter(i => i.type === "currency");
-  const metals     = items.filter(i => i.type === "metal");
+  const currencies = items.filter((i) => i.type === 'currency');
+  const metals = items.filter((i) => i.type === 'metal');
 
-  const gramAltin  = items.find(i => i.slug === "gram-altin");
-  const ceyrek     = items.find(i => i.slug === "ceyrek-altin");
-  const usd        = items.find(i => i.slug === "usd");
-  const eur        = items.find(i => i.slug === "eur");
+  const gramAltin = items.find((i) => i.slug === 'gram-altin');
+  const ceyrek = items.find((i) => i.slug === 'ceyrek-altin');
+  const bilezik22 = items.find((i) => i.slug === '22-ayar-bilezik');
+  const dolar = items.find((i) => i.slug === 'dolar');
+  const euro = items.find((i) => i.slug === 'euro');
 
-  const fmt = (p: number, dec = 2) =>
-    new Intl.NumberFormat("tr-TR", { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(p);
+  const faqs = [
+    {
+      q: 'Bugün gram altın ne kadar?',
+      a: `Anlık Kapalıçarşı verilerine göre gram altın alış fiyatı ${gramAltin ? formatAssetPrice(gramAltin.priceBuying, gramAltin) : 'canlı tablodan'}, satış fiyatı ise ${gramAltin ? formatAssetPrice(gramAltin.priceSelling, gramAltin) : 'güncel olarak'} seviyesindedir.`,
+    },
+    {
+      q: 'Çeyrek altın kaç TL oldu?',
+      a: `Bugün yeni tarihli çeyrek altın alış ${ceyrek ? formatAssetPrice(ceyrek.priceBuying, ceyrek) : 'güncel'}, satış ${ceyrek ? formatAssetPrice(ceyrek.priceSelling, ceyrek) : 'canlı'} fiyattan işlem görmektedir. Çeyrek altın 22 ayar olup 1,75 gram ağırlığındadır.`,
+    },
+    {
+      q: '22 ayar bilezik gram fiyatı ne kadar?',
+      a: `22 ayar bilezik (%91,6 saflık) anlık gram satış fiyatı ${bilezik22 ? formatAssetPrice(bilezik22.priceSelling, bilezik22) : 'tabloda yer aldığı şekildedir'}. Model işçiliğine göre vitrin fiyatı değişebilir.`,
+    },
+    {
+      q: 'Has altın ile gram altın arasındaki fark nedir?',
+      a: 'Has altın %99,5-%99,9 saflıkta ham 24 ayar altındır ve tüm kuyumcu fiyatlamalarının bazını oluşturur. Paketli gram altınlarda rafineri ve ambalaj maliyeti nedeniyle küçük fark bulunabilir.',
+    },
+    {
+      q: 'Kapalıçarşı ve banka altın fiyatları neden farklıdır?',
+      a: 'Kapalıçarşı fiziki arz-talep ve dar makasla çalışırken, bankalar dijital altın alım-satımında özellikle mesai saatleri dışında daha geniş makas aralığı uygulayabilir. Banka makas tablomuzdan en uygun kurumu kıyaslayabilirsiniz.',
+    },
+  ];
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      { "@type": "Question", name: "Gram altın ne kadar?", acceptedAnswer: { "@type": "Answer", text: `Bugün gram altın ${gramAltin ? fmt(gramAltin.priceSelling) + " TL" : "güncel olarak sitemizden takip edilebilir"}. Kapalıçarşı canlı fiyatı için tablolarımızı inceleyin.` } },
-      { "@type": "Question", name: "Çeyrek altın fiyatı nedir?", acceptedAnswer: { "@type": "Answer", text: `Bugün çeyrek altın fiyatı ${ceyrek ? fmt(ceyrek.priceSelling) + " TL" : "güncel olarak sitemizden takip edilebilir"}. Çeyrek altın 1.75 gram olup 22 ayardır.` } },
-      { "@type": "Question", name: "Altın almak için doğru zaman mı?", acceptedAnswer: { "@type": "Answer", text: "Yatırım kararları kişisel mali durumunuza bağlıdır. Sayfamız yalnızca bilgilendirme amacıyla anlık Kapalıçarşı fiyatlarını sunar." } },
-    ],
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: a,
+      },
+    })),
   };
+
+  const quickLinks = [
+    { label: 'Gram Altın Fiyatı', href: '/gram-altin' },
+    { label: 'Çeyrek Altın Ne Kadar?', href: '/ceyrek-altin' },
+    { label: '22 Ayar Bilezik Gram', href: '/22-ayar-bilezik' },
+    { label: 'Cumhuriyet Altını', href: '/cumhuriyet-altini' },
+    { label: 'Tam Altın Fiyatı', href: '/tam-altin' },
+    { label: 'Yarım Altın Fiyatı', href: '/yarim-altin' },
+    { label: 'Ata Altın Fiyatı', href: '/ata-altin' },
+    { label: 'Canlı Dolar Kuru', href: '/dolar' },
+    { label: 'Canlı Euro Kuru', href: '/euro' },
+    { label: 'Gümüş Gram Fiyatı', href: '/gumus' },
+    { label: 'Altın Hesaplama Aracı', href: '/hesaplama' },
+    { label: 'Gram Altın 2026 Analizi', href: '/altin/gram-altin-fiyati-2026' },
+  ];
 
   return (
     <>
-      <AutoRefresh intervalMs={30000} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <AutoRefresh intervalMs={20000} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-      {/* Ticker */}
-      <Ticker items={items} />
+      <SiteHeader items={items} updateDate={updateDate} activePath="/" />
 
-      {/* Navigasyon */}
-      <nav className="site-nav" aria-label="Ana gezinme">
-        <div className="page-wrapper">
-          <div style={{ display: "flex", overflowX: "auto", gap: 0 }} className="no-scrollbar">
-            {[
-              { label: "Canlı Altın",   href: "/" },
-              { label: "Gram Altın",    href: "/gram-altin" },
-              { label: "Çeyrek Altın",  href: "/ceyrek-altin" },
-              { label: "Kapalıçarşı",   href: "/" },
-              { label: "Hesaplama",     href: "/hesaplama" },
-              { label: "Gümüş",        href: "/gumus" },
-              { label: "Dolar",         href: "/usd" },
-            ].map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                style={{
-                  display: "inline-block",
-                  padding: "14px 18px",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  letterSpacing: "0.04em",
-                  color: "rgba(255,255,255,0.65)",
-                  textDecoration: "none",
-                  whiteSpace: "nowrap",
-                  borderBottom: "2px solid transparent",
-                  transition: "all 0.15s",
-                }}
-                className="nav-link-hover"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      <style>{`
-        .nav-link-hover:hover { color: #D4AF37; border-bottom-color: #D4AF37 !important; background: rgba(255,255,255,0.04); }
-        .detail-link:hover { background: var(--gold); color: #000; border-color: var(--gold); }
-      `}</style>
-
-      {/* Ana içerik */}
-      <div className="page-wrapper">
+      <main className="page-wrapper">
         <div className="page-content animate-in">
-
-          {/* Sayfa başlığı + özet */}
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          {/* Sayfa Başlığı + Canlı Tarih */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, color: "var(--text-primary)", marginBottom: 4, lineHeight: 1.2 }}>
-                Kapalıçarşı Altın Fiyatları{" "}
-                <span style={{ fontSize: 12, fontWeight: 800, background: "#16a34a", color: "#fff", padding: "2px 8px", borderRadius: 4, verticalAlign: "middle" }}>
+              <h1 style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 6px', lineHeight: 1.25 }}>
+                Kapalıçarşı ve Serbest Piyasa Canlı Altın Fiyatları{' '}
+                <span className="live-badge" style={{ verticalAlign: 'middle', marginLeft: 4 }}>
                   ANLIK
                 </span>
               </h1>
-              <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
-                Kuyumcular Odası canlı fiyatları · Son güncelleme:{" "}
-                <strong style={{ color: "var(--text-primary)" }}>{updateDate}</strong>
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>
+                {updateDateLong} · Aktif Akış: <strong style={{ color: 'var(--text-primary)' }}>{activeSource}</strong> · Son Güncelleme:{' '}
+                <time dateTime={updatedIso} style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
+                  {updateDate}
+                </time>
               </p>
             </div>
           </div>
 
-          {/* Hızlı fiyat özeti — 4 kart */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
-            {[gramAltin, ceyrek, usd, eur].filter(Boolean).map(item => {
-              if (!item) return null;
-              const isUp = (item.changePercent ?? 0) >= 0;
-              const dec  = item.type === "currency" ? 4 : 2;
-              return (
-                <Link
-                  key={item.slug}
-                  href={`/${item.slug}`}
-                  className="card hover-card"
-                  style={{ padding: "16px 18px", textDecoration: "none", display: "block", transition: "box-shadow 0.2s, transform 0.2s" }}
-                >
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>
-                    {item.name}
-                  </div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: "var(--text-primary)", lineHeight: 1 }}>
-                    {fmt(item.priceSelling, dec)} ₺
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
-                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                      Alış: {fmt(item.priceBuying, dec)}
-                    </span>
-                    {item.changePercent !== undefined && (
-                      <span className={isUp ? "badge-up" : "badge-down"}>
-                        {isUp ? "▲" : "▼"}{Math.abs(item.changePercent).toFixed(2)}%
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
+          {/* Hızlı Özet Kartları */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            {[gramAltin, ceyrek, dolar, euro]
+              .filter((x): x is NonNullable<typeof x> => Boolean(x))
+              .map((item) => (
+                <PriceCard key={item.slug} item={item} />
+              ))}
           </div>
 
-          {/* Ana içerik: 2/3 sol + 1/3 sağ */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }}>
+          {/* Sekmeli Altın Tablosu (Kapalıçarşı / Serbest Piyasa / Karşılaştırma) */}
+          <GoldTabTable items={tableGolds} serbestItems={serbestItems} />
 
-            {/* Altın tablosu (sekmeli) */}
-            <GoldTabTable items={tableGolds} />
-
-          </div>
-
-          {/* Banka + Döviz yan yana */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20 }}>
-
-            {/* Döviz */}
+          {/* Döviz ve Değerli Madenler */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
             <DataTable items={currencies} title="Canlı Döviz Kurları" />
-
-            {/* Gümüş / Madenler */}
-            {metals.length > 0 && (
-              <DataTable items={metals} title="Değerli Madenler" />
-            )}
-
+            {metals.length > 0 && <DataTable items={metals} title="Değerli Madenler & Ons" />}
           </div>
 
-          {/* Banka tablosu */}
-          {banks && banks.length > 0 && (
-            <BankTable banks={banks} />
-          )}
+          {/* Banka Karşılaştırma Tablosu */}
+          <BankTable banks={banks} />
 
-          {/* Hesaplama aracı */}
-          <section>
-            <h2 style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)", marginBottom: 12 }}>
-              Altın Hesaplama Aracı
-            </h2>
+          {/* Hesaplama Aracı */}
+          <section aria-label="Canlı altın hesaplama aracı">
             <Converter items={items} />
           </section>
 
-          {/* SEO İçerik */}
-          <div className="seo-section">
-            <h2>Kapalıçarşı'da Altın Fiyatları Nasıl Belirlenir?</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 20, marginTop: 16 }}>
-              {[
-                ["Gram Altın Fiyatı", `Gram altın fiyatı, uluslararası ons altın paritesi ve anlık dolar/TL kurundan hesaplanır. Bugün gram altın satış fiyatı ${gramAltin ? fmt(gramAltin.priceSelling) + " TL" : "canlı tabloda"} civarındadır.`],
-                ["Çeyrek Altın Fiyatı", `Çeyrek altın 1.75 gram olup 22 ayardır. İçerdiği saf altın 1.6065 gramdır. Bugün çeyrek altın ${ceyrek ? fmt(ceyrek.priceSelling) + " TL" : "canlı tabloda"} olarak işlem görmektedir.`],
-                ["Alış ve Satış Farkı (Makas)", "Alış fiyatı, kuyumcunun sizden altın aldığı (düşük) değerdir. Satış, kuyumcunun size sattığı (yüksek) değerdir. Bu fark 'makas' veya 'spread' olarak bilinir."],
-                ["Kapalıçarşı ve Bankalardaki Fark", "Kapalıçarşı serbest piyasasında fiyatlar arz-talep ile oluşur. Bankalar ise genellikle daha geniş makas (yüksek komisyon) uygular."],
-              ].map(([title, text]) => (
-                <div key={title}>
-                  <h3>{title}</h3>
-                  <p>{text}</p>
-                </div>
+          {/* Popüler Aramalar Dahili Link Ağı */}
+          <section className="seo-section">
+            <h2>Hızlı Altın, Döviz ve Hesaplama Sayfaları</h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {quickLinks.map((q) => (
+                <Link
+                  key={q.href}
+                  href={q.href}
+                  prefetch={false}
+                  style={{
+                    padding: '7px 14px',
+                    borderRadius: 999,
+                    border: '1px solid var(--border-strong)',
+                    background: 'var(--bg-table-h)',
+                    color: 'var(--text-primary)',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                  }}
+                >
+                  {q.label}
+                </Link>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* FAQ Schema için görünür içerik */}
-          <div className="seo-section">
-            <h2>Sık Sorulan Sorular</h2>
-            <div style={{ display: "grid", gap: 16, marginTop: 12 }}>
-              {[
-                ["Gram altın ne kadar?", `Bugün gram altın fiyatı ${gramAltin ? fmt(gramAltin.priceSelling) + " TL" : "güncel olarak yukarıdaki canlı tablodan öğrenebilirsiniz"}. Kapalıçarşı anlık fiyatı sayfamızda otomatik güncellenmektedir.`],
-                ["Çeyrek altın kaç TL?", `Çeyrek altın bugün ${ceyrek ? fmt(ceyrek.priceSelling) + " TL" : "canlı tablomuzdan takip edilebilir"}. Çeyrek altın fiyatı gram altına göre günlük değişim gösterir.`],
-                ["Altın almak için doğru zaman mı?", "Altın yatırımı uzun vadeli değer koruma aracı olarak bilinir. Yatırım kararlarını bir finansal danışmana danışarak vermenizi öneririz."],
-                ["Has altın ile gram altın farkı nedir?", "Has altın (24 ayar) %99.5+ saflıktadır. Gram altın genellikle 22 ayar olup içerdiği saf altın miktarı daha düşüktür. Has altın biraz daha pahalı olur."],
-              ].map(([q, a]) => (
-                <details key={q} style={{ borderBottom: "1px solid var(--border)", paddingBottom: 12 }}>
-                  <summary style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", cursor: "pointer", paddingBottom: 6 }}>{q}</summary>
-                  <p style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.7, margin: "8px 0 0" }}>{a}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <footer style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginTop: 8 }}>
-            <div className="card" style={{ padding: "16px 20px", display: "flex", gap: 14, alignItems: "flex-start", borderLeft: "4px solid #dc2626" }}>
-              <div style={{ fontSize: 22 }}>⚠️</div>
+          {/* SEO Piyasa Rehberi */}
+          <section className="seo-section">
+            <h2>Kapalıçarşı ve Serbest Piyasada Altın Fiyatları Nasıl Oluşur?</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
               <div>
-                <p style={{ fontSize: 12, fontWeight: 800, color: "#dc2626", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>Yasal Uyarı</p>
-                <p style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6, margin: 0 }}>
-                  Burada yer alan fiyatlar yalnızca bilgilendirme amaçlıdır ve yatırım tavsiyesi niteliği taşımaz.
-                  Gerçek işlem fiyatları yerel kuyumcu ve bankalara göre farklılık gösterebilir. Altıncınız.com yasal sorumluluk kabul etmez.
+                <h3>Gram ve Has Altın Fiyatı</h3>
+                <p>
+                  Türkiye’de gram altın değeri, küresel ons altın (XAU/USD) fiyatının 31,1035’e bölünüp canlı Dolar/TL kuru ile çarpılmasıyla belirlenir.
+                  Bugün gram altın satış fiyatı {gramAltin ? formatAssetPrice(gramAltin.priceSelling, gramAltin) : 'canlı tabloda'} seviyesindedir.
+                </p>
+              </div>
+              <div>
+                <h3>Çeyrek, Yarım ve Cumhuriyet Altını</h3>
+                <p>
+                  Darphane basımı sarrafiye ürünleri 22 ayar (%91,6 saflık) altından üretilir. Çeyrek altın 1,75 gr, yarım altın 3,50 gr, ziynet tam altın 7,00 gr ve Cumhuriyet (Ata) altını 7,216 gr ağırlığındadır.
+                </p>
+              </div>
+              <div>
+                <h3>Kapalıçarşı vs Banka Makas Farkı</h3>
+                <p>
+                  Alış (bozdurma) ile satış fiyatı arasındaki fark &ldquo;makas&rdquo; olarak adlandırılır. Piyasa saatlerinde Kapalıçarşı ve dijital banka makaslarını tablomuzdan karşılaştırarak maliyeti düşürebilirsiniz.
+                </p>
+              </div>
+              <div>
+                <h3>Serbest Piyasa (Toptan / Harem) Karşılaştırması</h3>
+                <p>
+                  Sekmeli altın tablomuzdaki &ldquo;Piyasa Karşılaştırma&rdquo; görünümü sayesinde Kapalıçarşı perakende ekranı ile serbest piyasa toptan referans fiyatları arasındaki TL farkını anında görebilirsiniz.
                 </p>
               </div>
             </div>
-            <div style={{ textAlign: "center", marginTop: 20, paddingBottom: 20 }}>
-              <span style={{ fontSize: 18, fontWeight: 900, color: "var(--text-muted)" }}>
-                <span style={{ color: "var(--gold)" }}>Altın</span>cınız
-              </span>
-              <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0 0" }}>
-                © {new Date().getFullYear()} Altıncınız — Canlı Altın ve Döviz Fiyatları
-              </p>
-            </div>
-          </footer>
+          </section>
 
+          {/* Sık Sorulan Sorular (Schema ile Birebir Uyumlu) */}
+          <section className="seo-section">
+            <h2>Sık Sorulan Sorular</h2>
+            <div style={{ display: 'grid', gap: 14 }}>
+              {faqs.map(({ q, a }) => (
+                <details key={q} style={{ borderBottom: '1px solid var(--border)', paddingBottom: 12 }}>
+                  <summary style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{q}</summary>
+                  <p style={{ marginTop: 8 }}>{a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
         </div>
-      </div>
+      </main>
+
+      <SiteFooter />
     </>
   );
 }

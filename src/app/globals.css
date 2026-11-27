@@ -3,10 +3,9 @@
 @tailwind utilities;
 
 /* ============================================================
-   DESIGN TOKENS — Referans site temasıyla uyumlu
+   DESIGN TOKENS — Profesyonel Aydınlık Finans Teması
    ============================================================ */
 :root {
-  /* Arka planlar */
   --bg-page:    #f0f2f5;
   --bg-card:    #ffffff;
   --bg-header:  #1b2f52;
@@ -14,32 +13,26 @@
   --bg-table-h: #f8fafc;
   --bg-row-alt: #fafbfc;
 
-  /* Metin */
   --text-primary:   #1b2f52;
   --text-secondary: #4a5568;
-  --text-muted:     #94a3b8;
+  --text-muted:     #64748b;
 
-  /* Aksan */
   --gold:         #D4AF37;
-  --gold-dark:    #b8941f;
+  --gold-dark:    #997815;
   --gold-bg:      rgba(212,175,55,0.10);
-  --gold-border:  rgba(212,175,55,0.30);
+  --gold-border:  rgba(212,175,55,0.32);
 
-  /* Durum renkleri */
-  --up:     #16a34a;
-  --up-bg:  rgba(22,163,74,0.08);
-  --down:   #dc2626;
-  --down-bg:rgba(220,38,38,0.08);
+  --up:     #15803d;
+  --up-bg:  rgba(22,163,74,0.10);
+  --down:   #b91c1c;
+  --down-bg:rgba(220,38,38,0.10);
 
-  /* Kenarlık */
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
 
-  /* Gölge */
   --shadow-sm: 0 1px 3px rgba(27,47,82,0.08);
   --shadow-md: 0 4px 12px rgba(27,47,82,0.10);
 
-  /* Scrollbar */
   --scrollbar-track: #e2e8f0;
   --scrollbar-thumb: #94a3b8;
 }
@@ -56,27 +49,39 @@ body {
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   min-height: 100vh;
+  margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 /* ============================================================
    SCROLLBAR
    ============================================================ */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 6px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
 /* ============================================================
-   HEADER DARK ZONE (ticker + nav)
+   HEADER & TICKER ZONE
    ============================================================ */
 .site-ticker {
   background: #0f1e38;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.site-brand-bar {
+  background: #13233f;
   border-bottom: 1px solid rgba(255,255,255,0.06);
-  position: sticky;
-  top: 0;
-  z-index: 50;
 }
 
 .site-nav {
@@ -85,6 +90,52 @@ body {
   position: sticky;
   top: 0;
   z-index: 40;
+  box-shadow: 0 2px 8px rgba(15,30,56,0.12);
+}
+
+.nav-link {
+  display: inline-block;
+  padding: 13px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: rgba(255,255,255,0.82);
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.nav-link:hover {
+  color: #FCE782;
+  border-bottom-color: #D4AF37;
+  background: rgba(255,255,255,0.05);
+}
+
+.nav-link.active {
+  color: #FCE782;
+  border-bottom-color: #D4AF37;
+  background: rgba(212,175,55,0.10);
+}
+
+@keyframes ticker-run {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-scroll {
+  display: flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: ticker-run 75s linear infinite;
+}
+
+.ticker-scroll:hover {
+  animation-play-state: paused;
+}
+
+.hover-ticker-box:hover {
+  background: rgba(255,255,255,0.05);
 }
 
 /* ============================================================
@@ -100,6 +151,7 @@ body {
 .hover-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+  border-color: var(--gold-border);
 }
 
 .card-header {
@@ -115,9 +167,10 @@ body {
 .card-header-title {
   font-size: 13px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #ffffff;
+  margin: 0;
 }
 
 /* ============================================================
@@ -134,11 +187,11 @@ body {
 }
 
 .price-table thead th {
-  padding: 10px 16px;
-  font-size: 10px;
+  padding: 10px 14px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   color: var(--text-secondary);
   white-space: nowrap;
 }
@@ -153,26 +206,44 @@ body {
 }
 
 .price-table tbody tr:hover {
-  background: rgba(212,175,55,0.04);
+  background: rgba(212,175,55,0.05);
 }
 
 .price-table td {
-  padding: 11px 16px;
+  padding: 11px 14px;
   line-height: 1.4;
 }
 
-/* Price values */
 .price-buy  { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
 .price-sell { font-size: 15px; font-weight: 800; color: var(--text-primary); }
 .price-name { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-.price-time { font-size: 10px; color: var(--text-muted); font-family: 'Monaco', monospace; }
+.price-time { font-size: 11px; color: var(--text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.detail-link {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.15s ease;
+}
+
+.detail-link:hover {
+  background: var(--bg-header);
+  color: #ffffff;
+  border-color: var(--bg-header);
+}
 
 /* Change badge */
-.badge-up   { color: var(--up);   background: var(--up-bg);   padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
-.badge-down { color: var(--down); background: var(--down-bg); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
+.badge-up   { color: var(--up);   background: var(--up-bg);   padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+.badge-down { color: var(--down); background: var(--down-bg); padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
 .badge-neutral { color: var(--text-muted); font-size: 11px; }
+.badge-gold { color: var(--gold-dark); background: var(--gold-bg); border: 1px solid var(--gold-border); padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
 
-/* Gold dot indicator */
+/* Dot indicator */
 .dot-up   { width: 7px; height: 7px; border-radius: 50%; background: var(--up);   flex-shrink: 0; }
 .dot-down { width: 7px; height: 7px; border-radius: 50%; background: var(--down); flex-shrink: 0; }
 .dot-neu  { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; flex-shrink: 0; }
@@ -190,7 +261,7 @@ body {
   text-transform: uppercase;
   color: var(--up);
   background: var(--up-bg);
-  border: 1px solid rgba(22,163,74,0.2);
+  border: 1px solid rgba(22,163,74,0.22);
   border-radius: 20px;
   padding: 3px 10px;
 }
@@ -206,7 +277,7 @@ body {
 
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
+  50% { opacity: 0.45; transform: scale(0.8); }
 }
 
 /* ============================================================
@@ -214,18 +285,19 @@ body {
    ============================================================ */
 .tab-list {
   display: flex;
+  flex-wrap: wrap;
   border-bottom: 1px solid rgba(255,255,255,0.1);
   background: var(--bg-header);
   border-radius: 12px 12px 0 0;
 }
 
 .tab-btn {
-  padding: 12px 20px;
+  padding: 13px 18px;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.68);
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -237,13 +309,13 @@ body {
 }
 
 .tab-btn:hover {
-  color: rgba(255,255,255,0.85);
+  color: #ffffff;
 }
 
 .tab-btn.active {
-  color: var(--gold);
+  color: #FCE782;
   border-bottom-color: var(--gold);
-  background: rgba(212,175,55,0.06);
+  background: rgba(212,175,55,0.10);
 }
 
 /* ============================================================
@@ -276,8 +348,27 @@ body {
   border-color: var(--gold);
 }
 
+.preset-btn {
+  background: var(--bg-page);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-btn:hover,
+.preset-btn.active {
+  background: var(--gold-bg);
+  border-color: var(--gold);
+  color: var(--text-primary);
+}
+
 /* ============================================================
-   PAGE LAYOUT
+   PAGE LAYOUT & GRIDS
    ============================================================ */
 .page-wrapper {
   max-width: 1360px;
@@ -286,17 +377,66 @@ body {
 }
 
 .page-content {
-  padding: 24px 0 48px;
+  padding: 24px 0 40px;
   display: grid;
   gap: 20px;
+}
+
+.responsive-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .responsive-two-col {
+    grid-template-columns: 1fr 1.9fr;
+  }
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ============================================================
+   BREADCRUMB
+   ============================================================ */
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.breadcrumb a:hover {
+  color: var(--gold-dark);
+  text-decoration: underline;
 }
 
 /* ============================================================
    RESPONSIVE OVERRIDES
    ============================================================ */
 @media (max-width: 768px) {
-  .price-table thead th { padding: 8px 10px; }
+  .price-table thead th { padding: 8px 10px; font-size: 10px; }
   .price-table td { padding: 9px 10px; }
+  .seo-section { padding: 20px 16px; }
 }
 
 /* ============================================================
@@ -312,7 +452,7 @@ body {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.animate-in { animation: fadeIn 0.3s ease-out; }
+.animate-in { animation: fadeIn 0.25s ease-out; }
 
 /* ============================================================
    SEO CONTENT
@@ -321,15 +461,11 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 28px 24px;
+  padding: 26px 24px;
   box-shadow: var(--shadow-sm);
 }
 
-.seo-section h2 { font-size: 18px; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; }
-.seo-section h3 { font-size: 14px; font-weight: 700; color: var(--gold-dark); margin-bottom: 6px; }
-.seo-section p  { font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
-
-/* ============================================================
-   DARK MODE için en azından site-ticker/nav kalır
-   (kullanıcı isterse toggle ekleyebiliriz ileride)
-   ============================================================ */
+.seo-section h2 { font-size: 18px; font-weight: 800; color: var(--text-primary); margin: 0 0 14px; }
+.seo-section h3 { font-size: 15px; font-weight: 700; color: var(--gold-dark); margin: 0 0 6px; }
+.seo-section p  { font-size: 14px; line-height: 1.7; color: var(--text-secondary); margin: 0 0 10px; }
+.seo-section p:last-child { margin-bottom: 0; }

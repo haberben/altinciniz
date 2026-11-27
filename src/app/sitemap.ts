@@ -1,74 +1,60 @@
 import { MetadataRoute } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { ASSET_SPECS } from '@/lib/assets';
+import { ALL_GUIDE_SLUGS } from '@/lib/guides';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://altinciniz.com';
 
-// Direct supabase client just for fetching slugs (no auth needed for public profiles)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
+export default function sitemap(): MetadataRoute.Sitemap {
+  const now = new Date();
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 1. Static Routes
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: 'always',
       priority: 1.0,
     },
     {
       url: `${baseUrl}/hesaplama`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
+      lastModified: now,
+      changeFrequency: 'hourly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/altin/gram-altin-fiyati-2026`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
+      url: `${baseUrl}/hakkimizda`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.5,
     },
     {
-      url: `${baseUrl}/altin/gram-altin-dun-ne-kadardi`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.7,
+      url: `${baseUrl}/iletisim`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.4,
     },
     {
-      url: `${baseUrl}/altin/22-ayar-bilezik-fiyatlari-2026`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
+      url: `${baseUrl}/gizlilik-politikasi`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.4,
     },
   ];
 
-  // 2. Dynamic Gold/Currency Routes
-  // Harcoded the main ones we want to rank highly for
-  const assetSlugs = [
-    'gram-altin',
-    'ceyrek-altin',
-    'yarim-altin',
-    'tam-altin',
-    'cumhuriyet-altini',
-    'ata-altin',
-    'has-altin',
-    'gremse-altin',
-    '22-ayar-bilezik',
-    '18-ayar-altin',
-    '14-ayar-altin',
-    'gumus',
-    'dolar',
-    'euro',
-    'sterlin'
-  ];
-
-  const assetRoutes: MetadataRoute.Sitemap = assetSlugs.map((slug) => ({
+  const assetRoutes: MetadataRoute.Sitemap = Object.keys(ASSET_SPECS).map((slug) => ({
     url: `${baseUrl}/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'always', // Prices update constantly
-    priority: 0.9,
+    lastModified: now,
+    changeFrequency: 'always',
+    priority: ['gram-altin', 'ceyrek-altin', '22-ayar-bilezik', 'cumhuriyet-altini', 'dolar', 'euro'].includes(slug)
+      ? 0.95
+      : 0.85,
   }));
 
-  return [...staticRoutes, ...assetRoutes];
+  const guideRoutes: MetadataRoute.Sitemap = ALL_GUIDE_SLUGS.map((slug) => ({
+    url: `${baseUrl}/altin/${slug}`,
+    lastModified: now,
+    changeFrequency: 'daily',
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...assetRoutes, ...guideRoutes];
 }

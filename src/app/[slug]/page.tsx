@@ -1,186 +1,338 @@
-import { getMarketData } from "@/lib/api";
-import { notFound } from "next/navigation";
+import { getMarketData } from '@/lib/api';
+import { getAssetSpec, formatAssetPrice, SLUG_REDIRECTS, ASSET_SPECS } from '@/lib/assets';
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
+import Converter from '@/components/Converter';
+import PriceCard from '@/components/PriceCard';
+import AutoRefresh from '@/components/AutoRefresh';
+import { notFound, permanentRedirect } from 'next/navigation';
+import Link from 'next/link';
 import type { Metadata } from 'next';
-import Link from "next/link";
-import { ArrowLeft, TrendingUp, AlertTriangle, Activity } from "lucide-react";
-import AdBanner from "@/components/AdBanner";
 
-export const revalidate = 15; // 15 saniye cache
+export const revalidate = 15;
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const { items } = await getMarketData();
-  const item = items.find((i: any) => i.slug === params.slug);
-  
-  if (!item) {
-    return {
-      title: 'Bulunamadı | Altıncınız',
-    };
+  const redirectTarget = SLUG_REDIRECTS[params.slug];
+  if (redirectTarget) {
+    return { title: 'Yönlendiriliyor...' };
   }
 
-  const formattedPrice = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(item.priceSelling);
+  const spec = getAssetSpec(params.slug);
+  if (!spec) {
+    return { title: 'Sayfa Bulunamadı' };
+  }
+
+  const { items, updateDateLong } = await getMarketData();
+  const item = items.find((i) => i.slug === spec.slug);
+  const priceText = item ? formatAssetPrice(item.priceSelling, item) : '';
+
+  const title = priceText
+    ? `${spec.name} Fiyatı: ${priceText} (${updateDateLong}) – Canlı Ne Kadar?`
+    : `${spec.name} Fiyatı (Canlı) – ${spec.seoTitleSuffix}`;
+
+  const description = item
+    ? `${updateDateLong} canlı ${spec.name} alış ${formatAssetPrice(item.priceBuying, item)}, satış ${priceText}. ${spec.seoLead}`
+    : spec.seoLead;
 
   return {
-    title: `Canlı ${item.name} Fiyatı: ${formattedPrice} | Bugün ${item.name} Ne Kadar?`,
-    description: `Anlık ${item.name} fiyatı alış ve satış detayları. Güncel ${item.name} kuru bugün ne kadar, kaç TL oldu? Canlı takip edin.`,
-    keywords: `${item.name.toLowerCase()} fiyatı, canlı ${item.name}, ${item.name} ne kadar, ${item.name} kaç tl, harem ${item.name}, ${item.name} canlı`,
+    title,
+    description,
     alternates: {
-      canonical: `https://altinciniz.com/${item.slug}`
-    }
+      canonical: `/${spec.slug}`,
+    },
+    openGraph: {
+      title: `${spec.name} Canlı Fiyatı ${priceText} | Altıncınız`,
+      description,
+      url: `https://altinciniz.com/${spec.slug}`,
+    },
   };
 }
 
-export default async function DetaySayfasi({ params }: { params: { slug: string } }) {
-  const { items, updateDate } = await getMarketData();
-  const item = items.find((i: any) => i.slug === params.slug);
+export default async function AssetDetailPage({ params }: { params: { slug: string } }) {
+  const redirectTarget = SLUG_REDIRECTS[params.slug];
+  if (redirectTarget) {
+    permanentRedirect(`/${redirectTarget}`);
+  }
+
+  const spec = getAssetSpec(params.slug);
+  if (!spec) {
+    notFound();
+  }
+
+  const { items, serbestItems, updateDate, updateDateLong, updatedIso } = await getMarketData();
+  const item = items.find((i) => i.slug === spec.slug);
 
   if (!item) {
     notFound();
   }
 
-  const formatPrice = (p: number) => {
-    return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(p) + ' ₺';
-  };
+  const serbestMatch = serbestItems.find((s) => s.slug === item.slug);
+  const spread = Math.max(0, item.priceSelling - item.priceBuying);
+  const spreadPct = item.priceSelling > 0 ? (spread / item.priceSelling) * 100 : 0;
+  const isUp = (item.changePercent ?? 0) >= 0;
 
-  // SEO için Schema/JSON-LD (FinancialProduct + FAQ)
-  const jsonLdData = [
+  const categoryLabel =
+    item.type === 'gold' ? 'Altın Fiyatları' : item.type === 'currency' ? 'Döviz Kurları' : 'Değerli Madenler';
+
+  const buyStr = formatAssetPrice(item.priceBuying, item);
+  const sellStr = formatAssetPrice(item.priceSelling, item);
+
+  const faqs = [
     {
-      "@context": "https://schema.org",
-      "@type": "FinancialProduct",
-      "name": item.name,
-      "offers": {
-        "@type": "Offer",
-        "priceCurrency": "TRY",
-        "price": item.priceSelling,
-        "priceSpecification": {
-          "@type": "UnitPriceSpecification",
-          "priceType": "https://schema.org/InvoicePrice"
-        }
-      }
+      q: `Bugün ${spec.name} alış ve satış fiyatı ne kadar?`,
+      a: `${updateDateLong} canlı verilerine göre ${spec.name} alış (bozdurma) fiyatı ${buyStr}, satış fiyatı ise ${sellStr} seviyesindedir.`,
     },
     {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": `Canlı ${item.name} fiyatı bugün ne kadar?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `Güncel verilere göre canlı ${item.name} alış fiyatı ${formatPrice(item.priceBuying)} ve satış fiyatı ${formatPrice(item.priceSelling)} şeklindedir.`
-          }
-        },
-        {
-          "@type": "Question",
-          "name": `Harem altın ${item.name} fiyatları ile piyasa aynı mı?`,
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": `${item.name} fiyatları kapalıçarşı piyasasına göre anlık değişir. Harem altın fiyatları gibi toptan piyasa verilerine çok yakın seviyelerde işlem görmektedir.`
-          }
-        }
-      ]
-    }
+      q: `${spec.name} alış-satış makası ne kadar?`,
+      a: `Anlık piyasa ekranına göre ${spec.name} için alış ile satış arasındaki makas ${formatAssetPrice(spread, item)} (yaklaşık %${spreadPct.toFixed(2)}) düzeyindedir.`,
+    },
+    ...spec.extraFaq,
   ];
 
+  const relatedItems = items
+    .filter((i) => i.slug !== item.slug && (i.type === item.type || ['gram-altin', 'ceyrek-altin', 'dolar'].includes(i.slug)))
+    .slice(0, 4);
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://altinciniz.com';
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: siteUrl },
+          { '@type': 'ListItem', position: 2, name: categoryLabel, item: siteUrl },
+          { '@type': 'ListItem', position: 3, name: spec.name, item: `${siteUrl}/${spec.slug}` },
+        ],
+      },
+      {
+        '@type': 'FinancialProduct',
+        name: spec.name,
+        description: spec.seoLead,
+        url: `${siteUrl}/${spec.slug}`,
+        offers: item.unit !== 'RATIO'
+          ? {
+              '@type': 'Offer',
+              priceCurrency: item.unit === 'USD' ? 'USD' : 'TRY',
+              price: item.priceSelling,
+              availability: 'https://schema.org/InStock',
+            }
+          : undefined,
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map(({ q, a }) => ({
+          '@type': 'Question',
+          name: q,
+          acceptedAnswer: { '@type': 'Answer', text: a },
+        })),
+      },
+    ],
+  };
+
   return (
-    <main className="min-h-screen py-8 px-4 md:px-8 max-w-5xl mx-auto space-y-12 animate-fade-in relative">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
-      />
-      
-      <Link href="/" className="inline-flex items-center text-gray-400 hover:text-gold-primary transition-colors text-sm font-medium">
-        <ArrowLeft size={16} className="mr-2" />
-        Ana Sayfa'ya Dön
-      </Link>
+    <>
+      <AutoRefresh intervalMs={20000} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
 
-      <AdBanner />
+      <SiteHeader items={items} updateDate={updateDate} activePath={`/${spec.slug}`} />
 
-      <div className="bg-gradient-to-br from-[#111] to-black border border-[#222] rounded-3xl p-8 md:p-12 relative overflow-hidden group shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gold-primary/5 rounded-full blur-[100px] pointer-events-none" />
-        
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-10">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3 text-gold-primary">
-                <TrendingUp size={28} />
-                <span className="font-black uppercase tracking-widest text-sm opacity-80">
-                  {item.type === 'gold' ? 'Altın' : item.type === 'currency' ? 'Döviz' : 'Metal'}
+      <main className="page-wrapper">
+        <div className="page-content animate-in">
+          {/* Breadcrumb */}
+          <nav className="breadcrumb" aria-label="Sayfa konumu">
+            <Link href="/">Ana Sayfa</Link>
+            <span aria-hidden="true">/</span>
+            <Link href="/">{categoryLabel}</Link>
+            <span aria-hidden="true">/</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{spec.name}</span>
+          </nav>
+
+          {/* Ana Fiyat Hero Kartı */}
+          <section className="card" style={{ padding: '24px 24px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20 }}>
+              <div style={{ flex: '1 1 320px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                  <span className="live-badge">Canlı</span>
+                  {spec.purity && <span className="badge-gold">{spec.purity}</span>}
+                  {spec.weight && <span className="badge-gold">{spec.weight}</span>}
+                </div>
+
+                <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 10px', lineHeight: 1.2 }}>
+                  {spec.name} Fiyatı Ne Kadar?
+                </h1>
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', lineHeight: 1.65, margin: '0 0 14px', maxWidth: 640 }}>
+                  {spec.seoLead}
+                </p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+                  {updateDateLong} · Son Güncelleme:{' '}
+                  <time dateTime={updatedIso} style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {item.updateTime || updateDate}
+                  </time>
+                </p>
+              </div>
+
+              {/* Sağ Alış / Satış Kutuları */}
+              <div style={{ flex: '1 1 300px', maxWidth: 440, display: 'grid', gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div style={{ background: 'var(--bg-table-h)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+                      Alış (Bozdurma)
+                    </div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)' }}>{buyStr}</div>
+                  </div>
+
+                  <div style={{ background: 'var(--gold-bg)', border: '1px solid var(--gold-border)', borderRadius: 10, padding: '14px 16px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--gold-dark)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+                      Satış Fiyatı
+                    </div>
+                    <div style={{ fontSize: 24, fontWeight: 900, color: 'var(--text-primary)' }}>{sellStr}</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'var(--bg-table-h)', borderRadius: 8, border: '1px solid var(--border)', fontSize: 12 }}>
+                  <span>
+                    Makas: <strong style={{ color: 'var(--text-primary)' }}>{formatAssetPrice(spread, item)}</strong> (%{spreadPct.toFixed(2)})
+                  </span>
+                  {item.changePercent !== undefined && (
+                    <span className={isUp ? 'badge-up' : 'badge-down'}>
+                      {isUp ? '▲' : '▼'} {Math.abs(item.changePercent).toFixed(2)}%
+                    </span>
+                  )}
+                  {serbestMatch && serbestMatch.priceSelling !== item.priceSelling && (
+                    <span style={{ color: 'var(--text-secondary)' }}>
+                      Serbest: <strong>{formatAssetPrice(serbestMatch.priceSelling, item)}</strong>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Hızlı Çoklu Miktar Tablosu (1, 5, 10, 50, 100 vb.) */}
+          {spec.quickAmounts.length > 1 && item.unit === 'TRY' && (
+            <section className="card" style={{ overflow: 'hidden' }}>
+              <div className="card-header">
+                <h2 className="card-header-title">Hızlı {spec.shortName} Hesaplama Tablosu</h2>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.75)' }}>
+                  CANLI ÇARPAN
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-4 leading-tight">
-                {item.name} Fiyatı Ne Kadar?
-              </h1>
-              <p className="text-gray-400 max-w-lg leading-relaxed">
-                Canlı ve anlık verilere göre <strong className="text-white">{item.name.toLowerCase()}</strong> işlemleri için güncel alış ve satış fiyatlaması aşağıda yer almaktadır. Piyasaya göre anlık değişiklikler gösterebilir. Kapalıçarşı ve serbest piyasa <strong className="text-white">harem altın</strong> eşdeğerlilik kurlarıyla desteklenmektedir.
+              <div style={{ overflowX: 'auto' }}>
+                <table className="price-table" aria-label={`${spec.name} miktar tablosu`}>
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: 'left', paddingLeft: 20 }}>Miktar</th>
+                      <th style={{ textAlign: 'right' }}>Bozdurma (Alış Toplamı)</th>
+                      <th style={{ textAlign: 'right', paddingRight: 20 }}>Satın Alma (Satış Toplamı)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {spec.quickAmounts.map((qty) => (
+                      <tr key={qty}>
+                        <td style={{ paddingLeft: 20 }}>
+                          <span className="price-name">
+                            {new Intl.NumberFormat('tr-TR').format(qty)} {spec.unitLabel} {spec.shortName}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <span className="price-buy">{formatAssetPrice(qty * item.priceBuying, item)}</span>
+                        </td>
+                        <td style={{ textAlign: 'right', paddingRight: 20 }}>
+                          <span className="price-sell">{formatAssetPrice(qty * item.priceSelling, item)}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {/* Sayfa İçi Çevirici */}
+          {item.unit === 'TRY' && (
+            <section aria-label="Özel miktar hesaplama">
+              <Converter items={items} defaultSlug={item.slug} />
+            </section>
+          )}
+
+          {/* Ürün Hakkında Detaylı Rehber + SSS */}
+          <div className="responsive-two-col">
+            <section className="seo-section">
+              <h2>{spec.name} Nedir ve Fiyatı Nasıl Belirlenir?</h2>
+              <p>{spec.aboutText}</p>
+              <p>
+                Kapalıçarşı ve serbest piyasa arasındaki makas farklarını görmek için{' '}
+                <Link href="/" style={{ color: 'var(--gold-dark)', fontWeight: 700 }}>
+                  ana sayfadaki piyasa karşılaştırma tablosunu
+                </Link>{' '}
+                inceleyebilir veya özel tutarlar için{' '}
+                <Link href="/hesaplama" style={{ color: 'var(--gold-dark)', fontWeight: 700 }}>
+                  altın hesaplama aracını
+                </Link>{' '}
+                kullanabilirsiniz.
               </p>
-            </div>
-            
-            <div className="flex flex-col gap-4 min-w-[320px]">
-              
-              <div className="flex items-center justify-between text-xs font-bold text-gray-500 bg-[#0a0a0a] px-4 py-3 rounded-xl border border-[#222]">
-                <span className="uppercase tracking-widest flex items-center">
-                  <Activity size={14} className="text-emerald-500 mr-2 animate-pulse" />
-                  Son Güncelleme
-                </span>
-                <span className="text-gray-600">{updateDate}</span>
+            </section>
+
+            <section className="seo-section">
+              <h2>{spec.shortName} Sık Sorulan Sorular</h2>
+              <div style={{ display: 'grid', gap: 12 }}>
+                {faqs.map(({ q, a }) => (
+                  <details key={q} open style={{ borderBottom: '1px solid var(--border)', paddingBottom: 10 }}>
+                    <summary style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{q}</summary>
+                    <p style={{ marginTop: 6 }}>{a}</p>
+                  </details>
+                ))}
               </div>
+            </section>
+          </div>
 
-              {/* Alış & Satış Dual Box */}
-              <div className="flex flex-col space-y-3">
-                <div className="bg-[#111] border border-[#333] rounded-2xl p-5 flex justify-between items-center shadow-inner">
-                  <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Kuyumcu Alış</span>
-                  <span className="text-2xl font-black text-white">{formatPrice(item.priceBuying)}</span>
-                </div>
-
-                <div className="bg-gradient-to-r from-gold-primary/10 to-transparent border border-gold-primary/40 rounded-2xl p-5 flex justify-between items-center shadow-[0_0_30px_rgba(212,175,55,0.1)] relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gold-primary/5 w-1/2 blur-2xl rounded-full mix-blend-screen"></div>
-                  <span className="text-sm font-bold text-gold-light uppercase tracking-widest relative z-10">Kuyumcu Satış</span>
-                  <span className="text-3xl font-black text-gold-light drop-shadow-lg relative z-10">{formatPrice(item.priceSelling)}</span>
-                </div>
+          {/* İlgili Altın ve Döviz Sayfaları */}
+          {relatedItems.length > 0 && (
+            <section>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+                İlgili Canlı Piyasa Fiyatları
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 12 }}>
+                {relatedItems.map((rel) => (
+                  <PriceCard key={rel.slug} item={rel} />
+                ))}
               </div>
+            </section>
+          )}
+
+          {/* Tüm Varlıklara Hızlı Erişim */}
+          <section className="seo-section">
+            <h2>Diğer Altın ve Döviz Fiyatları</h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {Object.values(ASSET_SPECS)
+                .filter((s) => s.slug !== spec.slug)
+                .map((s) => (
+                  <Link
+                    key={s.slug}
+                    href={`/${s.slug}`}
+                    prefetch={false}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: 999,
+                      border: '1px solid var(--border)',
+                      background: 'var(--bg-table-h)',
+                      color: 'var(--text-secondary)',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {s.shortName}
+                  </Link>
+                ))}
             </div>
+          </section>
         </div>
-      </div>
+      </main>
 
-      {/* Dinamik SEO ve FAQ İçeriği */}
-      <section className="bg-[#0a0a0a] rounded-3xl p-8 border border-[#222]">
-        <h2 className="text-2xl font-black italic uppercase tracking-tighter mb-8 text-white">{item.name} İçin Sıkça Sorulan Sorular</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gold-primary tracking-tight">Canlı {item.name} fiyatı bugün ne kadar?</h3>
-            <p className="text-gray-400 leading-relaxed text-sm">
-              Güncel Kapalıçarşı canlı piyasa verilerine göre {item.name.toLowerCase()} alış fiyatı <strong>{formatPrice(item.priceBuying)}</strong>, satış fiyatı ise <strong>{formatPrice(item.priceSelling)}</strong> olarak işlem görmektedir. Fiyatlar saniyeler içinde değişebilir.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gold-primary tracking-tight">Harem Altın {item.name} kurları ile fark var mı?</h3>
-            <p className="text-gray-400 leading-relaxed text-sm">
-               Altıncınız, Kapalıçarşı dahil tüm Türkiye'deki toptan altın paritelerine paralel veriler çeker. <strong>Harem altın</strong> ve diğer toptancı verileriyle çok yakın bazda güncel kurları sitemiz üzerinden anlık takip edebilirsiniz.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gold-primary tracking-tight">Makas Aralığı (Alış-Satış Farkı) Nedir?</h3>
-            <p className="text-gray-400 leading-relaxed text-sm">
-              Piyasada gösterilen Alış fiyatı kuyumcunun sizden altını aldığı ucuz fiyatı, Satış fiyatı ise kuyumcunun size altını sattığı yüksek fiyatı temsil eder. Sitemizde bu aralığı net ve şeffaf olarak ayrı ayrı görebilirsiniz. Fiziki kuyumcularda marjlar daha geniş olabilir.
-            </p>
-          </div>
-
-          <div className="bg-red-500/5 p-5 rounded-2xl border border-red-500/10">
-            <h3 className="text-sm font-bold text-red-400 mb-2 flex items-center uppercase tracking-widest">
-              <AlertTriangle className="inline mr-2" size={16} />
-              Yasal Uyarı
-            </h3>
-            <p className="text-gray-400 text-xs leading-relaxed">
-              Burada yer alan yatırım bilgi, yorum ve tavsiyeleri yatırım danışmanlığı kapsamında değildir. Herhangi bir kuyumcuda işlem yapacağınız tutarlar ekran fiyatlarından sapma gösterebilir.
-            </p>
-          </div>
-          
-        </div>
-      </section>
-
-      <AdBanner />
-    </main>
+      <SiteFooter />
+    </>
   );
 }

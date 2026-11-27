@@ -1,136 +1,160 @@
 import React from 'react';
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { getMarketData } from '@/lib/api';
-import Link from 'next/link';
+import { SEO_GUIDES } from '@/lib/guides';
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
 import PriceCard from '@/components/PriceCard';
+import Converter from '@/components/Converter';
 import AutoRefresh from '@/components/AutoRefresh';
+import Link from 'next/link';
+
+export const revalidate = 30;
 
 interface Props {
   params: { slug: string };
 }
 
-function parseSlug(slug: string) {
-  const parts = slug.split('-');
-  let title = "Altın Fiyatları";
-  let description = "Güncel altın piyasası analizi ve canlı fiyatlar.";
-  let type = "GENEL";
-
-  if (slug.includes('gram-altin')) {
-    title = "Gram Altın Fiyatı";
-    type = "GRAM";
-  } else if (slug.includes('ceyrek-altin')) {
-    title = "Çeyrek Altın Fiyatı";
-    type = "CEYREK";
-  }
-
-  if (slug.includes('dun')) {
-    title += " Dün Ne Kadardı?";
-    description = `${title} Geçmiş altın fiyatları ve piyasa değişimi incelemesi.`;
-  } else if (slug.includes('2026')) {
-    title += " 2026 Tahminleri ve Beklentiler";
-    description = `2026 yılında ${title.toLowerCase()} ne olur? Uzman yorumları ve piyasa beklentileri.`;
-  }
-
-  return { title, description, type };
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { title, description } = parseSlug(params.slug);
+  const guide = SEO_GUIDES[params.slug];
+  if (!guide) {
+    return { title: 'Rehber Bulunamadı' };
+  }
+
   return {
-    title: `${title} | Altıncınız`,
-    description: description,
+    title: guide.metaTitle,
+    description: guide.description,
     alternates: {
-      canonical: `/altin/${params.slug}`,
+      canonical: `/altin/${guide.slug}`,
+    },
+    openGraph: {
+      type: 'article',
+      title: guide.title,
+      description: guide.description,
+      url: `https://altinciniz.com/altin/${guide.slug}`,
     },
   };
 }
 
-export default async function ProgrammaticSEOPage({ params }: Props) {
-  const { items: data } = await getMarketData();
-  const { title, description, type } = parseSlug(params.slug);
+export default async function GuidePage({ params }: Props) {
+  const guide = SEO_GUIDES[params.slug];
+  if (!guide) {
+    notFound();
+  }
 
-  const selectedItem = data?.find(item => 
-    type === "GRAM" ? item.slug === "gram-altin" : 
-    type === "CEYREK" ? item.slug === "ceyrek-altin" : true
-  ) || data?.[0];
+  const { items, updateDate, updatedIso } = await getMarketData();
+  const selectedItem = items.find((i) => i.slug === guide.assetSlug) || items[0];
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://altinciniz.com';
+
+  const schemaData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: siteUrl },
+          { '@type': 'ListItem', position: 2, name: 'Altın Rehberleri', item: `${siteUrl}/altin/gram-altin-fiyati-2026` },
+          { '@type': 'ListItem', position: 3, name: guide.title, item: `${siteUrl}/altin/${guide.slug}` },
+        ],
+      },
+      {
+        '@type': 'Article',
+        headline: guide.title,
+        description: guide.description,
+        dateModified: updatedIso,
+        author: { '@type': 'Organization', name: 'Altıncınız' },
+        publisher: { '@type': 'Organization', name: 'Altıncınız', url: siteUrl },
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: guide.faqs.map(({ q, a }) => ({
+          '@type': 'Question',
+          name: q,
+          acceptedAnswer: { '@type': 'Answer', text: a },
+        })),
+      },
+    ],
+  };
 
   return (
-    <main style={{ minHeight: "100vh", padding: "40px 0" }}>
+    <>
       <AutoRefresh intervalMs={30000} />
-      <div className="page-wrapper">
-        
-        {/* Breadcrumb */}
-        <nav style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>
-          <Link href="/" style={{ textDecoration: "none", color: "var(--text-secondary)" }}>Ana Sayfa</Link>
-          <span>/</span>
-          <Link href="/" style={{ textDecoration: "none", color: "var(--text-secondary)" }}>Altın Fiyatları</Link>
-          <span>/</span>
-          <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{title}</span>
-        </nav>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} />
 
-        {/* Dynamic Header */}
-        <div style={{ paddingBottom: 24, borderBottom: "1px solid var(--border)", marginBottom: 32 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: "var(--text-primary)", marginBottom: 12 }}>
-            {title}
-          </h1>
-          <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.6, maxWidth: 800 }}>
-            {description} Altın piyasasındaki son dakika gelişmeleri ve canlı verilerle hazırlanan özel analiz sayfamız.
-          </p>
-        </div>
+      <SiteHeader items={items} updateDate={updateDate} activePath="/" />
 
-        {/* Action Section */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 32, '@media (minWidth: 992px)': { gridTemplateColumns: "1fr 2fr" } } as any}>
-          <div>
-            {selectedItem && (
-              <PriceCard item={selectedItem} />
-            )}
-            <div className="card" style={{ marginTop: 24, padding: 24 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--gold-dark)", marginBottom: 12 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 800 }}>Hızlı Bilgi</h3>
+      <main className="page-wrapper">
+        <div className="page-content animate-in">
+          {/* Breadcrumb */}
+          <nav className="breadcrumb" aria-label="Sayfa konumu">
+            <Link href="/">Ana Sayfa</Link>
+            <span aria-hidden="true">/</span>
+            <Link href={`/${selectedItem.slug}`}>{selectedItem.name}</Link>
+            <span aria-hidden="true">/</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{guide.title}</span>
+          </nav>
+
+          {/* Başlık */}
+          <div className="card" style={{ padding: '24px 24px' }}>
+            <span className="badge-gold" style={{ marginBottom: 10 }}>{guide.badge}</span>
+            <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 10px', lineHeight: 1.25 }}>
+              {guide.title}
+            </h1>
+            <p style={{ fontSize: 15, color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0, maxWidth: 820 }}>
+              {guide.intro}
+            </p>
+          </div>
+
+          {/* İki Kolonlu İçerik */}
+          <div className="responsive-two-col">
+            <div style={{ display: 'grid', gap: 16 }}>
+              {selectedItem && <PriceCard item={selectedItem} />}
+              <Converter items={items} defaultSlug={guide.assetSlug} />
+
+              <div className="seo-section">
+                <h3>Diğer Rehberler</h3>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0', display: 'grid', gap: 8, fontSize: 13 }}>
+                  {Object.values(SEO_GUIDES)
+                    .filter((g) => g.slug !== guide.slug)
+                    .map((g) => (
+                      <li key={g.slug}>
+                        <Link href={`/altin/${g.slug}`} style={{ color: 'var(--gold-dark)', fontWeight: 600, textDecoration: 'none' }}>
+                          → {g.title}
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
               </div>
-              <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-                Bu sayfa, <strong>{params.slug}</strong> aramasına yönelik özel olarak dinamik verilerle oluşturulmuştur. 
-                Buradaki veriler Kapalıçarşı serbest piyasa kurlarıyla anlık olarak güncellenmektedir.
-              </p>
+            </div>
+
+            <div style={{ display: 'grid', gap: 16 }}>
+              {guide.sections.map((sec) => (
+                <article key={sec.heading} className="seo-section">
+                  <h2>{sec.heading}</h2>
+                  {sec.paragraphs.map((p, idx) => (
+                    <p key={idx}>{p}</p>
+                  ))}
+                </article>
+              ))}
+
+              <section className="seo-section">
+                <h2>Sıkça Sorulan Sorular</h2>
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {guide.faqs.map(({ q, a }) => (
+                    <details key={q} open style={{ borderBottom: '1px solid var(--border)', paddingBottom: 10 }}>
+                      <summary style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', cursor: 'pointer' }}>{q}</summary>
+                      <p style={{ marginTop: 6 }}>{a}</p>
+                    </details>
+                  ))}
+                </div>
+              </section>
             </div>
           </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            <section className="seo-section">
-              <h2>Piyasa Analizi</h2>
-              <div style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.7, display: "flex", flexDirection: "column", gap: 16 }}>
-                <p>
-                  Altın fiyatları son dönemde küresel enflasyon verileri ve merkez bankalarının faiz kararlarıyla şekillenmekte. 
-                  <strong> {title}</strong> konusu, yatırımcıların en çok merak ettiği başlıklar arasında yer alıyor.
-                </p>
-                <p>
-                  Genellikle "güvenli liman" olarak adlandırılan altın, belirsiz dönemlerde portföylerin vazgeçilmezi olmaya devam ediyor. 2026 projeksiyonları ve geçmiş veriler ışığında yaptığımız analizler, piyasa volatilitesinin bir süre daha devam edebileceğini gösteriyor.
-                </p>
-                <div style={{ background: "var(--gold-bg)", borderLeft: "4px solid var(--gold)", padding: 16, borderRadius: "0 8px 8px 0" }}>
-                  <p style={{ fontSize: 14, color: "var(--gold-dark)", fontStyle: "italic", margin: 0 }}>
-                    "Altın yatırımı yaparken sadece anlık fiyatları değil, uzun vadeli trendleri ve küresel ekonomik takvimi de göz önünde bulundurmak önemlidir."
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <section className="seo-section">
-              <h2>Sıkça Sorulan Sorular</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: 16 }}>
-                <div>
-                  <h4 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>{title} hakkında en doğru veriye nereden ulaşırım?</h4>
-                  <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>Altıncınız olarak Kapalıçarşı verilerini harmanlayarak en şeffaf kurları sunmaktayız.</p>
-                </div>
-                <div>
-                  <h4 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>Piyasa makas aralıkları neden değişir?</h4>
-                  <p style={{ fontSize: 14, color: "var(--text-secondary)", lineHeight: 1.6 }}>Arz ve talep dengesi, işlem hacmi ve piyasa saatleri dışındaki volatilite makas aralıklarının açılmasına neden olabilir.</p>
-                </div>
-              </div>
-            </section>
-          </div>
         </div>
+      </main>
 
-      </div>
-    </main>
+      <SiteFooter />
+    </>
   );
 }
